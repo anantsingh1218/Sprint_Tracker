@@ -62,5 +62,10 @@ VALUES
   (6, NULL, 1, 2, '2026-06-08', 3, 'Fixed save crash issue'),
   (7, NULL, 2, 2, '2026-06-09', 5, 'Duplicate lead bug investigation');
 
+INSERT INTO DSUNotes (id, notes, notesDate, entityType, entityId, createdBy, createdAt, updatedBy, updatedAt)
+VALUES
+    (1, 'Completed Effectively', '2026-06-03', 'STORY', 1, null, null, null, null),
+    (2, 'Requirements were modified , expect delay', '2026-06-04', 'BUG', 2, null, null, null, null);
+
 SET CONSTRAINTS ALL IMMEDIATE;
 COMMIT;

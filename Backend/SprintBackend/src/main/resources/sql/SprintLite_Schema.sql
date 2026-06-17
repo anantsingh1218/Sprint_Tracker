@@ -177,6 +177,18 @@ CREATE TABLE WORKLOG (
                          REMARKS text
 );
 
+CREATE TABLE DSUNOTES (
+                        ID integer PRIMARY KEY,
+                        NOTES text,
+                        NOTESDATE date,
+                        ENTITYTYPE ENTITYTYPE,
+                        ENTITYID integer,
+                        CREATEDAT timestamp,
+                        CREATEDBY varchar,
+                        UPDATEDAT timestamp,
+                        UPDATEDBY varchar
+);
+
 -- =========================
 -- FOREIGN KEYS
 -- =========================

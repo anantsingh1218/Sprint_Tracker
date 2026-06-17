@@ -15,5 +15,4 @@ public class SprintLiteApplication {
 		}
 		SpringApplication.run(SprintLiteApplication.class, args);
 	}
-
 }
