@@ -19,7 +19,8 @@ public class PathsConfig {
                 "/actuator/**",
                 "/todos/**",
                 "/csrf-token",
-                "/register"
+                "/register",
+                "/login"
         );
     }
 

@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.entity;
 
+import com.sprint.SprintLite.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,7 @@ public class Users extends BaseEntity {
     private String username;
 
     @Column(name = "role", length = Integer.MAX_VALUE)
-    private String role;
+    private Role role;
 
     @Column(name = "email", length = Integer.MAX_VALUE)
     private String email;
