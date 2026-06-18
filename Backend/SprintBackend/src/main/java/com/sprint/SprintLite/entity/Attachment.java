@@ -24,19 +24,6 @@ public class Attachment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploadedby")
-    private User uploadedby;
-
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
-
+    private Users uploadedby;
 
 }

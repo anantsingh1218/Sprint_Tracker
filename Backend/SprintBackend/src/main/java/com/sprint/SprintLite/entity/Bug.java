@@ -30,7 +30,7 @@ public class Bug extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignedto")
-    private User assignedto;
+    private Users assignedto;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storyid")
@@ -49,18 +49,5 @@ public class Bug extends BaseEntity {
     @ColumnDefault("0")
     @Column(name = "reopencount")
     private Integer reopencount;
-
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
-
 
 }

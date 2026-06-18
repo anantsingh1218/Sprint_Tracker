@@ -28,7 +28,7 @@ public class Task extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "userid", nullable = false)
-    private User userid;
+    private Users userid;
 
     @Column(name = "taskstatus", columnDefinition = "status")
     private Status taskstatus;
@@ -51,18 +51,5 @@ public class Task extends BaseEntity {
 
     @Column(name = "remainingestimatehours")
     private Integer remainingestimatehours;
-
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
-
 
 }
