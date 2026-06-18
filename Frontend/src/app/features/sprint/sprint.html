@@ -1,0 +1,25 @@
+<h2>Sprint Management</h2>
+
+<div class="sprint-container">
+
+  <div class="sprint-form card">
+    <h3>Create Sprint</h3>
+
+    <input placeholder="Sprint Name" [(ngModel)]="sprintName" />
+    <input type="date" [(ngModel)]="startDate" />
+    <input type="date" [(ngModel)]="endDate" />
+
+    <button (click)="addSprint()">Create Sprint</button>
+  </div>
+
+  <div class="sprint-list card">
+    <h3>Active Sprints</h3>
+
+    <div *ngFor="let s of sprints" class="sprint-item">
+      <h4>{{ s.name }}</h4>
+      <p>{{ s.start }} → {{ s.end }}</p>
+    </div>
+
+  </div>
+
+</div>
