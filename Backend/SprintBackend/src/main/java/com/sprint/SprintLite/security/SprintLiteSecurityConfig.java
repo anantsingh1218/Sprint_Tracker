@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -47,7 +50,7 @@ public class SprintLiteSecurityConfig {
                 .authorizeHttpRequests(requests->{
                             publicPaths.forEach(path -> requests.requestMatchers(path).permitAll());
                             // Spring adds ROLE_ prefix to whatever u pass in ROle related methods so no need to keep ROLE_ADMIN, never use ROLE_ in these methods
-                            adminPaths.forEach(path -> requests.requestMatchers(path).hasRole("Product Manager"));
+                            adminPaths.forEach(path -> requests.requestMatchers(path).hasRole("PM"));
                             securedPaths.forEach(path -> requests.requestMatchers(path).authenticated());
                             requests.anyRequest().denyAll(); // Deny all other request if not mentioned in public/secured paths list
                         }
@@ -83,6 +86,11 @@ public class SprintLiteSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationProvider authenticationProvider){
+        return new ProviderManager(authenticationProvider);
     }
 
     @Bean

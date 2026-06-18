@@ -14,3 +14,6 @@ services:
       - 'POSTGRES_USER=SprintLite'
     ports:
       - '5000:5432'
+    volumes:
+      - C:\Docker_Container\Postgres\SprintLite:/var/lib/postgresql
+

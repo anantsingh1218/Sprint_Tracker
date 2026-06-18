@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.dto;
 
+import com.sprint.SprintLite.entity.enums.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -23,7 +24,7 @@ public record RegisterUserDto(
 
         @NotBlank(message = "Role is required")
         @Size(max = 50)
-        String role,
+        Role role,
 
         Instant createdAt,
         String createdBy
