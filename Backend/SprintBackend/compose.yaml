@@ -3,13 +3,14 @@ services:
     image: 'grafana/otel-lgtm:latest'
     ports:
       - '3000:3000'
-      - '4317'
-      - '4318'
+      - '4317:4317'
+      - '4318:4318'
   postgres:
     image: 'postgres:latest'
+    container_name: 'SprintLiteDB'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      - 'POSTGRES_DB=SprintLite'
+      - 'POSTGRES_PASSWORD=SprintLitePassword'
+      - 'POSTGRES_USER=SprintLite'
     ports:
-      - '5432'
+      - '5000:5432'
