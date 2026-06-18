@@ -26,19 +26,4 @@ public class Comment extends BaseEntity {
     @Column(name = "entityid")
     private Integer entityid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "createdby")
-    private User createdby;
-
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "updatedby")
-    private User updatedby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-
 }

@@ -45,17 +45,5 @@ public class Story extends BaseEntity {
     @Column(name = "storypoints")
     private Integer storypoints;
 
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
-
 
 }

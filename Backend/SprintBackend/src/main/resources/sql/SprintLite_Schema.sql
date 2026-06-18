@@ -49,6 +49,8 @@ CREATE TABLE USERS (
                        ID integer PRIMARY KEY,
                        USERNAME varchar,
                        ROLE varchar,
+                       EMAIL varchar,
+                       PASSWORDHASH varchar,
                        CREATEDAT timestamp,
                        CREATEDBY varchar,
                        UPDATEDAT timestamp,
@@ -155,9 +157,9 @@ CREATE TABLE COMMENTS (
                           COMMENT text,
                           ENTITYTYPE ENTITYTYPE,
                           ENTITYID integer,
-                          CREATEDBY integer,
+                          CREATEDBY varchar,
                           CREATEDAT timestamp,
-                          UPDATEDBY integer,
+                          UPDATEDBY varchar,
                           UPDATEDAT timestamp
 );
 
@@ -234,12 +236,6 @@ ALTER TABLE ATTACHMENTS
 
 ALTER TABLE ATTACHMENTMAPPING
     ADD FOREIGN KEY (ATTACHMENTID) REFERENCES ATTACHMENTS(ID);
-
-ALTER TABLE COMMENTS
-    ADD FOREIGN KEY (CREATEDBY) REFERENCES USERS(ID);
-
-ALTER TABLE COMMENTS
-    ADD FOREIGN KEY (UPDATEDBY) REFERENCES USERS(ID);
 
 ALTER TABLE USERPRODUCTMAPPING
     ADD FOREIGN KEY (USERID) REFERENCES USERS(ID);

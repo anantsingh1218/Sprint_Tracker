@@ -38,5 +38,4 @@ public class Worklog {
     @Column(name = "remarks", length = Integer.MAX_VALUE)
     private String remarks;
 
-
 }

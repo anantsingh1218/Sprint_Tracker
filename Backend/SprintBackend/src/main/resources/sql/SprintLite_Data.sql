@@ -6,11 +6,11 @@ INSERT INTO Sprint (id, sprintName, sprintDuration, status, startDate, endDate)
 VALUES
   (1, 'Sprint 1', 15, 'ACTIVE', '2026-06-01', '2026-06-15'),
   (2, 'Sprint 2', 15, 'PLANNED', '2026-06-16', '2026-06-30');
-INSERT INTO Users (id, username, role, createdAt, createdBy, updatedAt, updatedBy)
+INSERT INTO Users (id, username, role, email, passwordHash, createdAt, createdBy, updatedAt, updatedBy)
 VALUES
-  (1, 'Alice', 'Product Manager', NULL, NULL, NULL, NULL),
-  (2, 'Bob', 'Developer', NULL, NULL, NULL, NULL),
-  (3, 'Charlie', 'Scrum Master', NULL, NULL, NULL, NULL);
+  (1, 'Alice', 'Product Manager', 'alice@gmail.com', '12345hsnmo39@19xhq][23', NULL, NULL, NULL, NULL),
+      (2, 'Bob', 'Developer','bob@gmail.com', '1234hsnmo39@19xhq][23|', NULL, NULL, NULL, NULL),
+  (3, 'Charlie', 'Scrum Master','charlie@gmail.com', '1245hsnmo39@19xhq][23\', NULL, NULL, NULL, NULL);
 INSERT INTO ProductTable (productId, productName, description, ownerId, createdAt, createdBy, updatedAt, updatedBy)
 VALUES
   (1, 'FSM', 'Field Service Management', 1, NULL, NULL, NULL, NULL),
@@ -45,8 +45,8 @@ VALUES
   (2, 2, 'TASK', 4);
 INSERT INTO Comments (id, comment, entityType, entityId, createdBy, createdAt, updatedBy, updatedAt)
 VALUES
-  (1, 'Need API validation before release', 'STORY', 1, 1, NULL, 1, NULL),
-  (2, 'Crash reproducible in QA environment', 'BUG', 1, 3, NULL, 3, NULL);
+  (1, 'Need API validation before release', 'STORY', 1, 'Alice', NULL, 'Alice', NULL),
+  (2, 'Crash reproducible in QA environment', 'BUG', 1, 'Charlie', NULL, 'Charlie', NULL);
 INSERT INTO UserProductMapping (id, userId, productId)
 VALUES
   (1, 1, 1),

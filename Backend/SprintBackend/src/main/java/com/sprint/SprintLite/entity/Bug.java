@@ -50,17 +50,4 @@ public class Bug extends BaseEntity {
     @Column(name = "reopencount")
     private Integer reopencount;
 
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
-
-
 }
