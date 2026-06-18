@@ -30,7 +30,7 @@ public class Story extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid")
-    private User userid;
+    private Users userid;
 
     @Column(name = "storystatus", columnDefinition = "status")
     private Status storystatus;
@@ -44,18 +44,6 @@ public class Story extends BaseEntity {
 
     @Column(name = "storypoints")
     private Integer storypoints;
-
-    @Column(name = "createdat")
-    private Instant createdat;
-
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
 
 
 }

@@ -37,7 +37,7 @@ CREATE TYPE STATUS AS ENUM (
 -- =========================
 
 CREATE TABLE SPRINT (
-                        ID integer PRIMARY KEY,
+                        ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         SPRINTNAME text,
                         SPRINTDURATION integer DEFAULT 15,
                         STATUS SPRINTSTATUS,
@@ -46,9 +46,11 @@ CREATE TABLE SPRINT (
 );
 
 CREATE TABLE USERS (
-                       ID integer PRIMARY KEY,
+                       ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                        USERNAME varchar,
                        ROLE varchar,
+                       EMAIL varchar,
+                       PASSWORDHASH varchar,
                        CREATEDAT timestamp,
                        CREATEDBY varchar,
                        UPDATEDAT timestamp,
@@ -56,7 +58,7 @@ CREATE TABLE USERS (
 );
 
 CREATE TABLE PRODUCTTABLE (
-                              PRODUCTID integer PRIMARY KEY,
+                              PRODUCTID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                               PRODUCTNAME varchar UNIQUE,
                               DESCRIPTION text,
                               OWNERID integer,
@@ -67,7 +69,7 @@ CREATE TABLE PRODUCTTABLE (
 );
 
 CREATE TABLE FEATURETABLE (
-                              FEATUREID integer PRIMARY KEY,
+                              FEATUREID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                               TITLE varchar,
                               DESCRIPTION text,
                               PRODUCTID integer,
@@ -83,7 +85,7 @@ CREATE TABLE FEATURETABLE (
 );
 
 CREATE TABLE STORYTABLE (
-                            ID integer PRIMARY KEY,
+                            ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                             TITLE varchar,
                             BODY text,
                             FEATUREID integer,
@@ -99,7 +101,7 @@ CREATE TABLE STORYTABLE (
 );
 
 CREATE TABLE TASKTABLE (
-                           ID integer PRIMARY KEY,
+                           ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                            TITLE varchar,
                            BODY text,
                            USERID integer NOT NULL,
@@ -116,7 +118,7 @@ CREATE TABLE TASKTABLE (
 );
 
 CREATE TABLE BUGS (
-                      ID integer PRIMARY KEY,
+                      ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                       BUGSTATUS STATUS,
                       PRIORITY PRIORITY,
                       DESCRIPTION text,
@@ -133,7 +135,7 @@ CREATE TABLE BUGS (
 );
 
 CREATE TABLE ATTACHMENTS (
-                             ID integer PRIMARY KEY,
+                             ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                              FILENAME varchar,
                              FILEPATH varchar,
                              UPLOADEDBY integer,
@@ -144,31 +146,31 @@ CREATE TABLE ATTACHMENTS (
 );
 
 CREATE TABLE ATTACHMENTMAPPING (
-                                   ID integer PRIMARY KEY,
+                                   ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                    ATTACHMENTID integer,
                                    ENTITYTYPE ENTITYTYPE,
                                    ENTITYID integer
 );
 
 CREATE TABLE COMMENTS (
-                          ID integer PRIMARY KEY,
+                          ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                           COMMENT text,
                           ENTITYTYPE ENTITYTYPE,
                           ENTITYID integer,
-                          CREATEDBY integer,
+                          CREATEDBY varchar,
                           CREATEDAT timestamp,
-                          UPDATEDBY integer,
+                          UPDATEDBY varchar,
                           UPDATEDAT timestamp
 );
 
 CREATE TABLE USERPRODUCTMAPPING (
-                                    ID integer PRIMARY KEY,
+                                    ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                     USERID integer NOT NULL,
                                     PRODUCTID integer NOT NULL
 );
 
 CREATE TABLE WORKLOG (
-                         ID integer PRIMARY KEY,
+                         ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                          TASKID integer,
                          BUGID integer,
                          USERID integer,
@@ -178,7 +180,7 @@ CREATE TABLE WORKLOG (
 );
 
 CREATE TABLE DSUNOTES (
-                        ID integer PRIMARY KEY,
+                        ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                         NOTES text,
                         NOTESDATE date,
                         ENTITYTYPE ENTITYTYPE,
@@ -234,12 +236,6 @@ ALTER TABLE ATTACHMENTS
 
 ALTER TABLE ATTACHMENTMAPPING
     ADD FOREIGN KEY (ATTACHMENTID) REFERENCES ATTACHMENTS(ID);
-
-ALTER TABLE COMMENTS
-    ADD FOREIGN KEY (CREATEDBY) REFERENCES USERS(ID);
-
-ALTER TABLE COMMENTS
-    ADD FOREIGN KEY (UPDATEDBY) REFERENCES USERS(ID);
 
 ALTER TABLE USERPRODUCTMAPPING
     ADD FOREIGN KEY (USERID) REFERENCES USERS(ID);

@@ -3,15 +3,15 @@ package com.sprint.SprintLite.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.Instant;
+import org.hibernate.annotations.Generated;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity {
-    @Id
+
+public class Users extends BaseEntity {
+    @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
@@ -22,17 +22,10 @@ public class User extends BaseEntity {
     @Column(name = "role", length = Integer.MAX_VALUE)
     private String role;
 
-    @Column(name = "createdat")
-    private Instant createdat;
+    @Column(name = "email", length = Integer.MAX_VALUE)
+    private String email;
 
-    @Column(name = "createdby", length = Integer.MAX_VALUE)
-    private String createdby;
-
-    @Column(name = "updatedat")
-    private Instant updatedat;
-
-    @Column(name = "updatedby", length = Integer.MAX_VALUE)
-    private String updatedby;
-
+    @Column(name = "passwordhash", length = Integer.MAX_VALUE)
+    private String passwordhash;
 
 }

@@ -27,7 +27,7 @@ public class Worklog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid")
-    private User userid;
+    private Users userid;
 
     @Column(name = "workdate")
     private LocalDate workdate;
@@ -37,6 +37,5 @@ public class Worklog {
 
     @Column(name = "remarks", length = Integer.MAX_VALUE)
     private String remarks;
-
 
 }
