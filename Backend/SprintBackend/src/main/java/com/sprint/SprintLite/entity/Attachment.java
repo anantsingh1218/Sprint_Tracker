@@ -24,6 +24,6 @@ public class Attachment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploadedby")
-    private User uploadedby;
+    private Users uploadedby;
 
 }

@@ -1,7 +1,7 @@
 package com.sprint.SprintLite.util;
 
 import com.sprint.SprintLite.constants.ApplicationConstants;
-import com.sprint.SprintLite.entity.User;
+import com.sprint.SprintLite.entity.Users;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -19,7 +19,7 @@ public class ApplicationUtility {
         }
         Object principal = authentication.getPrincipal();
         String username;
-        if (principal instanceof User user){
+        if (principal instanceof Users user){
             username = user.getUsername();
         }
         else{

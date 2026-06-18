@@ -30,7 +30,7 @@ public class Bug extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignedto")
-    private User assignedto;
+    private Users assignedto;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storyid")

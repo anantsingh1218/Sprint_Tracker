@@ -24,6 +24,6 @@ public class Product extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerid")
-    private User ownerid;
+    private Users ownerid;
 
   }

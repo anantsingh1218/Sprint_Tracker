@@ -28,7 +28,7 @@ public class Task extends BaseEntity {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "userid", nullable = false)
-    private User userid;
+    private Users userid;
 
     @Column(name = "taskstatus", columnDefinition = "status")
     private Status taskstatus;

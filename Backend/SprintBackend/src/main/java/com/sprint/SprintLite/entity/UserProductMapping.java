@@ -18,7 +18,7 @@ public class UserProductMapping {
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "userid", nullable = false)
-    private User userid;
+    private Users userid;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

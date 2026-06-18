@@ -30,7 +30,7 @@ public class Story extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid")
-    private User userid;
+    private Users userid;
 
     @Column(name = "storystatus", columnDefinition = "status")
     private Status storystatus;
