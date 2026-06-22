@@ -1,0 +1,134 @@
+<div class="header">
+
+  <h2>Task Board</h2>
+
+  <button class="add-btn" (click)="showTaskModal = true">
+    + Create Task
+  </button>
+
+</div>
+
+<!-- SPRINT FILTER -->
+<div class="sprint-filter">
+
+  <label>Select Sprint:</label>
+
+  <select [(ngModel)]="selectedSprintId">
+
+    <option value="">
+      All Sprints
+    </option>
+
+    <option *ngFor="let s of sprints" [value]="s.id">
+      {{ s.name }}
+    </option>
+
+  </select>
+
+</div>
+
+<div class="board">
+
+  <!-- TO DO -->
+  <div class="column">
+
+    <h3>📝 To Do</h3>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="todoTasks"
+      (cdkDropListDropped)="drop($event, 'To Do')"
+      class="task-list">
+
+      <div class="task-card" *ngFor="let t of todoTasks" cdkDrag>
+        <h4>{{ t.title }}</h4>
+        <p>{{ t.description }}</p>
+
+        <span class="priority">{{ t.priority }}</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="column">
+
+    <h3>⚡ In Progress</h3>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="inProgressTasks"
+      (cdkDropListDropped)="drop($event, 'In Progress')"
+      class="task-list">
+
+      <div class="task-card" *ngFor="let t of inProgressTasks" cdkDrag>
+        <h4>{{ t.title }}</h4>
+        <p>{{ t.description }}</p>
+
+        <span class="priority">{{ t.priority }}</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="column">
+
+    <h3>✅ Done</h3>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="doneTasks"
+      (cdkDropListDropped)="drop($event, 'Done')"
+      class="task-list">
+
+      <div class="task-card" *ngFor="let t of doneTasks" cdkDrag>
+        <h4>{{ t.title }}</h4>
+        <p>{{ t.description }}</p>
+
+        <span class="priority">{{ t.priority }}</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- CREATE TASK MODAL -->
+<div class="modal" *ngIf="showTaskModal">
+
+  <div class="modal-content">
+
+    <h3>Create Task</h3>
+
+    <input
+      placeholder="Title"
+      [(ngModel)]="newTask.title"
+    />
+
+    <textarea
+      placeholder="Description"
+      [(ngModel)]="newTask.description">
+    </textarea>
+
+    <select [(ngModel)]="newTask.priority">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+
+    <div class="modal-actions">
+
+      <button (click)="createTask()">
+        Create
+      </button>
+
+      <button (click)="showTaskModal = false">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

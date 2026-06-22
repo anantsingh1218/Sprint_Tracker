@@ -6,14 +6,14 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AuthService {
 
-  private baseUrl = 'http://localhost:8001/user';
+  private baseUrl = 'http://localhost:8080/login';
 
   constructor(private http: HttpClient) {}
 
-  login(email: string, password: string) {
+  login(username: string, password: string) {
   return this.http.post<{ access_token: string; role?: string }>(
     'YOUR_API_URL/login',
-    { email, password }
+    { username, password }
   );
 }
 
