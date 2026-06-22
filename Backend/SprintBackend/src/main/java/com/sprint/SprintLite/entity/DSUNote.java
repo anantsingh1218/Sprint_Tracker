@@ -4,6 +4,8 @@ import com.sprint.SprintLite.entity.enums.EntityType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -24,6 +26,8 @@ public class DSUNote extends BaseEntity {
     @Column(name = "notesdate")
     private LocalDate notesdate;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "entitytype", columnDefinition = "entitytype")
     private EntityType entitytype;
 
