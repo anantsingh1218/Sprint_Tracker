@@ -7,6 +7,7 @@ import java.util.List;
 
 @Configuration
 public class PathsConfig {
+
     @Bean(name = "publicPaths")
     public List<String> publicPaths() {
         return List.of(
@@ -14,26 +15,29 @@ public class PathsConfig {
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
                 "/swagger-resources/**",
-                "/swagger-ui.html",
                 "/webjars/**",
                 "/actuator/**",
-                "/todos/**",
-                "/csrf-token",
+
                 "/register",
-                "/login"
+                "/login",          // login API
+                "/csrf-token"
         );
     }
 
     @Bean(name = "securedPaths")
     public List<String> securedPaths() {
         return List.of(
-                "/**"
+                "/profile/**",
+                "/dashboard/**",
+                "/sprint/**",
+                "/tasks/**"
         );
     }
 
     @Bean(name = "adminPaths")
     public List<String> adminPaths() {
         return List.of(
+                "/admin/**"
         );
     }
 }
