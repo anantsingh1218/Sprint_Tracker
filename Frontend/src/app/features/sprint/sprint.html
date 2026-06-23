@@ -1,0 +1,186 @@
+<div class="sprint-page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>🏃 Sprint Management</h2>
+
+    <button class="add-btn" (click)="openSprintForm()">
+      + New Sprint
+    </button>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+
+    <div class="card">
+      <h3>Active Sprints</h3>
+      <p>{{ sprints.length }}</p>
+    </div>
+
+    <div class="card">
+      <h3>Completed Sprints</h3>
+      <p>{{ completedSprints }}</p>
+    </div>
+
+    <div class="card">
+      <h3>Total Tasks</h3>
+      <p>{{ totalTasks }}</p>
+    </div>
+
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="sprints.length === 0" class="empty-state">
+    <h3>No sprints yet 🚀</h3>
+    <p>Create your first sprint using the "New Sprint" button</p>
+  </div>
+
+  <!-- SPRINT LIST -->
+  <div class="sprint-list">
+    <div class="sprint-card" *ngFor="let sprint of sprints">
+
+      <!-- Header -->
+      <div class="card-header">
+        <div>
+          <h3>{{ sprint.name }}</h3>
+          <p class="description">{{ sprint.description }}</p>
+        </div>
+
+        <span
+          class="badge"
+          [ngClass]="{
+            'planned': sprint.status === 'Planned',
+            'active': sprint.status === 'Active',
+            'completed': sprint.status === 'Completed'
+          }">
+          {{ sprint.status }}
+        </span>
+      </div>
+
+      <!-- Dates -->
+      <div class="info-section">
+        <div class="info-item">
+          <span class="label">Start</span>
+          <span class="value">{{ sprint.startDate }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="label">End</span>
+          <span class="value">{{ sprint.endDate }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="label">Duration</span>
+          <span class="value">{{ sprint.duration }} Days</span>
+        </div>
+      </div>
+
+      <!-- Footer Stats -->
+      <div class="card-footer">
+        <div class="stat">
+          <span class="stat-value">{{ getTaskCount(sprint.id) }}</span>
+          <span class="stat-label">Tasks</span>
+        </div>
+
+        <div class="stat">
+          <!-- <span class="stat-value">{{ getSprintProgress(sprint.id) }}%</span> -->
+          <!-- <span class="stat-label">Progress</span> -->
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-section">
+
+        <div class="progress-header">
+          <span>Progress</span>
+          <span>{{ getSprintProgress(sprint.id) }}%</span>
+        </div>
+
+        <div class="progress-bar">
+          <div
+            class="progress-fill"
+            [style.width.%]="getSprintProgress(sprint.id)">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TASKS INSIDE SPRINT -->
+      <div class="tasks-section">
+
+        <h4>📋 Tasks</h4>
+
+        <div
+          class="task-chip"
+          *ngFor="let task of getTasksForSprint(sprint.id)"
+        >
+          {{ task.title }}
+        </div>
+
+        <p
+          *ngIf="getTasksForSprint(sprint.id).length === 0"
+          class="no-task"
+        >
+          No tasks assigned
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" *ngIf="showSprintModal">
+
+  <div class="modal-content">
+
+    <h2>Create New Sprint</h2>
+
+    <input
+      placeholder="Sprint Name"
+      [(ngModel)]="newSprint.name" />
+
+    <input
+      placeholder="Description"
+      [(ngModel)]="newSprint.description" />
+
+
+    <label>Start Date</label>
+    <input
+      type="date"
+      [(ngModel)]="newSprint.startDate"
+      (ngModelChange)="onDateChange(); onDurationChange()"
+    />
+
+    <label>Duration (days)</label>
+    <input
+      type="number"
+      [(ngModel)]="newSprint.duration"
+      (ngModelChange)="onDurationChange()"
+    />
+
+    <label>End Date</label>
+    <input
+      type="date"
+      [(ngModel)]="newSprint.endDate"
+      (ngModelChange)="onDateChange()"
+    />
+
+    <!-- STATUS SELECT -->
+    <select [(ngModel)]="newSprint.status">
+      <option value="Planned">Planned</option>
+      <option value="Active">Active</option>
+      <option value="Completed">Completed</option>
+    </select>
+
+    <div class="modal-actions">
+      <button (click)="createSprint()">Create</button>
+      <button (click)="closeSprintForm()">Cancel</button>
+    </div>
+
+  </div>
+
+</div>

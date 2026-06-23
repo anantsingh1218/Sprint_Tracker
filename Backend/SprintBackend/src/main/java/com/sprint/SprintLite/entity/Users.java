@@ -1,9 +1,12 @@
 package com.sprint.SprintLite.entity;
 
+import com.sprint.SprintLite.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -19,8 +22,10 @@ public class Users extends BaseEntity {
     @Column(name = "username", length = Integer.MAX_VALUE)
     private String username;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "role", length = Integer.MAX_VALUE)
-    private String role;
+    private Role role;
 
     @Column(name = "email", length = Integer.MAX_VALUE)
     private String email;

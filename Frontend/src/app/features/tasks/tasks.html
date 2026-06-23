@@ -1,0 +1,288 @@
+<div class="header">
+
+  <h2>Task Board</h2>
+
+  <button class="add-btn" (click)="openTaskForm()">
+    + Create Task
+  </button>
+
+</div>
+
+<div class="sprint-filter">
+
+  <label>Select Sprint:</label>
+
+  <select [(ngModel)]="selectedSprintId">
+
+    <option value="">
+      All Sprints
+    </option>
+
+    <option *ngFor="let s of sprints" [value]="s.id">
+      {{ s.name }}
+    </option>
+
+  </select>
+
+</div>
+
+<!-- BOARD -->
+<div class="board">
+
+  <!-- TO DO -->
+  <div class="column">
+
+    <h3>📝 To Do</h3>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="todoTasks"
+      (cdkDropListDropped)="drop($event, 'Open')"
+      class="task-list">
+
+      <div
+        class="task-card"
+        *ngFor="let t of todoTasks"
+        cdkDrag
+        (click)="openEditTask(t)">
+
+        <div class="task-header">
+          <h4>{{ t.title }}</h4>
+          <span class="priority">{{ t.priority }}</span>
+        </div>
+
+        <p>{{ t.description }}</p>
+
+        <div class="task-meta">
+          <span>👤 {{ t.assignedTo || 'Unassigned' }}</span>
+          <span>⏱ {{ t.remainingEstimate || 0 }}h</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="column">
+
+    <h3>⚡ In Progress</h3>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="inProgressTasks"
+      (cdkDropListDropped)="drop($event, 'In Progress')"
+      class="task-list">
+
+      <div
+        class="task-card"
+        *ngFor="let t of inProgressTasks"
+        cdkDrag
+        (click)="openEditTask(t)">
+
+        <div class="task-header">
+          <h4>{{ t.title }}</h4>
+          <span class="priority">{{ t.priority }}</span>
+        </div>
+
+        <p>{{ t.description }}</p>
+
+        <div class="task-meta">
+          <span>👤 {{ t.assignedTo || 'Unassigned' }}</span>
+          <span>⏱ {{ t.remainingEstimate || 0 }}h</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DONE -->
+  <div class="column">
+
+    <h3>✅ Done</h3>
+
+    <div
+      cdkDropList
+      [cdkDropListData]="doneTasks"
+      (cdkDropListDropped)="drop($event, 'Done')"
+      class="task-list">
+
+      <div
+        class="task-card"
+        *ngFor="let t of doneTasks"
+        cdkDrag
+        (click)="openEditTask(t)">
+
+        <div class="task-header">
+          <h4>{{ t.title }}</h4>
+          <span class="priority">{{ t.priority }}</span>
+        </div>
+
+        <p>{{ t.description }}</p>
+
+        <div class="task-meta">
+          <span>👤 {{ t.assignedTo || 'Unassigned' }}</span>
+          <span>⏱ {{ t.remainingEstimate || 0 }}h</span>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= CREATE TASK MODAL ================= -->
+<div
+  class="modal-overlay"
+  *ngIf="showTaskModal"
+  (click)="closeTaskForm()">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>Create Task</h3>
+      <button class="close-btn" (click)="closeTaskForm()">✕</button>
+    </div>
+
+    <label>Task Title</label>
+    <input [(ngModel)]="newTask.title" />
+
+    <label>Description</label>
+    <textarea rows="3" [(ngModel)]="newTask.description"></textarea>
+
+    <label>Priority</label>
+    <select [(ngModel)]="newTask.priority">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+
+    <label>Status</label>
+    <select [(ngModel)]="newTask.status">
+      <option>Open</option>
+      <option>In Progress</option>
+      <option>Blocked</option>
+      <option>Done</option>
+      <option>Closed</option>
+    </select>
+
+    <label>Assigned To</label>
+    <input [(ngModel)]="newTask.assignedTo" [matAutocomplete]="auto" />
+
+    <mat-autocomplete #auto="matAutocomplete">
+      <mat-option *ngFor="let u of filteredUsers" [value]="u">
+        {{ u }}
+      </mat-option>
+    </mat-autocomplete>
+
+    <div class="estimate-row">
+
+      <div>
+        <label>Original Estimate</label>
+        <input type="number" min="0"
+               [(ngModel)]="newTask.originalEstimate" />
+      </div>
+
+      <div>
+        <label>Remaining Estimate</label>
+        <input type="number" min="0"
+               [max]="newTask.originalEstimate"
+               [(ngModel)]="newTask.remainingEstimate" />
+      </div>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button class="cancel-btn" (click)="closeTaskForm()">
+        Cancel
+      </button>
+
+      <button class="create-btn" (click)="createTask()">
+        Create Task
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= EDIT TASK MODAL ================= -->
+<div
+  class="modal-overlay"
+  *ngIf="showEditModal"
+  (click)="closeEditTask()">
+
+  <div class="modal-content" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>Edit Task</h3>
+      <button class="close-btn" (click)="closeEditTask()">✕</button>
+    </div>
+
+    <label>Task Title</label>
+    <input type="text" placeholder="Title" [(ngModel)]="editTask.title" />
+
+    <label>Description</label>
+    <textarea rows="3" [(ngModel)]="editTask.description"></textarea>
+
+    <label>Priority</label>
+    <select  [(ngModel)]="editTask.priority">
+      <option>Low</option>
+      <option>Medium</option>
+      <option>High</option>
+    </select>
+
+    <label>Status</label>
+    <select [(ngModel)]="editTask.status">
+      <option>Open</option>
+      <option>In Progress</option>
+      <option>Blocked</option>
+      <option>Done</option>
+      <option>Closed</option>
+    </select>
+
+    <label>Assigned To</label>
+    <input [(ngModel)]="editTask.assignedTo" [matAutocomplete]="autoEdit" />
+
+    <mat-autocomplete #autoEdit="matAutocomplete">
+      <mat-option *ngFor="let u of filteredUsers" [value]="u">
+        {{ u }}
+      </mat-option>
+    </mat-autocomplete>
+
+    <div class="estimate-row">
+
+      <div>
+        <label>Original Estimate</label>
+        <input type="number" min="0"
+               [(ngModel)]="editTask.originalEstimate" />
+      </div>
+
+      <div>
+        <label>Remaining Estimate</label>
+        <input type="number" min="0"
+               [max]="editTask.originalEstimate"
+               [(ngModel)]="editTask.remainingEstimate" />
+      </div>
+
+    </div>
+
+    <div class="modal-actions">
+
+      <button class="cancel-btn" (click)="closeEditTask()">
+        Cancel
+      </button>
+
+      <button class="create-btn" (click)="saveTaskChanges()">
+        Save Changes
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

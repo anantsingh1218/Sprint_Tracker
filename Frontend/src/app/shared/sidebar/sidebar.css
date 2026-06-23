@@ -1,0 +1,19 @@
+.sidebar {
+  width: 220px;
+  min-height: 100vh;
+  background-color: #f4f6f9;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.sidebar a:hover {
+  color: #2563eb;
+}

@@ -19,13 +19,16 @@ public class PathsConfig {
                 "/actuator/**",
                 "/todos/**",
                 "/csrf-token",
-                "/register"
-        );
+                "/register",
+                "/login",
+                "/attachment/**"
+                );
     }
 
     @Bean(name = "securedPaths")
     public List<String> securedPaths() {
         return List.of(
+//                "/attachment/*",
                 "/**"
         );
     }

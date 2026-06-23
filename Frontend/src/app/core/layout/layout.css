@@ -1,0 +1,37 @@
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* LEFT SIDEBAR */
+app-sidebar {
+  width: 240px;
+  height: 100vh;
+  background: #111827;
+  color: white;
+  display: block;
+}
+
+/* RIGHT SIDE */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* TOP NAVBAR */
+app-navbar {
+  height: 60px;
+  background: #2563eb;
+  color: white;
+  display: block;
+}
+
+/* PAGE CONTENT */
+.page-content {
+  flex: 1;
+  padding: 20px;
+  background: #f5f7fb;
+  overflow: auto;
+}
