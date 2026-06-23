@@ -14,48 +14,43 @@ export class LoginComponent {
   email = '';
   password = '';
   loading = false;
+  errorMessage: string = ''
+  errorMessageUpdated: boolean = false;
 
   constructor(
     private authService: AuthService,
     private router: Router
   ) {}
 
-  onLogin() {
-    if (!this.email || !this.password) {
-      alert('Please enter email and password');
-      return;
-    }
-
-    this.loading = true;
-
-    this.authService.login(this.email, this.password).subscribe({
-      next: (res: { access_token: string; role?: string }) => {
-        this.loading = false;
-
-        console.log('Login successful:', res);
-
-        localStorage.setItem('token', res.access_token);
-
-        if (res.role) {
-          localStorage.setItem('role', res.role);
-        }
-
-        alert('Login successful!');
-
-        this.router.navigate(['/dashboard']);
-      },
-
-      error: (err) => {
-        this.loading = false;
-
-        console.error('Login failed:', err);
-
-        alert(
-          err?.error?.message ||
-          err?.error?.detail ||
-          'Invalid email or password'
-        );
-      },
-    });
+   onLogin() {
+  if (!this.email && !this.password) {
+    // TODO: Change to inside Login Component
+    // TODO: Add username only or password only cases also.
+    // alert('Please enter email and password');
+    this.errorMessage = 'Please enter email and password'
+    this.errorMessageUpdated = true
+    return;
   }
-}
+  else if (!this.email){
+    // alert('Please enter email and password');
+    this.errorMessage = 'Please enter email'
+    this.errorMessageUpdated = true
+    return;
+  }
+  else if (!this.password){
+    // alert('Please enter email and password');
+    this.errorMessage = 'Please enter password'
+    this.errorMessageUpdated = true
+    return;
+  }
+  // Temporary frontend-only login
+
+  localStorage.setItem('token', 'dummy-token');
+
+  // TODO: Change to inside Login Component
+  // alert('Login successful!');
+  this.errorMessage = 'Login Successful'
+  this.errorMessageUpdated = true
+
+  this.router.navigate(['/dashboard']);
+}}
