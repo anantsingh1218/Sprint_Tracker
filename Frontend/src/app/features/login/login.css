@@ -1,33 +1,103 @@
-.login-container {
-  width: 350px;
-  margin: 120px auto;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 0 15px rgba(0,0,0,0.1);
-
+.login-page {
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  background: #f5f7fb;
 }
 
-/* ✅ ADD THIS */
+
+.login-container {
+  width: 380px;
+  background: white;
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+
+  /* Center all inner content */
+  text-align: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  width: 28px;
+  height: 28px;
+  color: #2563eb;
+}
+
+h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin: 12px 0 28px;
+  font-size: 14px;
+}
+
 form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
+}
+
+.input-group {
+  position: relative;
+  width: 100%;
+}
+
+.input-icon {
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
 }
 
 input {
   width: 100%;
-  padding: 10px;
+  padding: 14px 14px 14px 42px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
   box-sizing: border-box;
 }
 
 button {
   width: 100%;
-  padding: 10px;
-  background: #2563eb;
-  color: white;
+  padding: 14px;
   border: none;
+  border-radius: 12px;
+  background: #111827;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+}
+
+.forgot {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.error-message {
+  color: red;
+  font-size: small;
+  font-weight: lighter;
 }

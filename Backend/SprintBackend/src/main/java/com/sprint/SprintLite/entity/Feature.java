@@ -5,6 +5,8 @@ import com.sprint.SprintLite.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -32,9 +34,13 @@ public class Feature extends BaseEntity {
     @JoinColumn(name = "sprintid")
     private Sprint sprintid;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "featurestatus", columnDefinition = "status")
     private Status featurestatus;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "priority", columnDefinition = "priority")
     private Priority priority;
 
