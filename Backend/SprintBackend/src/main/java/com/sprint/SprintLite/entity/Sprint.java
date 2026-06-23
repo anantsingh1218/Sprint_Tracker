@@ -21,11 +21,11 @@ public class Sprint {
     private Integer id;
 
     @Column(name = "sprintname", length = Integer.MAX_VALUE)
-    private String sprintname;
+    private String sprintName;
 
     @ColumnDefault("15")
     @Column(name = "sprintduration")
-    private Integer sprintduration;
+    private Integer sprintDuration;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
@@ -33,10 +33,9 @@ public class Sprint {
     private SprintStatus status;
 
     @Column(name = "startdate")
-    private LocalDate startdate;
+    private LocalDate startDate;
 
     @Column(name = "enddate")
-    private LocalDate enddate;
-
+    private LocalDate endDate;
 
 }
