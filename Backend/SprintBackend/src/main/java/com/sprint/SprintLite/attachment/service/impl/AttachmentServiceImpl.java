@@ -43,19 +43,7 @@ public class AttachmentServiceImpl implements IAttachmentService {
 
     @Override
     @Transactional
-//    public AttachmentRequestDto createOrUpdateAttachment(String username, String filename, MultipartFile attachmentFile, Long entityId, EntityType entityType) {
-//        Users userWhoSentAttachment = usersRepository.findByUsername(username)
-//                .orElseThrow(() -> {
-//                    System.out.println("User NOT found in database");
-//                    return new RuntimeException("User not found with username: " + username);
-//                });
-//        Attachment attachment = new Attachment();
-//        this.mapToAttachment(attachment, userWhoSentAttachment, attachmentFile, filename);
-//        attachment = attachmentRepository.save(attachment);
-//        AttachmentMapping attachmentMapping = mapToAttachmentMapping(attachment, entityType, entityId);
-//        attachmentMappingRepository.save(attachmentMapping);
-//        return mapToAttachmentDto(attachment, entityId, entityType);
-//    }
+
     public List<AttachmentRequestDto> createOrUpdateAttachments(
             String username, MultipartFile[] attachmentFiles, Long entityId, EntityType entityType) {
 
