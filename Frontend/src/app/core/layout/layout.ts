@@ -8,6 +8,6 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [Sidebar, Navbar, RouterOutlet],
   templateUrl: './layout.html',
-  styleUrl: './layout.css'
+  styleUrl: './layout.css',
 })
 export class Layout {}

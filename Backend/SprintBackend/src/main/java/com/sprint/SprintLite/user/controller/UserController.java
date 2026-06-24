@@ -1,6 +1,7 @@
 package com.sprint.SprintLite.user.controller;
 
 import com.sprint.SprintLite.dto.LoginRequest;
+import com.sprint.SprintLite.dto.LoginResponseDto;
 import com.sprint.SprintLite.dto.RegisterUserDto;
 import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.repository.UsersRepository;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping()
@@ -42,55 +44,26 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Successfully Registered the User");
     }
 
-   /* @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Users user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(
-                        ()->new RuntimeException("User not found (Not Found from SQL Query)")
-                );
-        System.out.println(user.getUsername());
-        boolean isValid=passwordEncoder.matches(request.getPassword(), user.getPasswordhash());
-        if(!isValid){
-            throw new RuntimeException("Incorrect password");
-        }
-        var resultAuthentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        return ResponseEntity.ok().body(jwtUtil.generateJwtToken(resultAuthentication));
-    }*/
-
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-
-        System.out.println("===== LOGIN REQUEST RECEIVED =====");
-        System.out.println("Email: " + request.username());
-
-        Users user = userRepository
-                .findByUsername(request.username())
-                .orElseThrow(() -> {
-                    System.out.println("User NOT found in database");
-                    return new RuntimeException("User not found (Not Found from SQL Query)");
-                });
-
-        System.out.println("User found in database");
-        System.out.println("Username: " + user.getUsername());
-        System.out.println("Email: " + user.getEmail());
-
-        boolean isValid =
-                passwordEncoder.matches(
-                        request.password(),
-                        user.getPasswordhash()
+    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequest request) {
+        Users user = userRepository.findByUsername(request.username())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "Invalid credentials"
+                        )
                 );
-
-        System.out.println("Password match result: " + isValid);
-
+        boolean isValid = passwordEncoder.matches(
+                request.password(),
+                user.getPasswordhash()
+        );
         if (!isValid) {
-            System.out.println("Password validation failed");
-            throw new RuntimeException("Incorrect password");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid credentials"
+            );
         }
-
-        System.out.println("Calling AuthenticationManager...");
-
-        Authentication resultAuthentication =
+        Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
                                 request.username(),
@@ -98,17 +71,9 @@ public class UserController {
                         )
                 );
 
-        System.out.println("Authentication successful");
-        System.out.println("Authenticated Principal: "
-//                + resultAuthentication.getName());
-                + ApplicationUtility.getLoggedInUser());
-        String token = jwtUtil.generateJwtToken(resultAuthentication);
-
-        System.out.println("JWT generated successfully");
-        System.out.println("===== LOGIN COMPLETED =====");
-
-        return ResponseEntity.ok(token);
+        String token = jwtUtil.generateJwtToken(authentication);
+        LoginResponseDto response = new LoginResponseDto();
+        response.setToken(token);
+        return ResponseEntity.ok(response);
     }
-
-
 }
