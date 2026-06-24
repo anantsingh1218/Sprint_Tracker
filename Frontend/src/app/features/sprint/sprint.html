@@ -1,17 +1,13 @@
 <div class="sprint-page">
-
   <!-- HEADER -->
   <div class="header">
     <h2>🏃 Sprint Management</h2>
 
-    <button class="add-btn" (click)="openSprintForm()">
-      + New Sprint
-    </button>
+    <button class="add-btn" (click)="openSprintForm()">+ New Sprint</button>
   </div>
 
   <!-- STATS -->
   <div class="stats">
-
     <div class="card">
       <h3>Active Sprints</h3>
       <p>{{ sprints.length }}</p>
@@ -26,7 +22,6 @@
       <h3>Total Tasks</h3>
       <p>{{ totalTasks }}</p>
     </div>
-
   </div>
 
   <!-- EMPTY STATE -->
@@ -38,7 +33,6 @@
   <!-- SPRINT LIST -->
   <div class="sprint-list">
     <div class="sprint-card" *ngFor="let sprint of sprints">
-
       <!-- Header -->
       <div class="card-header">
         <div>
@@ -49,11 +43,12 @@
         <span
           class="badge"
           [ngClass]="{
-            'planned': sprint.status === 'Planned',
-            'active': sprint.status === 'Active',
-            'completed': sprint.status === 'Completed'
-          }">
-          {{ sprint.status }}
+            planned: (sprint.status || 'Planned') === 'Planned',
+            active: (sprint.status || 'Planned') === 'Active',
+            completed: (sprint.status || 'Planned') === 'Completed',
+          }"
+        >
+          {{ sprint.status || 'Planned' }}
         </span>
       </div>
 
@@ -90,63 +85,38 @@
 
       <!-- PROGRESS -->
       <div class="progress-section">
-
         <div class="progress-header">
           <span>Progress</span>
           <span>{{ getSprintProgress(sprint.id) }}%</span>
         </div>
 
         <div class="progress-bar">
-          <div
-            class="progress-fill"
-            [style.width.%]="getSprintProgress(sprint.id)">
-          </div>
+          <div class="progress-fill" [style.width.%]="getSprintProgress(sprint.id)"></div>
         </div>
-
       </div>
 
       <!-- TASKS INSIDE SPRINT -->
       <div class="tasks-section">
-
         <h4>📋 Tasks</h4>
 
-        <div
-          class="task-chip"
-          *ngFor="let task of getTasksForSprint(sprint.id)"
-        >
+        <div class="task-chip" *ngFor="let task of getTasksForSprint(sprint.id)">
           {{ task.title }}
         </div>
 
-        <p
-          *ngIf="getTasksForSprint(sprint.id).length === 0"
-          class="no-task"
-        >
-          No tasks assigned
-        </p>
-
+        <p *ngIf="getTasksForSprint(sprint.id).length === 0" class="no-task">No tasks assigned</p>
       </div>
-
     </div>
-
   </div>
-
 </div>
 
 <!-- MODAL -->
 <div class="modal" *ngIf="showSprintModal">
-
   <div class="modal-content">
-
     <h2>Create New Sprint</h2>
 
-    <input
-      placeholder="Sprint Name"
-      [(ngModel)]="newSprint.name" />
+    <input placeholder="Sprint Name" [(ngModel)]="newSprint.name" />
 
-    <input
-      placeholder="Description"
-      [(ngModel)]="newSprint.description" />
-
+    <input placeholder="Description" [(ngModel)]="newSprint.description" />
 
     <label>Start Date</label>
     <input
@@ -156,18 +126,10 @@
     />
 
     <label>Duration (days)</label>
-    <input
-      type="number"
-      [(ngModel)]="newSprint.duration"
-      (ngModelChange)="onDurationChange()"
-    />
+    <input type="number" [(ngModel)]="newSprint.duration" (ngModelChange)="onDurationChange()" />
 
     <label>End Date</label>
-    <input
-      type="date"
-      [(ngModel)]="newSprint.endDate"
-      (ngModelChange)="onDateChange()"
-    />
+    <input type="date" [(ngModel)]="newSprint.endDate" (ngModelChange)="onDateChange()" />
 
     <!-- STATUS SELECT -->
     <select [(ngModel)]="newSprint.status">
@@ -180,7 +142,5 @@
       <button (click)="createSprint()">Create</button>
       <button (click)="closeSprintForm()">Cancel</button>
     </div>
-
   </div>
-
 </div>

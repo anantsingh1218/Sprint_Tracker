@@ -1,1 +1,21 @@
-<h2 style="background:blue">NAVBAR WORKING</h2>
+<div class="navbar">
+  <!-- CENTER: Search -->
+  <div class="center">
+    <input type="text" placeholder="Search work items, sprints..." />
+  </div>
+
+  <!-- RIGHT: Actions -->
+  <div class="right">
+    @if (isProjectManager) {
+      <button class="btn" (click)="navigateToRegister()">Register New User</button>
+    }
+
+    <div class="avatar">
+      @if (username) {
+        {{ username[0] }}
+      } @else {
+        A
+      }
+    </div>
+  </div>
+</div>

@@ -1,7 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
+import { ApiService } from '../../core/apiService/api-service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { LoginResponse } from '../../dtos/LoginResponse';
+import { LoginRequest } from '../../dtos/LoginRequest';
 
 @Component({
   selector: 'app-login',
@@ -14,43 +18,59 @@ export class LoginComponent {
   email = '';
   password = '';
   loading = false;
-  errorMessage: string = ''
-  errorMessageUpdated: boolean = false;
+  errorMessage = signal('');
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private apiService: ApiService,
   ) {}
 
-   onLogin() {
-  if (!this.email && !this.password) {
-    // TODO: Change to inside Login Component
-    // TODO: Add username only or password only cases also.
-    // alert('Please enter email and password');
-    this.errorMessage = 'Please enter email and password'
-    this.errorMessageUpdated = true
-    return;
+  sendLoginRequest() {
+    this.errorMessage.set(''); // Reset every login
+    const payload: LoginRequest = { username: this.email, password: this.password };
+    this.apiService.postRequest<LoginResponse>('/login', payload).subscribe({
+      next: (response) => {
+        const jwtToken: string = response.token;
+        this.authService.saveToken(jwtToken);
+        this.router.navigate(['/dashboard']);
+        console.log('Server Response : ', response);
+      },
+      error: (err: HttpErrorResponse) => {
+        switch (err.status) {
+          case 401:
+            this.errorMessage.set('Invalid username or password');
+            break;
+          case 500:
+            this.errorMessage.set('Server error, try again later');
+            break;
+          default:
+            this.errorMessage.set(err.error?.errorMessage || 'Login failed');
+            break;
+        }
+      },
+    });
   }
-  else if (!this.email){
-    // alert('Please enter email and password');
-    this.errorMessage = 'Please enter email'
-    this.errorMessageUpdated = true
-    return;
+
+  onLogin() {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/dashboard']);
+      return;
+    } else {
+      if (localStorage.getItem('jwtToken') != null) {
+        this.authService.logout();
+      }
+    }
+    if (!this.email && !this.password) {
+      this.errorMessage.set('Please enter email and password');
+      return;
+    } else if (!this.email) {
+      this.errorMessage.set('Please enter email');
+      return;
+    } else if (!this.password) {
+      this.errorMessage.set('Please enter password');
+      return;
+    }
+    this.sendLoginRequest();
   }
-  else if (!this.password){
-    // alert('Please enter email and password');
-    this.errorMessage = 'Please enter password'
-    this.errorMessageUpdated = true
-    return;
-  }
-  // Temporary frontend-only login
-
-  localStorage.setItem('token', 'dummy-token');
-
-  // TODO: Change to inside Login Component
-  // alert('Login successful!');
-  this.errorMessage = 'Login Successful'
-  this.errorMessageUpdated = true
-
-  this.router.navigate(['/dashboard']);
-}}
+}

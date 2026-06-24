@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -112,5 +114,17 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+
+        Map<String, Object> error = new HashMap<>();
+        error.put("errorMessage", ex.getReason());
+        error.put("status", ex.getStatusCode().value());
+        error.put("timestamp", Instant.now());
+
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(error);
+    }
 }
 

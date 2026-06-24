@@ -1,0 +1,100 @@
+<div class="overlay">
+  <div class="workitem">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="title-block">
+        <div class="story-id">Story #{{ story.id }}</div>
+
+        <input class="title" [(ngModel)]="story.title" placeholder="Enter title..." />
+      </div>
+
+      <button class="btn-close" (click)="closeOverlay()">✕</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+      <!-- LEFT -->
+      <div class="left">
+        <label>Description</label>
+        <textarea [(ngModel)]="story.body"></textarea>
+
+        <div class="comments">
+          <h4>Discussion</h4>
+
+          <div class="comment" *ngFor="let c of story.comments">
+            <b>{{ getUserName(c.userId) }}</b>
+            <p>{{ c.text }}</p>
+            <small>{{ c.createdAt | date: 'short' }}</small>
+          </div>
+
+          <div class="add-comment">
+            <input [(ngModel)]="newComment" placeholder="Add comment..." />
+            <button (click)="addComment()">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right">
+        <!-- FEATURE -->
+        <label>Feature</label>
+        <select [(ngModel)]="story.featureId">
+          <option [ngValue]="null">Select Feature</option>
+          <option *ngFor="let f of features" [ngValue]="f.id">
+            {{ f.name }}
+          </option>
+        </select>
+
+        <!-- SPRINT -->
+        <label>Sprint</label>
+        <select [(ngModel)]="story.sprintId">
+          <option [ngValue]="null">Select Sprint</option>
+          <option *ngFor="let s of sprints" [ngValue]="s.id">
+            {{ s.name }}
+          </option>
+        </select>
+
+        <!-- ASSIGNED TO -->
+        <label>Assigned To</label>
+        <select [(ngModel)]="story.userId">
+          <option [ngValue]="null">Unassigned</option>
+          <option *ngFor="let u of users" [ngValue]="u.id">
+            {{ u.name }}
+          </option>
+        </select>
+
+        <!-- STATUS -->
+        <label>Status</label>
+        <select [(ngModel)]="story.status">
+          <option>New</option>
+          <option>Active</option>
+          <option>Resolved</option>
+          <option>Closed</option>
+        </select>
+
+        <!-- PRIORITY -->
+        <label>Priority</label>
+        <select [(ngModel)]="story.priority">
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+
+        <!-- ESTIMATION -->
+        <label>Story Points (Estimated)</label>
+        <input type="number" [(ngModel)]="story.estimatedStoryPoints" />
+
+        <!-- REMAINING -->
+        <label>Remaining Estimate</label>
+        <input type="number" [(ngModel)]="story.remainingStoryPoint" />
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <button class="btn-save" (click)="saveStory()">Save</button>
+
+      <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
+    </div>
+  </div>
+</div>
