@@ -1,9 +1,8 @@
-package com.sprint.SprintLite.Sprint.Service;
+package com.sprint.SprintLite.Sprint_and_Story_and_Task.Service;
 
 import com.sprint.SprintLite.dto.CreateSprintRequest;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
-import com.sprint.SprintLite.entity.enums.Status;
 
 import java.util.List;
 
