@@ -10,37 +10,34 @@ import { TaskService } from '../../core/task/task';
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './sprint.html',
-  styleUrl: './sprint.css'
+  styleUrl: './sprint.css',
 })
 export class Sprint {
   getTasksForSprint(sprintId: string) {
-  return this.taskService.getTasksBySprint(sprintId);
-}
-
-getTaskCount(sprintId: string) {
-  return this.taskService.getTasksBySprint(sprintId).length;
-}
-
-get totalTasks() {
-  return this.taskService.getTasks().length;
-}
-
-get completedSprints() {
-  return this.sprints.filter(
-    (s: any) => s.status === 'Completed'
-  ).length;
-}
-
-getSprintProgress(sprintId: string) {
-  const total = this.getTaskCount(sprintId);
-
-  if (total === 0) {
-    return 0;
+    return this.taskService.getTasksBySprint(sprintId) || [];
   }
 
-  // Demo progress calculation
-  return Math.min(total * 20, 100);
-}
+  getTaskCount(sprintId: string) {
+    return this.taskService.getTasksBySprint(sprintId).length;
+  }
+
+  get totalTasks() {
+    return this.taskService.getTasks().length;
+  }
+
+  get completedSprints() {
+    return this.sprints.filter((s) => s.status === 'Completed').length;
+  }
+
+  getSprintProgress(sprintId: string) {
+    const tasks = this.taskService.getTasksBySprint(sprintId);
+
+    if (!tasks || tasks.length === 0) return 0;
+
+    const done = tasks.filter((t) => t.status === 'Done').length;
+
+    return Math.round((done / tasks.length) * 100);
+  }
 
   showSprintModal = false;
 
@@ -49,14 +46,14 @@ getSprintProgress(sprintId: string) {
     description: '',
     startDate: '',
     endDate: '',
-    duration: '', // days
-    status: 'Planned'
+    duration: 0,
+    status: 'Planned',
   };
 
   constructor(
-  private sprintService: SprintService,
-  private taskService: TaskService
-) {}
+    private sprintService: SprintService,
+    private taskService: TaskService,
+  ) {}
 
   get sprints() {
     return this.sprintService.getSprints();
@@ -72,7 +69,7 @@ getSprintProgress(sprintId: string) {
 
   calculateDuration(): void {
     if (!this.newSprint.startDate || !this.newSprint.endDate) {
-      this.newSprint.duration = '0';
+      this.newSprint.duration = 0;
     }
 
     const start = new Date(this.newSprint.startDate);
@@ -81,7 +78,7 @@ getSprintProgress(sprintId: string) {
     const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    this.newSprint.duration = String(diffDays)
+    this.newSprint.duration = diffDays;
   }
 
   onDateChange() {
@@ -97,7 +94,7 @@ getSprintProgress(sprintId: string) {
       const diffTime = end.getTime() - start.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      this.newSprint.duration = diffDays.toString();
+      this.newSprint.duration = diffDays;
     }
   }
 
@@ -107,7 +104,7 @@ getSprintProgress(sprintId: string) {
     }
 
     const start = new Date(this.newSprint.startDate);
-    const duration = Number(this.newSprint.duration);
+    const duration = this.newSprint.duration;
 
     const end = new Date(start);
     end.setDate(start.getDate() + duration);
@@ -121,13 +118,13 @@ getSprintProgress(sprintId: string) {
     this.sprintService.addSprint(this.newSprint);
 
     this.newSprint = {
-  name: '',
-  description: '',
-  duration: '',
-  startDate: '',
-  endDate: '',
-  status: 'Planned'
-};
+      name: '',
+      description: '',
+      startDate: '',
+      endDate: '',
+      duration: 0,
+      status: 'Planned',
+    };
 
     this.showSprintModal = false;
   }

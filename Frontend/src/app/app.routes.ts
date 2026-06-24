@@ -4,6 +4,9 @@ import { Dashboard } from './features/dashboard/dashboard';
 import { Layout } from './core/layout/layout';
 import { Sprint } from './features/sprint/sprint';
 import { Tasks } from './features/tasks/tasks';
+import { Backlog } from './features/backlog/backlog';
+import { Board } from './features/board/board';
+import { StoryList } from './features/story-list/story-list';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -19,9 +22,12 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'sprints', component: Sprint },
       { path: 'tasks', component: Tasks },
-    ]
+      { path: 'backlog', component: Backlog },
+      { path: 'board', component: Board },
+      { path: 'story', component: StoryList },
+    ],
   },
 
   // fallback
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'login' },
 ];

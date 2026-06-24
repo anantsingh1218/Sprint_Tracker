@@ -4,8 +4,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
 import { ApiService } from '../../core/apiService/api-service';
 import { HttpErrorResponse } from '@angular/common/http';
-import { LoginResponse } from '../../models/LoginResponse';
-import { LoginRequest } from '../../models/LoginRequest';
+import { LoginResponse } from '../../dtos/LoginResponse';
+import { LoginRequest } from '../../dtos/LoginRequest';
 
 @Component({
   selector: 'app-login',

@@ -1,0 +1,33 @@
+<div class="page">
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Stories</h2>
+
+    <button class="btn-primary" (click)="openCreateStory()">+ Create Story</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="story-grid">
+    <div class="story-card" *ngFor="let story of stories" (click)="openStory(story)">
+      <h3>{{ story.title }}</h3>
+
+      <p class="desc">
+        {{ story.body || 'No description available' }}
+      </p>
+
+      <div class="meta">
+        <span class="status">{{ story.status }}</span>
+        <span class="points">{{ story.remainingStoryPoint }} pts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY -->
+  <app-story
+    *ngIf="isStoryOpen"
+    [story]="selectedStory"
+    (close)="closeStory()"
+    (save)="saveStory($event)"
+  >
+  </app-story>
+</div>
