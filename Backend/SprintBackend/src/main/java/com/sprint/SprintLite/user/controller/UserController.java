@@ -5,6 +5,7 @@ import com.sprint.SprintLite.dto.RegisterUserDto;
 import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.repository.UsersRepository;
 import com.sprint.SprintLite.security.util.JwtUtil;
+import com.sprint.SprintLite.util.ApplicationUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -99,8 +100,8 @@ public class UserController {
 
         System.out.println("Authentication successful");
         System.out.println("Authenticated Principal: "
-                + resultAuthentication.getName());
-
+//                + resultAuthentication.getName());
+                + ApplicationUtility.getLoggedInUser());
         String token = jwtUtil.generateJwtToken(resultAuthentication);
 
         System.out.println("JWT generated successfully");

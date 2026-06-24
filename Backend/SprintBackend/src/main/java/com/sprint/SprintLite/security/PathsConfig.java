@@ -29,8 +29,10 @@ public class PathsConfig {
     @Bean(name = "securedPaths")
     public List<String> securedPaths() {
         return List.of(
-//                "/attachment/*",
-                "/**"
+//                "/**"
+                "/feature/**",
+                "/product/**",
+                "/sprint/**"
         );
     }
 

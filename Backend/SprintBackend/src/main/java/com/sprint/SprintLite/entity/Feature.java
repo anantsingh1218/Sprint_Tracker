@@ -28,16 +28,16 @@ public class Feature extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productid")
-    private Product productid;
+    private Product productId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sprintid")
-    private Sprint sprintid;
+    private Sprint sprintId;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "featurestatus", columnDefinition = "status")
-    private Status featurestatus;
+    private Status featureStatus;
 
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
@@ -45,10 +45,10 @@ public class Feature extends BaseEntity {
     private Priority priority;
 
     @Column(name = "estimatedstorypoints")
-    private Integer estimatedstorypoints;
+    private Integer estimatedStoryPoints;
 
     @Column(name = "remainingstorypoints")
-    private Integer remainingstorypoints;
+    private Integer remainingStoryPoints;
 
 
 }
