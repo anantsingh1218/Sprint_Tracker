@@ -1,6 +1,6 @@
-package com.sprint.SprintLite.Sprint.Controller;
+package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 
-import com.sprint.SprintLite.Sprint.Service.ISprintService;
+import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ISprintService;
 import com.sprint.SprintLite.dto.CreateSprintRequest;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;

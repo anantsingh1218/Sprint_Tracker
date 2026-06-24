@@ -31,7 +31,9 @@ public class PathsConfig {
 //                "/**"
                 "/feature/**",
                 "/product/**",
-                "/sprint/**"
+                "/sprint/**",
+                "/story/**",
+                "/task/**"
         );
     }
 
