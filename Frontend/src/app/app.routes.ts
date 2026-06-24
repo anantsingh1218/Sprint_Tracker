@@ -7,12 +7,20 @@ import { Tasks } from './features/tasks/tasks';
 import { Backlog } from './features/backlog/backlog';
 import { Board } from './features/board/board';
 import { StoryList } from './features/story-list/story-list';
+import { Register } from './features/register/register';
+import { pmGuard } from './core/guards/pm-guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
   // Auth routes (NO layout)
   { path: 'login', component: LoginComponent },
+  {
+    path: 'register',
+    component: Register,
+    canActivate: [pmGuard]
+  },
+  
 
   // APP routes (WITH layout)
   {

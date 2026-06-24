@@ -2,6 +2,7 @@ package com.sprint.SprintLite.user.controller;
 
 import com.sprint.SprintLite.dto.LoginRequest;
 import com.sprint.SprintLite.dto.LoginResponseDto;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.dto.RegisterUserDto;
 import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.repository.UsersRepository;
@@ -35,13 +36,14 @@ public class UserController {
 
 
     @PostMapping(value = "/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterUserDto registerUserDto){
+    public ResponseEntity<RegisterResponseDto> registerUser(@RequestBody RegisterUserDto registerUserDto){
         Users user = new Users();
         BeanUtils.copyProperties(registerUserDto, user);
         user.setPasswordhash(passwordEncoder.encode(registerUserDto.password()));
         user.setRole(registerUserDto.role());
         userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Successfully Registered the User");
+        RegisterResponseDto registerResponseDto = new RegisterResponseDto("Successfully Registered the User");
+        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponseDto);
     }
 
     @PostMapping("/login")

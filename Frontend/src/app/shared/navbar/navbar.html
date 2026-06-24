@@ -1,14 +1,4 @@
 <div class="navbar">
-
-  <!-- LEFT: Project / Logo -->
-  <div class="left">
-    <div class="logo">AL</div>
-    <div class="title">
-      <h3>Agile Lite</h3>
-      <small>Project Dashboard</small>
-    </div>
-  </div>
-
   <!-- CENTER: Search -->
   <div class="center">
     <input type="text" placeholder="Search work items, sprints..." />
@@ -16,13 +6,16 @@
 
   <!-- RIGHT: Actions -->
   <div class="right">
-
-    <button class="btn">+ New</button>
+    @if (isProjectManager) {
+      <button class="btn" (click)="navigateToRegister()">Register New User</button>
+    }
 
     <div class="avatar">
-      U
+      @if (username) {
+        {{ username[0] }}
+      } @else {
+        A
+      }
     </div>
-
   </div>
-
 </div>
