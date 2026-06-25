@@ -12,7 +12,7 @@
 
     <div class="avatar">
       @if (username) {
-        {{ username[0] }}
+        {{ username[0] | uppercase}}
       } @else {
         A
       }

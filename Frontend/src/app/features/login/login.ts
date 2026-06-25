@@ -53,14 +53,7 @@ export class LoginComponent {
   }
 
   onLogin() {
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-      return;
-    } else {
-      if (localStorage.getItem('jwtToken') != null) {
-        this.authService.logout();
-      }
-    }
+    this.authService.logout();
     if (!this.email && !this.password) {
       this.errorMessage.set('Please enter email and password');
       return;

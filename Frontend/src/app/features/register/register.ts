@@ -87,6 +87,9 @@ export class Register {
             if (err.error.userName) {
               errors.push(err.error.userName);
             }
+            if (err.error.roles) {
+              errors.push(err.error.roles);
+            }
 
             this.errorMessage.set(errors.length > 0 ? errors.join('\n') : 'Invalid data');
 
