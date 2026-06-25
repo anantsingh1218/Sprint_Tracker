@@ -5,6 +5,7 @@ import com.sprint.SprintLite.dto.LoginResponseDto;
 import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.dto.RegisterUserDto;
 import com.sprint.SprintLite.entity.Users;
+import com.sprint.SprintLite.entity.enums.Role;
 import com.sprint.SprintLite.repository.UsersRepository;
 import com.sprint.SprintLite.security.util.JwtUtil;
 import com.sprint.SprintLite.util.ApplicationUtility;
@@ -17,12 +18,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.authentication.password.CompromisedPasswordDecision;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping()
@@ -35,15 +39,47 @@ public class UserController {
     private final CompromisedPasswordChecker compromisedPasswordChecker;
 
 
-    @PostMapping(value = "/register")
-    public ResponseEntity<RegisterResponseDto> registerUser(@RequestBody RegisterUserDto registerUserDto){
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponseDto> registerUser(
+            @RequestBody RegisterUserDto registerUserDto) {
+
+        boolean firstUser = userRepository.count() == 0;
+
         Users user = new Users();
         BeanUtils.copyProperties(registerUserDto, user);
-        user.setPasswordhash(passwordEncoder.encode(registerUserDto.password()));
-        user.setRole(registerUserDto.role());
+        user.setPasswordhash(
+                passwordEncoder.encode(registerUserDto.password()));
+
+        if (firstUser) {
+
+            user.setRole(Role.ROLE_PM);
+
+        } else {
+
+            Authentication auth =
+                    SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            boolean allowed =
+                    auth.getAuthorities().stream()
+                            .anyMatch(a ->
+                                    Objects.equals(a.getAuthority(), "ROLE_PM"));
+
+            if (!allowed) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            user.setRole(registerUserDto.role());
+        }
+
         userRepository.save(user);
-        RegisterResponseDto registerResponseDto = new RegisterResponseDto("Successfully Registered the User");
-        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponseDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new RegisterResponseDto(
+                        "Successfully Registered the User"));
     }
 
     @PostMapping("/login")

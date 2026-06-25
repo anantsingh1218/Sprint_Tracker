@@ -3,8 +3,11 @@ package com.sprint.SprintLite.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,5 +28,14 @@ public class Product extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerid")
     private Users ownerid;
+    @NonNull
+    @OneToMany(mappedBy = "productId")
+    private Set<Feature> featuretables = new LinkedHashSet<>();
+    @NonNull
+    @OneToMany(mappedBy = "productid")
+    private Set<UserProductMapping> userproductmappings = new LinkedHashSet<>();
+    @NonNull
+    @OneToMany(mappedBy = "productid")
+    private Set<Sprint> sprints = new LinkedHashSet<>();
 
-  }
+}

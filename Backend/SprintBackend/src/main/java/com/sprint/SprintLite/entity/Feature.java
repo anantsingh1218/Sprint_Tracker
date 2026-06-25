@@ -7,8 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -49,6 +52,9 @@ public class Feature extends BaseEntity {
 
     @Column(name = "remainingstorypoints")
     private Integer remainingStoryPoints;
+    @NonNull
+    @OneToMany(mappedBy = "featureid")
+    private Set<Story> storytables = new LinkedHashSet<>();
 
 
 }
