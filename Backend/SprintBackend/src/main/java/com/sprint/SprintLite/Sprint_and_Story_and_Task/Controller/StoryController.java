@@ -5,10 +5,7 @@ import com.sprint.SprintLite.dto.CreateStoryRequest;
 import com.sprint.SprintLite.entity.Story;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/story")
@@ -19,6 +16,12 @@ public class StoryController {
     @PostMapping("/create")
     public ResponseEntity<Story> createStory(@RequestBody CreateStoryRequest story) {
         Story st=storyService.createStory(story);
+        return ResponseEntity.ok().body(st);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Story> updateStory(@PathVariable Integer id,@RequestBody CreateStoryRequest story) {
+        Story st=storyService.updateStory(id,story);
         return ResponseEntity.ok().body(st);
     }
 }

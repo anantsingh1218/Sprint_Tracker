@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.dto;
 
+import com.sprint.SprintLite.entity.Comment;
 import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
@@ -19,4 +20,6 @@ private Status status;
 private Priority priority;
 private Integer sprintId;
 private Integer storyPoints;
+private String comments;
+
 }

@@ -2,14 +2,9 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl;
 
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ITaskService;
 import com.sprint.SprintLite.dto.CreateTaskRequest;
-import com.sprint.SprintLite.entity.Sprint;
-import com.sprint.SprintLite.entity.Story;
-import com.sprint.SprintLite.entity.Task;
-import com.sprint.SprintLite.entity.Users;
-import com.sprint.SprintLite.repository.SprintRepository;
-import com.sprint.SprintLite.repository.StoryRepository;
-import com.sprint.SprintLite.repository.TaskRepository;
-import com.sprint.SprintLite.repository.UsersRepository;
+import com.sprint.SprintLite.entity.*;
+import com.sprint.SprintLite.entity.enums.EntityType;
+import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -24,6 +19,7 @@ public class TaskServiceImpl implements ITaskService {
     private final SprintRepository sprintRepository;
     private final StoryRepository storyRepository;
     private final UsersRepository usersRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public Task createTask(CreateTaskRequest request) {
@@ -78,45 +74,75 @@ public class TaskServiceImpl implements ITaskService {
     }
 
     @Override
-    public Task updateTask(Long id, CreateTaskRequest request) {
+    public Task updateTask(Integer id, CreateTaskRequest request) {
 
-        Task task = getTaskById(id);
+        Task existingTask = taskRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
 
         String username = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getName();
 
-        Users assignedUser = usersRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Assigned user not found"));
+        if (request.getTitle() != null) {
+            existingTask.setTitle(request.getTitle());
+        }
 
-        Sprint sprint = sprintRepository.findById(request.getSprintid())
-                .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
+        if (request.getBody() != null) {
+            existingTask.setBody(request.getBody());
+        }
 
-        Story story = storyRepository.findById(request.getStoryid())
-                .orElseThrow(() -> new IllegalArgumentException("Story not found"));
+        if (request.getUserId() != null) {
+            Users assignedUser = usersRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("Assigned user not found"));
 
-        task.setTitle(request.getTitle());
-        task.setBody(request.getBody());
+            existingTask.setUserid(assignedUser);
+        }
 
-        // logged-in user becomes task owner
-        task.setUserid(assignedUser);
+        if (request.getSprintid() != null) {
+            Sprint sprint = sprintRepository.findById(request.getSprintid())
+                    .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
 
-        task.setSprintid(sprint);
-        task.setStoryid(story);
+            existingTask.setSprintid(sprint);
+        }
 
-        task.setTaskstatus(request.getTaskstatus());
-        task.setPriority(request.getPriority());
+        if (request.getStoryid() != null) {
+            Story story = storyRepository.findById(request.getStoryid())
+                    .orElseThrow(() -> new IllegalArgumentException("Story not found"));
 
-        task.setOriginalestimatehours(request.getOriginalestimatehours());
-        task.setRemainingestimatehours(request.getRemainingestimatehours());
+            existingTask.setStoryid(story);
+        }
 
-        // audit field
-        task.setUpdatedBy(username);
+        if (request.getTaskstatus() != null) {
+            existingTask.setTaskstatus(request.getTaskstatus());
+        }
 
-        return taskRepository.save(task);
+        if (request.getPriority() != null) {
+            existingTask.setPriority(request.getPriority());
+        }
+
+        if (request.getOriginalestimatehours() != null) {
+            existingTask.setOriginalestimatehours(request.getOriginalestimatehours());
+        }
+
+        if (request.getRemainingestimatehours() != null) {
+            existingTask.setRemainingestimatehours(request.getRemainingestimatehours());
+        }
+
+        existingTask.setUpdatedBy(username);
+
+        if (request.getComments() != null && !request.getComments().isBlank()) {
+            Comment comment = new Comment();
+            comment.setComment(request.getComments());
+            comment.setEntitytype(EntityType.TASK);
+            comment.setEntityid(id);
+            comment.setCreatedBy(username);
+
+            commentRepository.save(comment);
+        }
+
+        return taskRepository.save(existingTask);
     }
-
     @Override
     public void deleteTask(Long id) {
         Task task = getTaskById(id);

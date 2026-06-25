@@ -5,4 +5,5 @@ import com.sprint.SprintLite.entity.Story;
 
 public interface IStoryService {
     Story createStory(CreateStoryRequest story);
+    Story updateStory(Integer id,CreateStoryRequest story);
 }
