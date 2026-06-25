@@ -14,7 +14,7 @@ public interface ITaskService {
 
     List<Task> getTasksBySprintId(Long sprintId);
 
-    Task updateTask(Long id, CreateTaskRequest request);
+    Task updateTask(Integer id, CreateTaskRequest request);
 
     void deleteTask(Long id);
 }

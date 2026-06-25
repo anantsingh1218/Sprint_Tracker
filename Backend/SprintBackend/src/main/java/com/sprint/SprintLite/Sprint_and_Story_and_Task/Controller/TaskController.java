@@ -1,6 +1,7 @@
 package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ITaskService;
+import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl.TaskServiceImpl;
 import com.sprint.SprintLite.dto.CreateTaskRequest;
 import com.sprint.SprintLite.entity.Task;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 
     @RequiredArgsConstructor
     public class TaskController {
-        private final ITaskService taskService;
+        private final TaskServiceImpl taskService;
         @PostMapping("/add")
         public ResponseEntity<Task> addTask(
                 @RequestBody CreateTaskRequest request) {
@@ -50,7 +51,7 @@ import java.util.List;
 
         @PutMapping("/{id}")
         public ResponseEntity<Task> updateTask(
-                @PathVariable Long id,
+                @PathVariable Integer id,
                 @RequestBody CreateTaskRequest request) {
 
             Task updatedTask =
