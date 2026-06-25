@@ -1,6 +1,7 @@
 package com.sprint.SprintLite.Feature.Controller;
 
 import ch.qos.logback.core.status.Status;
+import com.sprint.SprintLite.Feature.Service.impl.FeatureServiceImpl;
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
 import com.sprint.SprintLite.dto.CreateProductRequest;
 import com.sprint.SprintLite.entity.Feature;
@@ -15,7 +16,7 @@ import java.util.List;
 @RequestMapping("/feature")
 @RequiredArgsConstructor
 public class FeatureController {
-    private final IFeatureService featureService;
+    private final FeatureServiceImpl featureService;
 
     @PostMapping("/add")
     public ResponseEntity<Feature> addFeature(@RequestBody CreateFeatureRequest request) {
@@ -52,7 +53,7 @@ public class FeatureController {
     @PutMapping("/{featureId}")
     public ResponseEntity<Feature> updateFeature(
             @PathVariable Long featureId,
-            @RequestBody Feature feature) {
+            @RequestBody CreateFeatureRequest feature) {
 
         Feature updatedFeature =
                 featureService.updateFeature(featureId, feature);

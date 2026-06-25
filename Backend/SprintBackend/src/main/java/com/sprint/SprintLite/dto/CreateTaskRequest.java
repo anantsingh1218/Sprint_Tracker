@@ -13,7 +13,7 @@ public class CreateTaskRequest {
 
     private String body;
 
-    private String username;
+    private Integer userId;
 
     private Integer sprintid;
 
@@ -26,4 +26,6 @@ public class CreateTaskRequest {
     private Integer originalestimatehours;
 
     private Integer remainingestimatehours;
+
+    private String comments;
 }
