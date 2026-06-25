@@ -41,6 +41,7 @@ CREATE TABLE SPRINT (
                         SPRINTNAME text,
                         SPRINTDURATION integer DEFAULT 15,
                         STATUS SPRINTSTATUS,
+                        PRODUCTID integer,
                         STARTDATE date,
                         ENDDATE date
 );
@@ -180,20 +181,23 @@ CREATE TABLE WORKLOG (
 );
 
 CREATE TABLE DSUNOTES (
-                        ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                        NOTES text,
-                        NOTESDATE date,
-                        ENTITYTYPE ENTITYTYPE,
-                        ENTITYID integer,
-                        CREATEDAT timestamp,
-                        CREATEDBY varchar,
-                        UPDATEDAT timestamp,
-                        UPDATEDBY varchar
+                          ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                          NOTES text,
+                          NOTESDATE date,
+                          ENTITYTYPE ENTITYTYPE,
+                          ENTITYID integer,
+                          CREATEDAT timestamp,
+                          CREATEDBY varchar,
+                          UPDATEDAT timestamp,
+                          UPDATEDBY varchar
 );
 
 -- =========================
 -- FOREIGN KEYS
 -- =========================
+
+ALTER TABLE SPRINT
+    ADD FOREIGN KEY (PRODUCTID) REFERENCES PRODUCTTABLE(PRODUCTID);
 
 ALTER TABLE PRODUCTTABLE
     ADD FOREIGN KEY (OWNERID) REFERENCES USERS(ID);
@@ -251,3 +255,4 @@ ALTER TABLE WORKLOG
 
 ALTER TABLE WORKLOG
     ADD FOREIGN KEY (BUGID) REFERENCES BUGS(ID);
+

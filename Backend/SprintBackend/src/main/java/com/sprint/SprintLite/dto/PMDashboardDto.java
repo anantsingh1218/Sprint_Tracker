@@ -1,4 +1,14 @@
 package com.sprint.SprintLite.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PMDashboardDto {
 
     private String sprintName;
@@ -15,24 +25,14 @@ public class PMDashboardDto {
 
     private Integer totalHours;
 
-    public PMDashboardDto(){}
+    private Long totalStories;
 
-    public PMDashboardDto(
-            String sprintName,
-            Integer progress,
-            Long totalTasks,
-            Long completedTasks,
-            Long inProgressTasks,
-            Long blockedTasks,
-            Integer totalHours
-    ){
-        this.sprintName=sprintName;
-        this.progress=progress;
-        this.totalTasks=totalTasks;
-        this.completedTasks=completedTasks;
-        this.inProgressTasks=inProgressTasks;
-        this.blockedTasks=blockedTasks;
-        this.totalHours=totalHours;
-    }
+    private Integer sprintDuration;
+
+    private Long completedStories;
+
+    private Integer remainingHours;
+
+    private Integer completionRate;
 
 }

@@ -1,7 +1,58 @@
 package com.sprint.SprintLite.repository;
 
+import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.Task;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.sprint.SprintLite.entity.Users;
+import com.sprint.SprintLite.entity.enums.Status;
 
-public interface TaskRepository extends JpaRepository<Task, Integer> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+
+
+public interface TaskRepository
+        extends JpaRepository<Task, Integer> {
+
+    Long countByTaskstatus(
+            Status status
+    );
+
+    Long countByUserid(
+            Users user
+    );
+
+    Long countByUseridAndTaskstatus(
+            Users user,
+            Status status
+    );
+
+    @Query("""
+            SELECT COALESCE(
+                SUM(t.originalestimatehours),
+                0
+            )
+            FROM Task t
+            WHERE t.sprintid = :sprint
+            """)
+    Integer getTotalEstimatedHours(
+            @Param("sprint")
+            Sprint sprint
+    );
+
+    @Query("""
+SELECT COALESCE(
+SUM(
+t.remainingestimatehours
+),
+0
+)
+FROM Task t
+WHERE t.sprintid=:sprint
+""")
+    Integer getRemainingHours(
+            @Param("sprint")
+            Sprint sprint
+    );
+
 }
