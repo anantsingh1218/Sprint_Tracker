@@ -9,12 +9,14 @@ import { Board } from './features/board/board';
 import { StoryList } from './features/story-list/story-list';
 import { Register } from './features/register/register';
 import { pmGuard } from './core/guards/pm-guard';
+import { ForgotPassword } from './features/forgot-password/forgot-password';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 
   // Auth routes (NO layout)
   { path: 'login', component: LoginComponent },
+  { path: 'forgot-password', component: ForgotPassword },
   {
     path: 'register',
     component: Register,

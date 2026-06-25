@@ -79,9 +79,9 @@ public class AttachmentServiceImpl implements IAttachmentService {
     }
 
     @Override
-    public AttachmentDownloadDto getAttachmentFile(Integer attachmentId) {
-        Attachment attachment = attachmentRepository.findById(attachmentId)
-                .orElseThrow(() -> new FileStorageException("File not found with attachment Id = " + attachmentId));
+    public AttachmentDownloadDto getAttachmentFile(String originalFileName) {
+        Attachment attachment = attachmentRepository.findAttachmentByFilename(originalFileName)
+                .orElseThrow(() -> new FileStorageException("File not found with attachment filename = " + originalFileName));
         Path path = Paths.get(attachment.getFilepath());
         Resource resource = new FileSystemResource(path);
 

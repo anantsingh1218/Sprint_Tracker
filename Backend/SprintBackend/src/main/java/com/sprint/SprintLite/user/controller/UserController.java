@@ -1,14 +1,12 @@
 package com.sprint.SprintLite.user.controller;
 
-import com.sprint.SprintLite.dto.LoginRequest;
-import com.sprint.SprintLite.dto.LoginResponseDto;
-import com.sprint.SprintLite.dto.RegisterResponseDto;
-import com.sprint.SprintLite.dto.RegisterUserDto;
+import com.sprint.SprintLite.dto.*;
 import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.entity.enums.Role;
 import com.sprint.SprintLite.repository.UsersRepository;
 import com.sprint.SprintLite.security.util.JwtUtil;
 import com.sprint.SprintLite.util.ApplicationUtility;
+import com.sprint.SprintLite.util.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -20,10 +18,8 @@ import org.springframework.security.authentication.password.CompromisedPasswordD
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
@@ -113,5 +109,22 @@ public class UserController {
         LoginResponseDto response = new LoginResponseDto();
         response.setToken(token);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/forgot-password")
+    @Transactional
+    public ResponseEntity<RegisterResponseDto> forgotPassword(@RequestBody ForgotPasswordDto request){
+        Users user = userRepository.readUsersByEmailOrderByUsername(request.email(), request.username())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "Invalid credentials"
+                        )
+                );
+        String randomPassword = PasswordGenerator.generateRandomPassword(15);
+        user.setPasswordhash(passwordEncoder.encode(randomPassword));
+        userRepository.save(user); //Performs update operation here cause id is found
+        RegisterResponseDto registerResponseDto = new RegisterResponseDto("The updated password is: " + randomPassword);
+        return ResponseEntity.ok(registerResponseDto);
     }
 }

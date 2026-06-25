@@ -75,7 +75,7 @@ export class StoryList {
 
   openCreateStory() {
   this.selectedStory = {
-    id: Date.now(),
+    id: this.stories.length + 1,
     title: '',
     body: '',
 

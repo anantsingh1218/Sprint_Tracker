@@ -2,6 +2,9 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { WorkItemType } from '../../models/workItem';
+import { Attachment } from '../../models/attachmentInterface';
+import { FetchAttachmentsResponse } from '../../models/fetchAttachmnetResponseInterface';
 
 @Injectable({
   providedIn: 'root',
@@ -42,9 +45,13 @@ export class ApiService {
     requestParams?: Record<string, any>,
     contentType: string = 'application/json',
   ): Observable<T> {
-    const headers = new HttpHeaders({
-      'Content-Type': contentType,
-    });
+    let headers = new HttpHeaders();
+
+    const isFormData = payload instanceof FormData;
+
+    if (!isFormData) {
+      headers = headers.set('Content-Type', contentType);
+    }
 
     return this.http
       .post<T>(`${this.apiUrl}${endpoint}`, payload, {
@@ -89,5 +96,22 @@ export class ApiService {
   private apiErrorHandler(error: HttpErrorResponse) {
     console.error('Backend error:', error);
     return throwError(() => error);
+  }
+
+  getAttachments(entityType: WorkItemType, entityId: number) {
+    return this.getRequest<FetchAttachmentsResponse>(
+      `/attachment/fetch/${entityType.toUpperCase()}/${entityId}`,
+    );
+  }
+
+  uploadAttachments(entityType: WorkItemType, entityId: number, files: File[]) {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('attachments', file); // same key repeated
+    });
+    return this.postRequest<Array<Attachment>>(
+      `/attachment/upload/${entityType.toUpperCase()}/${entityId}`,
+      formData,
+    );
   }
 }

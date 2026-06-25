@@ -1,13 +1,25 @@
 <div class="overlay">
   <div class="workitem">
-    <!-- HEADER -->
     <div class="header">
+      <!-- LEFT -->
       <div class="title-block">
         <div class="story-id">Story #{{ story.id }}</div>
-
         <input class="title" [(ngModel)]="story.title" placeholder="Enter title..." />
       </div>
 
+      <!-- CENTER -->
+      <div class="header-center">
+        <button
+          class="icon-btn"
+          (click)="toggleAttachmentsView()"
+          [class.active]="isAttachmentView"
+          title="Attachments"
+        >
+          {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+        </button>
+      </div>
+
+      <!-- RIGHT -->
       <button class="btn-close" (click)="closeOverlay()">✕</button>
     </div>
 
@@ -15,23 +27,46 @@
     <div class="body">
       <!-- LEFT -->
       <div class="left">
-        <label>Description</label>
-        <textarea [(ngModel)]="story.body"></textarea>
+        <!-- DESCRIPTION + COMMENTS VIEW -->
+        @if (!isAttachmentView) {
+          <label>Description</label>
+          <textarea [(ngModel)]="story.body"></textarea>
 
-        <div class="comments">
-          <h4>Discussion</h4>
+          <div class="comments">
+            <h4>Discussion</h4>
 
-          <div class="comment" *ngFor="let c of story.comments">
-            <b>{{ getUserName(c.userId) }}</b>
-            <p>{{ c.text }}</p>
-            <small>{{ c.createdAt | date: 'short' }}</small>
+            <div class="comment" *ngFor="let c of story.comments">
+              <b>{{ getUserName(c.userId) }}</b>
+              <p>{{ c.text }}</p>
+              <small>{{ c.createdAt | date: 'short' }}</small>
+            </div>
+
+            <div class="add-comment">
+              <input [(ngModel)]="newComment" placeholder="Add comment..." />
+              <button (click)="addComment()">Add</button>
+            </div>
           </div>
+        }
 
-          <div class="add-comment">
-            <input [(ngModel)]="newComment" placeholder="Add comment..." />
-            <button (click)="addComment()">Add</button>
+        <!-- ATTACHMENTS VIEW -->
+        @if (isAttachmentView) {
+          <h4>Attachments</h4>
+
+          <input type="file" multiple (change)="onFileSelected($event)" />
+
+          <button (click)="uploadFiles()">Upload</button>
+          <div>{{ attachmentUploadStatus() }}</div>
+
+          <div class="attachment-list">
+            <div class="attachment" *ngFor="let file of attachments">
+              <a [href]="file.filename" target="_blank">
+                {{ file.filename }}
+              </a>
+
+              <button class="remove-btn" (click)="deleteAttachment(file.filename)"></button>
+            </div>
           </div>
-        </div>
+        }
       </div>
 
       <!-- RIGHT PANEL -->
