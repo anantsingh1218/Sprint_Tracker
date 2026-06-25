@@ -11,6 +11,7 @@ import com.sprint.SprintLite.repository.StoryRepository;
 import com.sprint.SprintLite.repository.TaskRepository;
 import com.sprint.SprintLite.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,9 +27,14 @@ public class TaskServiceImpl implements ITaskService {
 
     @Override
     public Task createTask(CreateTaskRequest request) {
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
 
-        Users user = usersRepository.findByUsername(request.getUsername())
+        Users userid = usersRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
 
         Sprint sprint = sprintRepository.findById(request.getSprintid())
                 .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
@@ -41,7 +47,7 @@ public class TaskServiceImpl implements ITaskService {
         task.setTitle(request.getTitle());
         task.setBody(request.getBody());
 
-        task.setUserid(user);
+        task.setUserid(userid);
         task.setSprintid(sprint);
         task.setStoryid(story);
 
@@ -50,6 +56,7 @@ public class TaskServiceImpl implements ITaskService {
 
         task.setOriginalestimatehours(request.getOriginalestimatehours());
         task.setRemainingestimatehours(request.getRemainingestimatehours());
+        task.setCreatedBy(username);
 
         return taskRepository.save(task);
     }
@@ -75,8 +82,13 @@ public class TaskServiceImpl implements ITaskService {
 
         Task task = getTaskById(id);
 
-        Users user = usersRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        String username = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        Users assignedUser = usersRepository.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Assigned user not found"));
 
         Sprint sprint = sprintRepository.findById(request.getSprintid())
                 .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
@@ -87,7 +99,9 @@ public class TaskServiceImpl implements ITaskService {
         task.setTitle(request.getTitle());
         task.setBody(request.getBody());
 
-        task.setUserid(user);
+        // logged-in user becomes task owner
+        task.setUserid(assignedUser);
+
         task.setSprintid(sprint);
         task.setStoryid(story);
 
@@ -96,6 +110,9 @@ public class TaskServiceImpl implements ITaskService {
 
         task.setOriginalestimatehours(request.getOriginalestimatehours());
         task.setRemainingestimatehours(request.getRemainingestimatehours());
+
+        // audit field
+        task.setUpdatedBy(username);
 
         return taskRepository.save(task);
     }

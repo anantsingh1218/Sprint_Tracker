@@ -13,7 +13,7 @@ public class CreateTaskRequest {
 
     private String body;
 
-    private String username;
+    private Integer userId;
 
     private Integer sprintid;
 
