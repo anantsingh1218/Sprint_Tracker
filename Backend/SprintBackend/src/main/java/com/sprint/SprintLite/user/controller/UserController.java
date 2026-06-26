@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
 import java.util.Objects;
 
 @RestController
@@ -126,5 +127,29 @@ public class UserController {
         userRepository.save(user); //Performs update operation here cause id is found
         RegisterResponseDto registerResponseDto = new RegisterResponseDto("The updated password is: " + randomPassword);
         return ResponseEntity.ok(registerResponseDto);
+    }
+
+    @PostMapping("/bootstrap-admin")
+    public ResponseEntity<RegisterResponseDto> bootstrap(@RequestBody RegisterUserDto dto) {
+
+        if (userRepository.count() > 0) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Users user = new Users();
+        BeanUtils.copyProperties(dto, user);
+        user.setPasswordhash(passwordEncoder.encode(dto.password()));
+        user.setRole(Role.ROLE_PM);
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new RegisterResponseDto("Bootstrap Admin Created."));
+    }
+
+    @GetMapping("/system/status")
+    public Map<String, Boolean> status() {
+        return Map.of(
+                "initialized", userRepository.count() > 0
+        );
     }
 }

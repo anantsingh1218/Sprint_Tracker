@@ -19,10 +19,11 @@ public class PathsConfig {
                 "/actuator/**",
                 "/todos/**",
                 "/csrf-token",
-                "/register",
                 "/login",
                 "/attachment/**",
-                "/forgot-password"
+                "/forgot-password",
+                "/system/status",
+                "/bootstrap-admin"
                 );
     }
 
@@ -41,6 +42,7 @@ public class PathsConfig {
     @Bean(name = "adminPaths")
     public List<String> adminPaths() {
         return List.of(
+                "/register"
         );
     }
 }

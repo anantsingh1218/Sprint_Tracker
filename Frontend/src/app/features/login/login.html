@@ -70,8 +70,12 @@
           {{ errorMessage() }}
         </h2>
       }
-
+      @if(isInitialized == true){
       <a href="/forgot-password" class="forgot">Forgot password?</a>
+      }
+      @else {
+        <a href="/register" class="forgot"> Register User </a>
+      }
     </form>
   </div>
 </div>

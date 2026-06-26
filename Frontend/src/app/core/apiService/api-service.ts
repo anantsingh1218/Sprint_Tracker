@@ -5,6 +5,7 @@ import { catchError } from 'rxjs/operators';
 import { WorkItemType } from '../../models/workItem';
 import { Attachment } from '../../models/attachmentInterface';
 import { FetchAttachmentsResponse } from '../../models/fetchAttachmnetResponseInterface';
+import { AuthService } from '../auth/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +13,7 @@ import { FetchAttachmentsResponse } from '../../models/fetchAttachmnetResponseIn
 export class ApiService {
   private apiUrl = 'http://localhost:8080';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   private buildParams(
     requestParams?: Record<string, string | number | boolean | null | undefined>,
@@ -46,6 +47,11 @@ export class ApiService {
     contentType: string = 'application/json',
   ): Observable<T> {
     let headers = new HttpHeaders();
+    const jwtToken : string | null = this.authService.getToken();
+    
+    if(jwtToken){
+      headers = headers.set('Authorization' , "Bearer " + jwtToken);
+    }
 
     const isFormData = payload instanceof FormData;
 

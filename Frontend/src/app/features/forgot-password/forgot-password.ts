@@ -44,7 +44,6 @@ export class ForgotPassword {
 
     this.apiService.patchRequest('/forgot-password', payload).subscribe({
       next: (res: any) => {
-        console.log(res);
         this.successMessage.set(
           res.response || 'Temporary password has been generated successfully'
         );

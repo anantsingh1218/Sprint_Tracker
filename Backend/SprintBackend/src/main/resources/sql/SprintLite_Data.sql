@@ -160,10 +160,10 @@ VALUES
 INSERT INTO DSUNotes (notes, notesDate, entityType, entityId, createdBy, createdAt, updatedBy, updatedAt)
 VALUES
     ('Completed Effectively', '2026-06-03', 'STORY', 1,
-     NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP),
+     'Alice', CURRENT_TIMESTAMP, 'Alice', CURRENT_TIMESTAMP),
 
     ('Requirements were modified, expect delay', '2026-06-04', 'BUG', 2,
-     NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP);
+     'Charlie', CURRENT_TIMESTAMP, 'Charlie', CURRENT_TIMESTAMP);
 
 
 SET CONSTRAINTS ALL IMMEDIATE;
