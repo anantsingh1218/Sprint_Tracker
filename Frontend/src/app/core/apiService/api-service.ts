@@ -2,6 +2,10 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { WorkItemType } from '../../models/workItem';
+import { Attachment } from '../../models/attachmentInterface';
+import { FetchAttachmentsResponse } from '../../models/fetchAttachmnetResponseInterface';
+import { AuthService } from '../auth/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +13,10 @@ import { catchError } from 'rxjs/operators';
 export class ApiService {
   private apiUrl = 'http://localhost:8080';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
 
   private buildParams(
     requestParams?: Record<string, string | number | boolean | null | undefined>,
@@ -42,9 +49,18 @@ export class ApiService {
     requestParams?: Record<string, any>,
     contentType: string = 'application/json',
   ): Observable<T> {
-    const headers = new HttpHeaders({
-      'Content-Type': contentType,
-    });
+    let headers = new HttpHeaders();
+    const jwtToken: string | null = this.authService.getToken();
+
+    if (jwtToken) {
+      headers = headers.set('Authorization', 'Bearer ' + jwtToken);
+    }
+
+    const isFormData = payload instanceof FormData;
+
+    if (!isFormData) {
+      headers = headers.set('Content-Type', contentType);
+    }
 
     return this.http
       .post<T>(`${this.apiUrl}${endpoint}`, payload, {
@@ -78,16 +94,45 @@ export class ApiService {
       .pipe(catchError(this.apiErrorHandler));
   }
 
-  deleteRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
-    return this.http
-      .delete<T>(`${this.apiUrl}${endpoint}`, {
-        params: this.buildParams(requestParams),
-      })
-      .pipe(catchError(this.apiErrorHandler));
+  // deleteRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
+  //   return this.http
+  //     .delete<T>(`${this.apiUrl}${endpoint}`, {
+  //       params: this.buildParams(requestParams),
+  //     })
+  //     .pipe(catchError(this.apiErrorHandler));
+  // }
+  deleteRequest<T>(
+    endpoint: string,
+    options?: {
+      params?: Record<string, any>;
+      body?: any;
+    },
+  ): Observable<T> {
+    return this.http.delete<T>(`${this.apiUrl}${endpoint}`, {
+      params: this.buildParams(options?.params),
+      body: options?.body ?? null,
+    });
   }
 
   private apiErrorHandler(error: HttpErrorResponse) {
     console.error('Backend error:', error);
     return throwError(() => error);
+  }
+
+  getAttachments(entityType: WorkItemType, entityId: number) {
+    return this.getRequest<FetchAttachmentsResponse>(
+      `/attachment/fetch/${entityType.toUpperCase()}/${entityId}`,
+    );
+  }
+
+  uploadAttachments(entityType: WorkItemType, entityId: number, files: File[]) {
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('attachments', file); // same key repeated
+    });
+    return this.postRequest<Array<Attachment>>(
+      `/attachment/upload/${entityType.toUpperCase()}/${entityId}`,
+      formData,
+    );
   }
 }
