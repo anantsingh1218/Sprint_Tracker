@@ -1,9 +1,11 @@
 package com.sprint.SprintLite.entity;
 
 import com.sprint.SprintLite.entity.enums.EntityType;
+import com.sprint.SprintLite.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -20,9 +22,6 @@ public class DSUNote extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "notes", length = Integer.MAX_VALUE)
-    private String notes;
-
     @Column(name = "notesdate")
     private LocalDate notesdate;
 
@@ -33,5 +32,19 @@ public class DSUNote extends BaseEntity {
 
     @Column(name = "entityid")
     private Integer entityid;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name="status",columnDefinition = "status")
+    private Status status;
+
+    @Column(name="completedwork",length=Integer.MAX_VALUE)
+    private String completedwork;
+
+    @Column(name="blockers",length=Integer.MAX_VALUE)
+    private String blockers;
+
+    @Column(name="nextplan",length=Integer.MAX_VALUE)
+    private String nextplan;
 
 }

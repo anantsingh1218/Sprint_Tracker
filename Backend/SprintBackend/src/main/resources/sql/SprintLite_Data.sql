@@ -62,10 +62,10 @@ VALUES
   ( NULL, 1, 2, '2026-06-08', 3, 'Fixed save crash issue'),
   ( NULL, 2, 2, '2026-06-09', 5, 'Duplicate lead bug investigation');
 
-INSERT INTO DSUNotes ( notes, notesDate, entityType, entityId, createdBy, createdAt, updatedBy, updatedAt)
+INSERT INTO DSUNotes ( notes, notesDate, entityType, entityId, status, completedWork, blockers, nextplan, createdBy, createdAt, updatedBy, updatedAt)
 VALUES
-    ( 'Completed Effectively', '2026-06-03', 'STORY', 1, null, null, null, null),
-    ( 'Requirements were modified , expect delay', '2026-06-04', 'BUG', 2, null, null, null, null);
+    ( 'Completed Effectively', '2026-06-03', 'STORY', 1, "BLOCKED","completed task 1","Escalated to xyz Team","",null, null, null, null),
+    ( 'Requirements were modified , expect delay', '2026-06-04', 'BUG', 2,"OPEN","As per plan","None","As per decided plan" null, null, null, null);
 
 SET CONSTRAINTS ALL IMMEDIATE;
 COMMIT;
