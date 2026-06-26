@@ -13,7 +13,10 @@ import { AuthService } from '../auth/auth';
 export class ApiService {
   private apiUrl = 'http://localhost:8080';
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
 
   private buildParams(
     requestParams?: Record<string, string | number | boolean | null | undefined>,
@@ -47,10 +50,10 @@ export class ApiService {
     contentType: string = 'application/json',
   ): Observable<T> {
     let headers = new HttpHeaders();
-    const jwtToken : string | null = this.authService.getToken();
-    
-    if(jwtToken){
-      headers = headers.set('Authorization' , "Bearer " + jwtToken);
+    const jwtToken: string | null = this.authService.getToken();
+
+    if (jwtToken) {
+      headers = headers.set('Authorization', 'Bearer ' + jwtToken);
     }
 
     const isFormData = payload instanceof FormData;
@@ -91,12 +94,24 @@ export class ApiService {
       .pipe(catchError(this.apiErrorHandler));
   }
 
-  deleteRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
-    return this.http
-      .delete<T>(`${this.apiUrl}${endpoint}`, {
-        params: this.buildParams(requestParams),
-      })
-      .pipe(catchError(this.apiErrorHandler));
+  // deleteRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
+  //   return this.http
+  //     .delete<T>(`${this.apiUrl}${endpoint}`, {
+  //       params: this.buildParams(requestParams),
+  //     })
+  //     .pipe(catchError(this.apiErrorHandler));
+  // }
+  deleteRequest<T>(
+    endpoint: string,
+    options?: {
+      params?: Record<string, any>;
+      body?: any;
+    },
+  ): Observable<T> {
+    return this.http.delete<T>(`${this.apiUrl}${endpoint}`, {
+      params: this.buildParams(options?.params),
+      body: options?.body ?? null,
+    });
   }
 
   private apiErrorHandler(error: HttpErrorResponse) {

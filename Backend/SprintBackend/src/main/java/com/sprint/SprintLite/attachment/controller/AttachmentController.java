@@ -1,14 +1,14 @@
 package com.sprint.SprintLite.attachment.controller;
 
 import com.sprint.SprintLite.attachment.service.IAttachmentService;
-import com.sprint.SprintLite.dto.AttachmentDownloadDto;
-import com.sprint.SprintLite.dto.AttachmentRequestDto;
-import com.sprint.SprintLite.dto.AttachmentResponseDto;
-import com.sprint.SprintLite.dto.RegisterResponseDto;
+import com.sprint.SprintLite.dto.*;
 import com.sprint.SprintLite.entity.Attachment;
+import com.sprint.SprintLite.entity.AttachmentMapping;
 import com.sprint.SprintLite.entity.enums.EntityType;
 import com.sprint.SprintLite.exception.FileStorageException;
+import com.sprint.SprintLite.repository.AttachmentMappingRepository;
 import com.sprint.SprintLite.repository.AttachmentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -32,8 +32,10 @@ public class AttachmentController {
 
     private final IAttachmentService attachmentService;
     private final AttachmentRepository attachmentRepository;
+    private final AttachmentMappingRepository attachmentMappingRepository;
 
     @PostMapping(value = "/upload/{entityType}/{entityId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<List<AttachmentRequestDto>> createOrUpdateAttachments(
             @RequestPart(value = "attachments") MultipartFile[] attachments, // Changed to array
             Authentication authentication,
@@ -78,16 +80,23 @@ public class AttachmentController {
 
     }
 
-    @DeleteMapping(value = "/delete/{attachmentFileName}")
+    @DeleteMapping(value = "/delete")
     @Transactional
     public ResponseEntity<RegisterResponseDto> deleteAttachment(
-            @PathVariable String attachmentFileName
-    ) throws IOException {
-        Attachment attachment = attachmentRepository.findAttachmentByFilename(attachmentFileName)
-                .orElseThrow(() -> new FileStorageException("File not found with attachment filename = " + attachmentFileName));
+            @RequestBody AttachmentDeleteRequestDto attachmentDeleteRequestDto
+    ) throws IOException, EntityNotFoundException {
+        Attachment attachment = attachmentRepository.findAttachmentByFilename(attachmentDeleteRequestDto.filename())
+                .orElseThrow(() -> new FileStorageException("File not found with attachment filename = " + attachmentDeleteRequestDto.filename()));
         String filePath = attachment.getFilepath();
         Path path = Path.of(filePath);
         Files.deleteIfExists(path);
+        List<AttachmentMapping> attachmentMappingList = attachmentMappingRepository.findAttachmentMappingByAttachmentid(attachment);
+        if(!attachmentMappingList.isEmpty()){
+            attachmentMappingRepository.deleteAll(attachmentMappingList);
+        }
+        else{
+            throw new EntityNotFoundException("Attachment mapping for attachment : " + attachment.getFilename() + " was not found");
+        }
         attachmentRepository.delete(attachment);
         RegisterResponseDto registerResponseDto = new RegisterResponseDto("File deleted successfully");
         return ResponseEntity.ok(registerResponseDto);

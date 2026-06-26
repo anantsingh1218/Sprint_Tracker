@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 import { IComment, IStory } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-story',
@@ -24,8 +25,8 @@ export class Story implements OnChanges {
   @Input() story!: IStory;
   @Output() save = new EventEmitter<IStory>();
   @Output() close = new EventEmitter<void>();
-  selectedFiles: File[] = [];
-  attachments: Attachment[] = [];
+  selectedFiles = signal<File[]>([]);
+  attachments = signal<Attachment[]>([]);
   isAttachmentView = false;
   attachmentUploadStatus = signal('');
 
@@ -81,10 +82,13 @@ export class Story implements OnChanges {
   loadAttachments() {
     this.apiService.getAttachments('story', this.story.id).subscribe({
       next: (data) => {
-        this.attachments = data.fileToBeFetched;
+        this.attachments.set(data.fileToBeFetched);
       },
-      error: () => {
-        this.attachments = [];
+      error: (err: HttpErrorResponse) => {
+        this.attachments.set([]);
+        if (err.status === 500) {
+          this.attachmentUploadStatus.set('Resource not found');
+        }
       },
     });
   }
@@ -100,26 +104,28 @@ export class Story implements OnChanges {
 
     if (!files) return;
 
-    this.selectedFiles = Array.from(files);
+    this.selectedFiles.set(Array.from(files));
   }
 
   uploadFiles() {
-    if (!this.selectedFiles.length) return;
+    if (!this.selectedFiles().length) return;
 
-    this.apiService.uploadAttachments('story', this.story.id, this.selectedFiles).subscribe({
+    this.apiService.uploadAttachments('story', this.story.id, this.selectedFiles()).subscribe({
       next: (res: Attachment[]) => {
-        console.log('attachments:', this.attachments);
-        console.log('isArray:', Array.isArray(this.attachments));
-        this.attachments = res;
-        this.selectedFiles = [];
-        this.attachmentUploadStatus.set(res + 'Files uploaded Successfully');
+        this.selectedFiles.set([]);
+        this.attachmentUploadStatus.set('Files uploaded Successfully');
+        this.attachments.set(res);
       },
     });
   }
 
   deleteAttachment(filename: string) {
-    this.apiService.deleteRequest(`/attachments/delete/story/${filename}`).subscribe(() => {
-      this.attachments = this.attachments.filter((a) => a.filename !== filename);
-    });
+    this.apiService
+      .deleteRequest('/attachment/delete', {
+        body: { filename: filename },
+      })
+      .subscribe(() => {
+        this.attachments.update((list) => list.filter((a) => a.filename !== filename));
+      });
   }
 }

@@ -54,16 +54,21 @@
 
           <input type="file" multiple (change)="onFileSelected($event)" />
 
+          <div class="selected-files" *ngIf="selectedFiles().length">
+            <h5>Selected Files</h5>
+
+            <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
+          </div>
+
           <button (click)="uploadFiles()">Upload</button>
-          <div>{{ attachmentUploadStatus() }}</div>
 
           <div class="attachment-list">
-            <div class="attachment" *ngFor="let file of attachments">
+            <div class="attachment" *ngFor="let file of attachments()">
               <a [href]="file.filename" target="_blank">
                 {{ file.filename }}
               </a>
 
-              <button class="remove-btn" (click)="deleteAttachment(file.filename)"></button>
+              <button class="remove-btn" (click)="deleteAttachment(file.filename)">X</button>
             </div>
           </div>
         }

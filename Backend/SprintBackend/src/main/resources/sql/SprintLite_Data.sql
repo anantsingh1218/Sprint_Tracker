@@ -1,4 +1,5 @@
 -- Defer constraint checking for INSERT
+ROLLBACK;
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 
@@ -157,10 +158,10 @@ VALUES
 -- =========================
 -- DSU NOTES
 -- =========================
-INSERT INTO DSUNotes ( notes, notesDate, entityType, entityId, status, completedWork, blockers, nextplan, createdBy, createdAt, updatedBy, updatedAt)
+INSERT INTO DSUNotes ( notesDate, entityType, entityId, status, completedWork, blockers, nextplan, createdBy, createdAt, updatedBy, updatedAt)
 VALUES
-    ( 'Completed Effectively', '2026-06-03', 'STORY', 1, "BLOCKED","completed task 1","Escalated to xyz Team","",null, null, null, null),
-    ( 'Requirements were modified , expect delay', '2026-06-04', 'BUG', 2,"OPEN","As per plan","None","As per decided plan" null, null, null, null);
+    (  '2026-06-03', 'STORY', 1, 'BLOCKED','completed task 1','Escalated to xyz Team','Resolve Blocker', 'Bob', CURRENT_TIMESTAMP, 'Bob', CURRENT_TIMESTAMP),
+    (  '2026-06-04', 'BUG', 2,'OPEN','As per plan','None','As per decided plan', 'Bob', CURRENT_TIMESTAMP, 'Bob' , CURRENT_TIMESTAMP);
 
 SET CONSTRAINTS ALL IMMEDIATE;
 COMMIT;
