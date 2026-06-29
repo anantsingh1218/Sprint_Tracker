@@ -9,6 +9,7 @@ import { Board } from './features/board/board';
 import { StoryList } from './features/story-list/story-list';
 import { Register } from './features/register/register';
 import { pmGuard } from './core/guards/pm-guard';
+import { DsuComponent } from './features/DSU/dsu';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -20,7 +21,7 @@ export const routes: Routes = [
     component: Register,
     canActivate: [pmGuard]
   },
-  
+
 
   // APP routes (WITH layout)
   {
@@ -33,6 +34,8 @@ export const routes: Routes = [
       { path: 'backlog', component: Backlog },
       { path: 'board', component: Board },
       { path: 'story', component: StoryList },
+      { path: 'dsu', component: DsuComponent }
+
     ],
   },
 

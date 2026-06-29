@@ -1,6 +1,7 @@
 package com.sprint.SprintLite.DSU.controller;
 
 import com.sprint.SprintLite.DSU.service.DsuService;
+import com.sprint.SprintLite.dto.AutoDtoResponse;
 import com.sprint.SprintLite.dto.DsuDto;
 import com.sprint.SprintLite.entity.DSUNote;
 import com.sprint.SprintLite.entity.Task;
@@ -44,6 +45,14 @@ public class DSU_Controller {
     @GetMapping("/date/{notesDate}")
     public ResponseEntity<Map<String,Object>> getDSUNotes(@PathVariable LocalDate notesDate) {
         return ResponseEntity.ok(dsuService.getDsuBuDate(notesDate));
+    }
+
+    @GetMapping("/auto")
+    public ResponseEntity<AutoDtoResponse> generateAutoDSU(@RequestParam LocalDate startDate,
+                                                           @RequestParam LocalDate endDate) {
+        return ResponseEntity.ok(
+                dsuService.generateAutoDSU(startDate, endDate)
+        );
     }
 
 }
