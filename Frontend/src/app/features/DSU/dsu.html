@@ -1,0 +1,106 @@
+<!-- Success Notification -->
+@if (successMessage) {
+  <div class="success-box">
+    {{ successMessage }}
+  </div>
+}
+
+<div class="dsu-container">
+
+  <!-- Create DSU -->
+  <div class="dsu-card">
+    <h2>Create DSU</h2>
+
+    <!-- Entity Type + Entity ID -->
+    <div class="form-row">
+      <input [(ngModel)]="entityType" placeholder="Entity Type">
+      <input [(ngModel)]="entityId" type="number" placeholder="Entity ID">
+    </div>
+
+    <!-- Date -->
+    <input [(ngModel)]="dsuData.notesdate" type="date">
+
+    <!-- Status -->
+    <select [(ngModel)]="dsuData.status">
+      <option value="">Select Status</option>
+      <option value="OPEN">OPEN</option>
+      <option value="IN_PROGRESS">IN_PROGRESS</option>
+      <option value="BLOCKED">BLOCKED</option>
+      <option value="DONE">DONE</option>
+      <option value="CLOSED">CLOSED</option>
+    </select>
+
+    <!-- Completed Work -->
+    <textarea
+      [(ngModel)]="dsuData.completedwork"
+      placeholder="Completed Work">
+    </textarea>
+
+    <!-- Blockers -->
+    <textarea
+      [(ngModel)]="dsuData.blockers"
+      placeholder="Blockers">
+    </textarea>
+
+    <!-- Next Plan -->
+    <textarea
+      [(ngModel)]="dsuData.nextplan"
+      placeholder="Next Plan">
+    </textarea>
+
+    <button (click)="submitDSU()">
+      Submit DSU
+    </button>
+  </div>
+
+  <!-- DSU Report -->
+  <div class="dsu-card">
+    <h2>DSU Report</h2>
+
+    <input [(ngModel)]="reportDate" type="date">
+
+    <button (click)="fetchReport()">
+      Get Report
+    </button>
+
+    @if (reportData) {
+      <div class="report-box">
+        <h3>Report Summary</h3>
+        <pre>{{ reportData | json }}</pre>
+      </div>
+    }
+  </div>
+
+  <!-- Auto DSU Generator -->
+  <div class="dsu-card auto-dsu-card">
+    <h2>Auto DSU Generator</h2>
+
+    <!-- Date Range -->
+    <div class="form-row">
+      <input [(ngModel)]="autoStartDate" type="date">
+      <input [(ngModel)]="autoEndDate" type="date">
+    </div>
+
+    <button (click)="generateAutoDSU()">
+      Generate Auto DSU
+    </button>
+
+    @if (autoDsuData) {
+      <div class="report-box">
+        <h3>Generated Summary</h3>
+
+       <div class="structured-report">
+  @for (item of autoDsuData.completedWork.split(','); track item) {
+    @if (item.trim() !== '') {
+      <div class="report-item">
+        <span class="dot"></span>
+        <span>{{ item }}</span>
+      </div>
+    }
+  }
+</div>
+      </div>
+    }
+  </div>
+
+</div>
