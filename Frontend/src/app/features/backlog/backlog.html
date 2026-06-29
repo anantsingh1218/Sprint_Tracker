@@ -1,0 +1,38 @@
+<div class="backlog">
+  <h2>Backlog</h2>
+
+  <div *ngFor="let feature of tree">
+    <!-- FEATURE -->
+    <mat-card class="feature" @fadeSlide>
+      <div class="row" (click)="toggle(feature)">
+        <span class="arrow">
+          {{ feature.expanded ? '▼' : '▶' }}
+        </span>
+
+        <b> {{ feature.title }}</b>
+      </div>
+
+      <!-- STORIES -->
+      <div class="children" *ngIf="feature.expanded">
+        <div *ngFor="let story of feature.children">
+          <mat-card class="story" @fadeSlide>
+            <div class="row" (click)="toggle(story)">
+              <span class="arrow">
+                {{ story.expanded ? '▼' : '▶' }}
+              </span>
+
+              {{ story.title }}
+            </div>
+
+            <!-- TASKS -->
+            <div class="children" *ngIf="story.expanded">
+              <mat-card class="task" *ngFor="let task of story.children" @fadeSlide>
+                {{ task.title }}
+              </mat-card>
+            </div>
+          </mat-card>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>

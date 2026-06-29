@@ -29,6 +29,7 @@ public interface TaskRepository
             Status status
     );
 
+    List<Task> findBySprintid_Id(Long sprintId);
     @Query("""
             SELECT COALESCE(
                 SUM(t.originalestimatehours),

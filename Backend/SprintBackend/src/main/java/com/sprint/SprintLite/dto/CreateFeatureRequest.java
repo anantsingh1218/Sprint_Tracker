@@ -7,4 +7,5 @@ public class CreateFeatureRequest {
     String title;
     String description;
     Long productId;
+    String Comments;
 }

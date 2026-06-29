@@ -18,9 +18,7 @@ public interface IFeatureService {
 
     List<Feature> getFeaturesBySprint(Long sprintId);
 
-    Feature updateFeature(Long featureId, Feature feature);
-
-    Feature updateFeatureStatus(Long featureId, Status status);
+    Feature updateFeature(Long featureId, CreateFeatureRequest feature);
 
     void deleteFeature(Long featureId);
 }

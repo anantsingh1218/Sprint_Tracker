@@ -1,15 +1,19 @@
 package com.sprint.SprintLite.Feature.Service.impl;
 
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
+import com.sprint.SprintLite.entity.Comment;
 import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.Product;
+import com.sprint.SprintLite.entity.enums.EntityType;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.Status;
+import com.sprint.SprintLite.repository.CommentRepository;
 import com.sprint.SprintLite.repository.FeatureRepository;
 import com.sprint.SprintLite.repository.ProductRepository;
 import com.sprint.SprintLite.Feature.Service.IFeatureService;
 import com.sprint.SprintLite.repository.SprintRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +27,7 @@ public class FeatureServiceImpl implements IFeatureService {
 
     private final FeatureRepository featureRepository;
     private final ProductRepository productRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public Feature createFeature(CreateFeatureRequest request) {
@@ -86,21 +91,35 @@ public class FeatureServiceImpl implements IFeatureService {
     }
 
     @Override
-    public Feature updateFeature(Long featureId, Feature updatedFeature) {
+    public Feature updateFeature(Long featureId, CreateFeatureRequest request) {
 
         Feature existingFeature = getFeatureById(featureId);
 
-        existingFeature.setTitle(updatedFeature.getTitle());
-        existingFeature.setDescription(updatedFeature.getDescription());
-        existingFeature.setFeatureStatus(updatedFeature.getFeatureStatus());
-        existingFeature.setPriority(updatedFeature.getPriority());
-        existingFeature.setEstimatedStoryPoints(
-                updatedFeature.getEstimatedStoryPoints()
-        );
-        existingFeature.setRemainingStoryPoints(
-                updatedFeature.getRemainingStoryPoints()
-        );
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        if (request.getTitle() != null) {
+            existingFeature.setTitle(request.getTitle());
+        }
+
+        if (request.getDescription() != null) {
+            existingFeature.setDescription(request.getDescription());
+        }
+
+        existingFeature.setUpdatedBy(username);
         existingFeature.setUpdatedAt(Instant.now());
+
+        if (request.getComments() != null && !request.getComments().isBlank()) {
+            Comment comment = new Comment();
+            comment.setComment(request.getComments());
+            comment.setCreatedBy(username);
+            comment.setEntitytype(EntityType.FEATURE);
+            comment.setEntityid(Math.toIntExact(featureId));
+            comment.setCreatedAt(Instant.now());
+
+            commentRepository.save(comment);
+        }
 
         return featureRepository.save(existingFeature);
     }

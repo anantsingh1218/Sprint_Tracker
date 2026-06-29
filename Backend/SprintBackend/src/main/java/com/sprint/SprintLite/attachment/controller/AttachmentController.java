@@ -1,20 +1,28 @@
 package com.sprint.SprintLite.attachment.controller;
 
 import com.sprint.SprintLite.attachment.service.IAttachmentService;
-import com.sprint.SprintLite.dto.AttachmentDownloadDto;
-import com.sprint.SprintLite.dto.AttachmentRequestDto;
-import com.sprint.SprintLite.dto.AttachmentResponseDto;
+import com.sprint.SprintLite.dto.*;
+import com.sprint.SprintLite.entity.Attachment;
+import com.sprint.SprintLite.entity.AttachmentMapping;
 import com.sprint.SprintLite.entity.enums.EntityType;
 import com.sprint.SprintLite.exception.FileStorageException;
+import com.sprint.SprintLite.repository.AttachmentMappingRepository;
+import com.sprint.SprintLite.repository.AttachmentRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -23,8 +31,11 @@ import java.util.List;
 public class AttachmentController {
 
     private final IAttachmentService attachmentService;
+    private final AttachmentRepository attachmentRepository;
+    private final AttachmentMappingRepository attachmentMappingRepository;
 
-    @PutMapping(value = "/upload/{entityType}/{entityId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/upload/{entityType}/{entityId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<List<AttachmentRequestDto>> createOrUpdateAttachments(
             @RequestPart(value = "attachments") MultipartFile[] attachments, // Changed to array
             Authentication authentication,
@@ -52,12 +63,12 @@ public class AttachmentController {
         );
     }
 
-    @GetMapping("/download/{attachmentId}")
+    @GetMapping("/download/{attachmentFileName}")
     public ResponseEntity<Resource> downloadAttachment(
-            @PathVariable Integer attachmentId,
+            @PathVariable String attachmentFileName,
             @RequestParam(required = false, defaultValue = "false") boolean download
     ){
-        AttachmentDownloadDto attachmentDownloadDto = attachmentService.getAttachmentFile(attachmentId);
+        AttachmentDownloadDto attachmentDownloadDto = attachmentService.getAttachmentFile(attachmentFileName);
 
         String dispositionType = download ? "attachment" : "inline";
 
@@ -67,6 +78,28 @@ public class AttachmentController {
                 .contentType(MediaType.parseMediaType(attachmentDownloadDto.contentType()))
                 .body(attachmentDownloadDto.resource());
 
+    }
+
+    @DeleteMapping(value = "/delete")
+    @Transactional
+    public ResponseEntity<RegisterResponseDto> deleteAttachment(
+            @RequestBody AttachmentDeleteRequestDto attachmentDeleteRequestDto
+    ) throws IOException, EntityNotFoundException {
+        Attachment attachment = attachmentRepository.findAttachmentByFilename(attachmentDeleteRequestDto.filename())
+                .orElseThrow(() -> new FileStorageException("File not found with attachment filename = " + attachmentDeleteRequestDto.filename()));
+        String filePath = attachment.getFilepath();
+        Path path = Path.of(filePath);
+        Files.deleteIfExists(path);
+        List<AttachmentMapping> attachmentMappingList = attachmentMappingRepository.findAttachmentMappingByAttachmentid(attachment);
+        if(!attachmentMappingList.isEmpty()){
+            attachmentMappingRepository.deleteAll(attachmentMappingList);
+        }
+        else{
+            throw new EntityNotFoundException("Attachment mapping for attachment : " + attachment.getFilename() + " was not found");
+        }
+        attachmentRepository.delete(attachment);
+        RegisterResponseDto registerResponseDto = new RegisterResponseDto("File deleted successfully");
+        return ResponseEntity.ok(registerResponseDto);
     }
 
 }

@@ -1,0 +1,60 @@
+<div class="register-page">
+  <div class="top-actions">
+    @if (isInitialized == true) {
+      <button type="button" class="back-btn" (click)="goToDashboard()">← Back to Dashboard</button>
+    } @else {
+      <button type="button" class="back-btn" (click)="goToLogin()">← Back to Login</button>
+    }
+  </div>
+
+  <div class="register-container">
+    <div class="brand">
+      <h2>Create User</h2>
+      <p>Project Manager Access</p>
+    </div>
+
+    <form (ngSubmit)="register()">
+      <input type="text" [(ngModel)]="username" name="username" placeholder="Username" required />
+
+      <input type="email" [(ngModel)]="email" name="email" placeholder="Email" required />
+
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        placeholder="Password"
+        required
+      />
+      <div class="field">
+        <label for="role">Role</label>
+
+        <!-- <select id="role" [(ngModel)]="role" name="role" required>
+          <option value="ROLE_Developer">Developer</option>
+          <option value="ROLE_BA">Business Analyst</option>
+          <option value="ROLE_PM">Project Manager</option>
+          <option value="ROLE_QA">Quality Assurance</option>
+          <option value="ROLE_Scrum_Master">Scrum Master</option>
+        </select> -->
+
+        <select id="role" [(ngModel)]="role" name="role" required>
+          @for (role of visibleRoles; track role) {
+            <option [value]="role.value" ]>{{ role.label }}</option>
+          }
+        </select>
+      </div>
+      <button type="submit">Register User</button>
+
+      @if (errorMessage()) {
+        <div class="error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      @if (successMessage()) {
+        <div class="success">
+          {{ successMessage() }}
+        </div>
+      }
+    </form>
+  </div>
+</div>

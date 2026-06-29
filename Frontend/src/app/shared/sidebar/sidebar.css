@@ -1,19 +1,85 @@
 .sidebar {
-  width: 220px;
-  min-height: 100vh;
-  background-color: #f4f6f9;
-  padding: 20px;
+  width: 240px;
+  height: 100vh;
+  background: #0f172a;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
 .sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  color: #cbd5e1;
   text-decoration: none;
-  color: #333;
-  font-weight: 500;
+
+  transition: 0.2s ease;
+  width: 100%; /* 🔥 prevents overflow */
+  box-sizing: border-box;
 }
 
 .sidebar a:hover {
-  color: #2563eb;
+  background: rgba(37, 99, 235, 0.15);
+  transform: none; /* 🔥 remove push effect causing overflow */
+  color: white;
+}
+
+.sidebar a.active {
+  background: #2563eb;
+  color: white;
+}
+
+/* NAV should grow and push footer down */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;              /* 🔥 THIS FIXES FOOTER POSITION */
+  margin-top: 20px;
+}
+
+/* FOOTER always stays bottom */
+.footer {
+  margin-top: auto;     /* 🔥 critical */
+  color: #94a3b8;
+  font-size: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.logo-badge {
+  width: 36px;
+  height: 36px;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.logo-text h3 {
+  margin: 0;
+  font-size: 14px;
+  color: white;
+}
+
+.logo-text small {
+  color: #94a3b8;
+  font-size: 11px;
 }

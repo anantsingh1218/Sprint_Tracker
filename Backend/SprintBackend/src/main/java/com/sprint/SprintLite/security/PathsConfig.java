@@ -23,7 +23,11 @@ public class PathsConfig {
                 "/login",
                 "/attachment/**",
                 "/dashboard/**",
-                "/worklog/**"
+                "/worklog/**",
+                "/attachment/**",
+                "/forgot-password",
+                "/system/status",
+                "/bootstrap-admin"
                 );
     }
 
@@ -33,13 +37,17 @@ public class PathsConfig {
 //                "/**"
                 "/feature/**",
                 "/product/**",
-                "/sprint/**"
+                "/sprint/**",
+                "/story/**",
+                "/task/**",
+                "/DSU/**"
         );
     }
 
     @Bean(name = "adminPaths")
     public List<String> adminPaths() {
         return List.of(
+                "/register"
         );
     }
 }

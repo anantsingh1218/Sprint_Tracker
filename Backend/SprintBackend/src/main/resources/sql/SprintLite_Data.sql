@@ -1,3 +1,4 @@
+-- Defer constraint checking for INSERT
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 
@@ -153,18 +154,13 @@ VALUES
     (NULL, 1, 2, '2026-06-08', 3, 'Fixed save crash issue'),
     (NULL, 2, 2, '2026-06-09', 5, 'Duplicate lead bug investigation');
 
-
 -- =========================
 -- DSU NOTES
 -- =========================
-INSERT INTO DSUNotes (notes, notesDate, entityType, entityId, createdBy, createdAt, updatedBy, updatedAt)
+INSERT INTO DSUNotes ( notesDate, entityType, entityId, status, completedWork, blockers, nextplan, createdBy, createdAt, updatedBy, updatedAt)
 VALUES
-    ('Completed Effectively', '2026-06-03', 'STORY', 1,
-     NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP),
-
-    ('Requirements were modified, expect delay', '2026-06-04', 'BUG', 2,
-     NULL, CURRENT_TIMESTAMP, NULL, CURRENT_TIMESTAMP);
-
+    (  '2026-06-03', 'STORY', 1, 'BLOCKED','completed task 1','Escalated to xyz Team','Resolve Blocker', 'Bob', CURRENT_TIMESTAMP, 'Bob', CURRENT_TIMESTAMP),
+    (  '2026-06-04', 'BUG', 2,'OPEN','As per plan','None','As per decided plan', 'Bob', CURRENT_TIMESTAMP, 'Bob' , CURRENT_TIMESTAMP);
 
 SET CONSTRAINTS ALL IMMEDIATE;
 COMMIT;

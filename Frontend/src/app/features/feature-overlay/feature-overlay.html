@@ -1,0 +1,140 @@
+<div class="overlay">
+  <div class="workitem">
+    <div class="header">
+      <!-- LEFT -->
+      <div class="title-block">
+        <div class="story-id">Feature #{{ feature.id }}</div>
+        <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
+      </div>
+
+      <!-- CENTER -->
+      <div class="header-center">
+        <button
+          class="icon-btn"
+          (click)="toggleAttachmentsView()"
+          [class.active]="isAttachmentView"
+          title="Attachments"
+        >
+          {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+        </button>
+      </div>
+
+      <!-- RIGHT -->
+      <button class="btn-close" (click)="closeOverlay()">✕</button>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+      <!-- LEFT -->
+      <div class="left">
+        <!-- DESCRIPTION + COMMENTS VIEW -->
+        @if (!isAttachmentView) {
+          <label>Description</label>
+          <textarea [(ngModel)]="feature.description"></textarea>
+
+          <div class="comments">
+            <h4>Discussion</h4>
+
+            <div class="comment" *ngFor="let c of feature.comments">
+              <b>{{ getUserName(c.userId) }}</b>
+              <p>{{ c.text }}</p>
+              <small>{{ c.createdAt | date: 'short' }}</small>
+            </div>
+
+            <div class="add-comment">
+              <input [(ngModel)]="newComment" placeholder="Add comment..." />
+              <button (click)="addComment()">Add</button>
+            </div>
+          </div>
+        }
+
+        <!-- ATTACHMENTS VIEW -->
+        @if (isAttachmentView) {
+          <h4>Attachments</h4>
+
+          <input type="file" multiple (change)="onFileSelected($event)" />
+
+          <div class="selected-files" *ngIf="selectedFiles().length">
+            <h5>Selected Files</h5>
+
+            <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
+          </div>
+
+          <button (click)="uploadFiles()">Upload</button>
+
+          <div class="attachment-list">
+            <div class="attachment" *ngFor="let file of attachments()">
+              <a [href]="file.filename" target="_blank">
+                {{ file.filename }}
+              </a>
+
+              <button class="remove-btn" (click)="deleteAttachment(file.filename)">X</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right">
+        <!-- PRODUCTS -->
+        <label>Product</label>
+        <select [(ngModel)]="feature.productId">
+          <option [ngValue]="null">Select Products</option>
+          <option *ngFor="let f of products" [ngValue]="f.id">
+            {{ f.name }}
+          </option>
+        </select>
+
+        <!-- SPRINT -->
+        <label>Sprint</label>
+        <select [(ngModel)]="feature.sprintId">
+          <option [ngValue]="null">Select Sprint</option>
+          <option *ngFor="let s of sprints" [ngValue]="s.id">
+            {{ s.name }}
+          </option>
+        </select>
+
+        <!-- ASSIGNED TO -->
+        <label>Assigned To</label>
+        <select [(ngModel)]="feature.userId">
+          <option [ngValue]="null">Unassigned</option>
+          <option *ngFor="let u of users" [ngValue]="u.id">
+            {{ u.name }}
+          </option>
+        </select>
+
+        <!-- STATUS -->
+        <label>Status</label>
+        <select [(ngModel)]="feature.status">
+          <option>New</option>
+          <option>Active</option>
+          <option>Resolved</option>
+          <option>Closed</option>
+        </select>
+
+        <!-- PRIORITY -->
+        <label>Priority</label>
+        <select [(ngModel)]="feature.priority">
+          <option>Low</option>
+          <option>Medium</option>
+          <option>High</option>
+        </select>
+
+        <!-- ESTIMATION -->
+        <label>Story Points (Estimated)</label>
+        <input type="number" [(ngModel)]="feature.estimatedStoryPoints" />
+
+        <!-- REMAINING -->
+        <label>Remaining Estimate</label>
+        <input type="number" [(ngModel)]="feature.remainingStoryPoint" />
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <button class="btn-save" (click)="saveFeature()">Save</button>
+
+      <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
+    </div>
+  </div>
+</div>

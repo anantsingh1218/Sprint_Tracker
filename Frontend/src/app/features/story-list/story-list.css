@@ -1,0 +1,48 @@
+.page {
+  padding: 20px;
+  background: #f3f2f1;
+  min-height: 100%;
+  font-family: "Segoe UI", Arial;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.btn-primary {
+  background: #0078d4;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.story-card {
+  background: white;
+  border: 1px solid #edebe9;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.story-card:hover {
+  border-color: #0078d4;
+}
+
+.status {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  padding: 2px 6px;
+  border: 1px solid #c8c6c4;
+  border-radius: 2px;
+}

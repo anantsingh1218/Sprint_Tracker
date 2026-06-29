@@ -181,15 +181,19 @@ CREATE TABLE WORKLOG (
 );
 
 CREATE TABLE DSUNOTES (
-                          ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                          NOTES text,
-                          NOTESDATE date,
-                          ENTITYTYPE ENTITYTYPE,
-                          ENTITYID integer,
-                          CREATEDAT timestamp,
-                          CREATEDBY varchar,
-                          UPDATEDAT timestamp,
-                          UPDATEDBY varchar
+                        ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                        NOTES text,
+                        NOTESDATE date,
+                        ENTITYTYPE ENTITYTYPE,
+                        ENTITYID integer,
+                        STATUS STATUS,
+                        COMPLETEDWORK varchar,
+                        BLOCKERS varchar,
+                        NEXTPLAN varchar,
+                        CREATEDAT timestamp,
+                        CREATEDBY varchar,
+                        UPDATEDAT timestamp,
+                        UPDATEDBY varchar
 );
 
 -- =========================

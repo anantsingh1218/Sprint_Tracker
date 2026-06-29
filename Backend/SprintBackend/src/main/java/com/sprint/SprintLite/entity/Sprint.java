@@ -44,6 +44,20 @@ public class Sprint {
 
     @Column(name = "enddate")
     private LocalDate endDate;
+    @NonNull
+    @OneToMany(mappedBy = "sprintid")
+    private Set<Bug> bugs = new LinkedHashSet<>();
+    @NonNull
+    @OneToMany(mappedBy = "sprintId")
+    private Set<Feature> featuretables = new LinkedHashSet<>();
+    @NonNull
+    @OneToMany(mappedBy = "sprintid")
+    private Set<Story> storytables = new LinkedHashSet<>();
+    @NonNull
+    @OneToMany(mappedBy = "sprintid")
+    private Set<Task> tasktables = new LinkedHashSet<>();
+
+
 
     @NonNull
     @OneToMany(mappedBy = "sprintid")

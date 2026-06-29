@@ -1,1 +1,47 @@
 /* You can add global styles to this file, and also import other style files */
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* sidebar fixed */
+app-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+}
+
+/* right side container */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* navbar fixed */
+app-navbar {
+  height: 56px;
+  flex-shrink: 0;
+}
+
+/* main content scroll area */
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+  background: #f4f6f9;
+}
