@@ -22,4 +22,7 @@ public interface AttachmentMappingRepository extends JpaRepository<AttachmentMap
             @Param("entityType") EntityType entityType,
             @Param("entityId") Long entityId
     );
+
+    List<AttachmentMapping> findAttachmentMappingByAttachmentid(Attachment attachment);
+
 }

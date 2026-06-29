@@ -1,0 +1,33 @@
+<div class="page">
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Features</h2>
+
+    <button class="btn-primary" (click)="openCreateFeature()">+ Create Feature</button>
+  </div>
+
+  <!-- LIST -->
+  <div class="story-grid">
+    <div class="story-card" *ngFor="let feature of features" (click)="openFeature(feature)">
+      <h3>{{ feature.title }}</h3>
+
+      <p class="desc">
+        {{ feature.description || 'No description available' }}
+      </p>
+
+      <div class="meta">
+        <span class="status">{{ feature.status }}</span>
+        <span class="points">{{ feature.remainingStoryPoint }} pts</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OVERLAY -->
+  <app-story
+    *ngIf="isFeatureOpen"
+    [feature]="selectedFeature"
+    (close)="closeFeature()"
+    (save)="saveFeature($event)"
+  >
+  </app-story>
+</div>

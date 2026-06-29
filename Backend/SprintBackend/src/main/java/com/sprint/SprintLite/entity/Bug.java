@@ -8,8 +8,11 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -55,5 +58,8 @@ public class Bug extends BaseEntity {
     @ColumnDefault("0")
     @Column(name = "reopencount")
     private Integer reopencount;
+    @NonNull
+    @OneToMany(mappedBy = "bugid")
+    private Set<Worklog> worklogs = new LinkedHashSet<>();
 
 }

@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
@@ -6,6 +6,8 @@ import { ApiService } from '../../core/apiService/api-service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { LoginResponse } from '../../dtos/LoginResponse';
 import { LoginRequest } from '../../dtos/LoginRequest';
+import { SystemService } from '../../services/systemService';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -14,17 +16,32 @@ import { LoginRequest } from '../../dtos/LoginRequest';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   email = '';
   password = '';
   loading = false;
   errorMessage = signal('');
+  isInitialized: boolean = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private apiService: ApiService,
+    private systemService: SystemService,
   ) {}
+
+  ngOnInit(): void {
+    this.systemService.loadStatus();
+
+    this.systemService.status$.pipe(takeUntil(this.destroy$)).subscribe((system) => {
+      this.isInitialized = system?.initialized ?? false;
+    });
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   sendLoginRequest() {
     this.errorMessage.set(''); // Reset every login
@@ -53,14 +70,7 @@ export class LoginComponent {
   }
 
   onLogin() {
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
-      return;
-    } else {
-      if (localStorage.getItem('jwtToken') != null) {
-        this.authService.logout();
-      }
-    }
+    this.authService.logout();
     if (!this.email && !this.password) {
       this.errorMessage.set('Please enter email and password');
       return;

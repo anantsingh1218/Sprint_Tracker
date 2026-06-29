@@ -1,7 +1,7 @@
 <div class="sprint-page">
   <!-- HEADER -->
   <div class="header">
-    <h2>🏃 Sprint Management</h2>
+    <h2> Sprint Management</h2>
 
     <button class="add-btn" (click)="openSprintForm()">+ New Sprint</button>
   </div>
@@ -26,7 +26,7 @@
 
   <!-- EMPTY STATE -->
   <div *ngIf="sprints.length === 0" class="empty-state">
-    <h3>No sprints yet 🚀</h3>
+    <h3>No sprints yet </h3>
     <p>Create your first sprint using the "New Sprint" button</p>
   </div>
 
@@ -97,7 +97,7 @@
 
       <!-- TASKS INSIDE SPRINT -->
       <div class="tasks-section">
-        <h4>📋 Tasks</h4>
+        <h4> Tasks</h4>
 
         <div class="task-chip" *ngFor="let task of getTasksForSprint(sprint.id)">
           {{ task.title }}

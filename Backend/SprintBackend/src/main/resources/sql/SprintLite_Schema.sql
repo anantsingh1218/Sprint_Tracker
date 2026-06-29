@@ -41,6 +41,7 @@ CREATE TABLE SPRINT (
                         SPRINTNAME text,
                         SPRINTDURATION integer DEFAULT 15,
                         STATUS SPRINTSTATUS,
+                        PRODUCTID integer,
                         STARTDATE date,
                         ENDDATE date
 );
@@ -199,6 +200,9 @@ CREATE TABLE DSUNOTES (
 -- FOREIGN KEYS
 -- =========================
 
+ALTER TABLE SPRINT
+    ADD FOREIGN KEY (PRODUCTID) REFERENCES PRODUCTTABLE(PRODUCTID);
+
 ALTER TABLE PRODUCTTABLE
     ADD FOREIGN KEY (OWNERID) REFERENCES USERS(ID);
 
@@ -255,3 +259,4 @@ ALTER TABLE WORKLOG
 
 ALTER TABLE WORKLOG
     ADD FOREIGN KEY (BUGID) REFERENCES BUGS(ID);
+

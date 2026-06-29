@@ -2,40 +2,40 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { Story } from '../story/story';
-import { IStory } from '../../models/storyInterface';
+import { FeatureOverlay } from '../feature-overlay/feature-overlay';
+import { IFeature } from '../../models/featureInterface';
 
 @Component({
   selector: 'app-story-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, Story],
-  templateUrl: './story-list.html',
-  styleUrl: './story-list.css',
+  imports: [CommonModule, FormsModule, FeatureOverlay],
+  templateUrl: './feature-list.html',
+  styleUrl: './feature-list.css',
 })
-export class StoryList {
-  isStoryOpen = false;
+export class FeatureList {
+  isFeatureOpen = false;
 
-  selectedStory!: IStory;
+  selectedFeature!: IFeature;
 
-  stories: IStory[] = [
+  features: IFeature[] = [
   {
     id: 101,
     title: 'Login Page UI',
-    body: 'Build login screen with validation',
+    description: 'Build login screen with validation',
 
     status: 'New',
     priority: 'Medium',
     estimatedStoryPoints: 8,
     remainingStoryPoint: 5,
 
-    featureId: 0,
+    productId: 0,
     sprintId: 0,
     userId: 0,
 
     comments: [
       {
         userId: 0,
-        text: 'Story created',
+        text: 'Feature created',
         createdAt: new Date().toISOString()
       }
     ]
@@ -44,14 +44,14 @@ export class StoryList {
   {
     id: 102,
     title: 'Sprint API Integration',
-    body: 'Connect sprint module to backend',
+    description: 'Connect sprint module to backend',
 
     status: 'Active',
     priority: 'High',
     estimatedStoryPoints: 8,
     remainingStoryPoint: 5,
 
-    featureId: 1,
+    productId: 1,
     sprintId: 3,
     userId: 1,
 
@@ -64,45 +64,45 @@ export class StoryList {
     ]
   }
   ];
-  openStory(story: IStory) {
-    this.selectedStory = { ...story };
-    this.isStoryOpen = true;
+  openFeature(story: IFeature) {
+    this.selectedFeature = { ...story };
+    this.isFeatureOpen = true;
   }
 
-  closeStory() {
-    this.isStoryOpen = false;
+  closeFeature() {
+    this.isFeatureOpen = false;
   }
 
-  openCreateStory() {
-  this.selectedStory = {
-    id: this.stories.length + 1,
+  openCreateFeature() {
+  this.selectedFeature = {
+    id: this.features.length + 1,
     title: '',
-    body: '',
+    description: '',
 
     status: 'New',
     priority: 'Medium',
     estimatedStoryPoints: 0,
     remainingStoryPoint: 0,
 
-    featureId: null,
+    productId: null,
     sprintId: null,
     userId: null,
 
     comments: []
   };
 
-  this.isStoryOpen = true;
+  this.isFeatureOpen = true;
 }
 
-  saveStory(updated: IStory) {
-    const index = this.stories.findIndex((s) => s.id === updated.id);
+  saveFeature(updated: IFeature) {
+    const index = this.features.findIndex((s) => s.id === updated.id);
 
     if (index >= 0) {
-      this.stories[index] = updated;
+      this.features[index] = updated;
     } else {
-      this.stories.push(updated);
+      this.features.push(updated);
     }
 
-    this.closeStory();
+    this.closeFeature();
   }
 }

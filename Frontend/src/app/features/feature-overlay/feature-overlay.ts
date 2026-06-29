@@ -9,21 +9,22 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IComment, IStory } from '../../models/storyInterface';
+import { IComment } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
 import { HttpErrorResponse } from '@angular/common/http';
+import { IFeature } from '../../models/featureInterface';
 
 @Component({
   selector: 'app-story',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './story.html',
-  styleUrl: './story.css',
+  templateUrl: './feature-overlay.html',
+  styleUrl: './feature-overlay.css',
 })
-export class Story implements OnChanges {
-  @Input() story!: IStory;
-  @Output() save = new EventEmitter<IStory>();
+export class FeatureOverlay implements OnChanges {
+  @Input() feature!: IFeature;
+  @Output() save = new EventEmitter<IFeature>();
   @Output() close = new EventEmitter<void>();
   selectedFiles = signal<File[]>([]);
   attachments = signal<Attachment[]>([]);
@@ -40,9 +41,9 @@ export class Story implements OnChanges {
     { id: 3, name: 'Mike Johnson' },
   ];
 
-  features = [
-    { id: 1, name: 'Login Module' },
-    { id: 2, name: 'Sprint Module' },
+  products = [
+    { id: 1, name: 'FSM' },
+    { id: 2, name: 'Starwatch' },
   ];
 
   sprints = [
@@ -50,8 +51,8 @@ export class Story implements OnChanges {
     { id: 2, name: 'Sprint 2' },
   ];
 
-  saveStory() {
-    this.save.emit(this.story);
+  saveFeature() {
+    this.save.emit(this.feature);
   }
 
   closeOverlay() {
@@ -67,7 +68,7 @@ export class Story implements OnChanges {
       createdAt: new Date().toISOString(),
     };
 
-    this.story.comments.push(comment);
+    this.feature.comments.push(comment);
     this.newComment = '';
   }
 
@@ -80,7 +81,7 @@ export class Story implements OnChanges {
   }
 
   loadAttachments() {
-    this.apiService.getAttachments('story', this.story.id).subscribe({
+    this.apiService.getAttachments('feature', this.feature.id).subscribe({
       next: (data) => {
         this.attachments.set(data.fileToBeFetched);
       },
@@ -94,7 +95,7 @@ export class Story implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['story'] && this.story?.id) {
+    if (changes['story'] && this.feature?.id) {
       this.loadAttachments();
     }
   }
@@ -110,7 +111,7 @@ export class Story implements OnChanges {
   uploadFiles() {
     if (!this.selectedFiles().length) return;
 
-    this.apiService.uploadAttachments('story', this.story.id, this.selectedFiles()).subscribe({
+    this.apiService.uploadAttachments('feature', this.feature.id, this.selectedFiles()).subscribe({
       next: (res: Attachment[]) => {
         this.selectedFiles.set([]);
         this.attachmentUploadStatus.set('Files uploaded Successfully');

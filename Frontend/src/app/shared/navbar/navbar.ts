@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
+import { UpperCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [],
+  imports: [UpperCasePipe],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })

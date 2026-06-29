@@ -3,8 +3,8 @@
     <div class="header">
       <!-- LEFT -->
       <div class="title-block">
-        <div class="story-id">Story #{{ story.id }}</div>
-        <input class="title" [(ngModel)]="story.title" placeholder="Enter title..." />
+        <div class="story-id">Feature #{{ feature.id }}</div>
+        <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
       </div>
 
       <!-- CENTER -->
@@ -30,12 +30,12 @@
         <!-- DESCRIPTION + COMMENTS VIEW -->
         @if (!isAttachmentView) {
           <label>Description</label>
-          <textarea [(ngModel)]="story.body"></textarea>
+          <textarea [(ngModel)]="feature.description"></textarea>
 
           <div class="comments">
             <h4>Discussion</h4>
 
-            <div class="comment" *ngFor="let c of story.comments">
+            <div class="comment" *ngFor="let c of feature.comments">
               <b>{{ getUserName(c.userId) }}</b>
               <p>{{ c.text }}</p>
               <small>{{ c.createdAt | date: 'short' }}</small>
@@ -76,18 +76,18 @@
 
       <!-- RIGHT PANEL -->
       <div class="right">
-        <!-- FEATURE -->
-        <label>Feature</label>
-        <select [(ngModel)]="story.featureId">
-          <option [ngValue]="null">Select Feature</option>
-          <option *ngFor="let f of features" [ngValue]="f.id">
+        <!-- PRODUCTS -->
+        <label>Product</label>
+        <select [(ngModel)]="feature.productId">
+          <option [ngValue]="null">Select Products</option>
+          <option *ngFor="let f of products" [ngValue]="f.id">
             {{ f.name }}
           </option>
         </select>
 
         <!-- SPRINT -->
         <label>Sprint</label>
-        <select [(ngModel)]="story.sprintId">
+        <select [(ngModel)]="feature.sprintId">
           <option [ngValue]="null">Select Sprint</option>
           <option *ngFor="let s of sprints" [ngValue]="s.id">
             {{ s.name }}
@@ -96,7 +96,7 @@
 
         <!-- ASSIGNED TO -->
         <label>Assigned To</label>
-        <select [(ngModel)]="story.userId">
+        <select [(ngModel)]="feature.userId">
           <option [ngValue]="null">Unassigned</option>
           <option *ngFor="let u of users" [ngValue]="u.id">
             {{ u.name }}
@@ -105,7 +105,7 @@
 
         <!-- STATUS -->
         <label>Status</label>
-        <select [(ngModel)]="story.status">
+        <select [(ngModel)]="feature.status">
           <option>New</option>
           <option>Active</option>
           <option>Resolved</option>
@@ -114,7 +114,7 @@
 
         <!-- PRIORITY -->
         <label>Priority</label>
-        <select [(ngModel)]="story.priority">
+        <select [(ngModel)]="feature.priority">
           <option>Low</option>
           <option>Medium</option>
           <option>High</option>
@@ -122,17 +122,17 @@
 
         <!-- ESTIMATION -->
         <label>Story Points (Estimated)</label>
-        <input type="number" [(ngModel)]="story.estimatedStoryPoints" />
+        <input type="number" [(ngModel)]="feature.estimatedStoryPoints" />
 
         <!-- REMAINING -->
         <label>Remaining Estimate</label>
-        <input type="number" [(ngModel)]="story.remainingStoryPoint" />
+        <input type="number" [(ngModel)]="feature.remainingStoryPoint" />
       </div>
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
-      <button class="btn-save" (click)="saveStory()">Save</button>
+      <button class="btn-save" (click)="saveFeature()">Save</button>
 
       <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
     </div>

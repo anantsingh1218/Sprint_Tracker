@@ -12,5 +12,5 @@ import java.util.Optional;
 public interface IAttachmentService {
     List<AttachmentRequestDto> createOrUpdateAttachments(String username, MultipartFile[] attachmentFile, Long entityId, EntityType entityType);
     AttachmentResponseDto getAllAttachments(EntityType entityType, Long entityId, boolean optimizedFunction);
-    AttachmentDownloadDto getAttachmentFile(Integer attachmentId);
+    AttachmentDownloadDto getAttachmentFile(String originalFileName);
 }

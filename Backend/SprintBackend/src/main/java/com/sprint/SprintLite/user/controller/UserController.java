@@ -1,13 +1,12 @@
 package com.sprint.SprintLite.user.controller;
 
-import com.sprint.SprintLite.dto.LoginRequest;
-import com.sprint.SprintLite.dto.LoginResponseDto;
-import com.sprint.SprintLite.dto.RegisterResponseDto;
-import com.sprint.SprintLite.dto.RegisterUserDto;
+import com.sprint.SprintLite.dto.*;
 import com.sprint.SprintLite.entity.Users;
+import com.sprint.SprintLite.entity.enums.Role;
 import com.sprint.SprintLite.repository.UsersRepository;
 import com.sprint.SprintLite.security.util.JwtUtil;
 import com.sprint.SprintLite.util.ApplicationUtility;
+import com.sprint.SprintLite.util.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -17,12 +16,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
 import org.springframework.security.authentication.password.CompromisedPasswordDecision;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping()
@@ -35,15 +36,47 @@ public class UserController {
     private final CompromisedPasswordChecker compromisedPasswordChecker;
 
 
-    @PostMapping(value = "/register")
-    public ResponseEntity<RegisterResponseDto> registerUser(@RequestBody RegisterUserDto registerUserDto){
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponseDto> registerUser(
+            @RequestBody RegisterUserDto registerUserDto) {
+
+        boolean firstUser = userRepository.count() == 0;
+
         Users user = new Users();
         BeanUtils.copyProperties(registerUserDto, user);
-        user.setPasswordhash(passwordEncoder.encode(registerUserDto.password()));
-        user.setRole(registerUserDto.role());
+        user.setPasswordhash(
+                passwordEncoder.encode(registerUserDto.password()));
+
+        if (firstUser) {
+
+            user.setRole(Role.ROLE_PM);
+
+        } else {
+
+            Authentication auth =
+                    SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            boolean allowed =
+                    auth.getAuthorities().stream()
+                            .anyMatch(a ->
+                                    Objects.equals(a.getAuthority(), "ROLE_PM"));
+
+            if (!allowed) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            user.setRole(registerUserDto.role());
+        }
+
         userRepository.save(user);
-        RegisterResponseDto registerResponseDto = new RegisterResponseDto("Successfully Registered the User");
-        return ResponseEntity.status(HttpStatus.CREATED).body(registerResponseDto);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new RegisterResponseDto(
+                        "Successfully Registered the User"));
     }
 
     @PostMapping("/login")
@@ -77,5 +110,46 @@ public class UserController {
         LoginResponseDto response = new LoginResponseDto();
         response.setToken(token);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/forgot-password")
+    @Transactional
+    public ResponseEntity<RegisterResponseDto> forgotPassword(@RequestBody ForgotPasswordDto request){
+        Users user = userRepository.readUsersByEmailOrderByUsername(request.email(), request.username())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "Invalid credentials"
+                        )
+                );
+        String randomPassword = PasswordGenerator.generateRandomPassword(15);
+        user.setPasswordhash(passwordEncoder.encode(randomPassword));
+        userRepository.save(user); //Performs update operation here cause id is found
+        RegisterResponseDto registerResponseDto = new RegisterResponseDto("The updated password is: " + randomPassword);
+        return ResponseEntity.ok(registerResponseDto);
+    }
+
+    @PostMapping("/bootstrap-admin")
+    public ResponseEntity<RegisterResponseDto> bootstrap(@RequestBody RegisterUserDto dto) {
+
+        if (userRepository.count() > 0) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Users user = new Users();
+        BeanUtils.copyProperties(dto, user);
+        user.setPasswordhash(passwordEncoder.encode(dto.password()));
+        user.setRole(Role.ROLE_PM);
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new RegisterResponseDto("Bootstrap Admin Created."));
+    }
+
+    @GetMapping("/system/status")
+    public Map<String, Boolean> status() {
+        return Map.of(
+                "initialized", userRepository.count() > 0
+        );
     }
 }
