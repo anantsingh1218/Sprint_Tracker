@@ -1,7 +1,8 @@
 import { IComment } from "./storyInterface";
+import { WorkStatus } from "./workItem";
 
 export interface IFeature {
-  id: number;
+  id: string;
   title: string;
   description: string;
 
@@ -9,7 +10,7 @@ export interface IFeature {
   sprintId: number | null;
   userId: number | null;
 
-  status: 'New' | 'Active' | 'Resolved' | 'Closed';
+  status: WorkStatus;
   priority: 'Low' | 'Medium' | 'High';
 
   estimatedStoryPoints: number;

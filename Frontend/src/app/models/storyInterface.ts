@@ -1,5 +1,7 @@
+import { WorkStatus } from "./workItem";
+
 export interface IStory {
-  id: number;
+  id: string;
   title: string;
   body: string;
 
@@ -7,7 +9,7 @@ export interface IStory {
   sprintId: number | null;
   userId: number | null;
 
-  status: 'New' | 'Active' | 'Resolved' | 'Closed';
+  status: WorkStatus;
   priority: 'Low' | 'Medium' | 'High';
 
   estimatedStoryPoints: number;

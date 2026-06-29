@@ -19,11 +19,11 @@ export class StoryList {
 
   stories: IStory[] = [
   {
-    id: 101,
+    id: 'S101',
     title: 'Login Page UI',
     body: 'Build login screen with validation',
 
-    status: 'New',
+    status: 'todo',
     priority: 'Medium',
     estimatedStoryPoints: 8,
     remainingStoryPoint: 5,
@@ -42,11 +42,11 @@ export class StoryList {
   },
 
   {
-    id: 102,
+    id: 'S102',
     title: 'Sprint API Integration',
     body: 'Connect sprint module to backend',
 
-    status: 'Active',
+    status: 'in-progress',
     priority: 'High',
     estimatedStoryPoints: 8,
     remainingStoryPoint: 5,
@@ -75,11 +75,11 @@ export class StoryList {
 
   openCreateStory() {
   this.selectedStory = {
-    id: this.stories.length + 1,
+    id: 'S' + this.stories.length + 1,
     title: '',
     body: '',
 
-    status: 'New',
+    status: 'todo',
     priority: 'Medium',
     estimatedStoryPoints: 0,
     remainingStoryPoint: 0,

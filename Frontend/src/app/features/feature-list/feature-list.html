@@ -23,11 +23,11 @@
   </div>
 
   <!-- OVERLAY -->
-  <app-story
+  <app-feature
     *ngIf="isFeatureOpen"
     [feature]="selectedFeature"
     (close)="closeFeature()"
     (save)="saveFeature($event)"
   >
-  </app-story>
+  </app-feature>
 </div>

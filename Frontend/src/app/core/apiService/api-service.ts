@@ -135,4 +135,12 @@ export class ApiService {
       formData,
     );
   }
+
+  toApiWorkItemId(id: string): number {
+    const match = id.match(/^([A-Z])(\d+)$/);
+
+    if (!match) throw new Error(`Invalid WorkItem id: ${id}`);
+
+    return Number(match[2]);
+  }
 }
