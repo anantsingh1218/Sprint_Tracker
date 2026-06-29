@@ -1,4 +1,4 @@
-package com.sprint.SprintLite.dto;
+package com.sprint.SprintLite.DashBoard;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChartItemDto {
+public class TeamMemberDto {
 
-    private String label;
+    private Long assignedTasks;
 
-    private Integer value;
+    private Long completedTasks;
+
+    private Long pendingTasks;
 
 }

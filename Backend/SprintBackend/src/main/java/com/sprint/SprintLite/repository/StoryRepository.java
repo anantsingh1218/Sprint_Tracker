@@ -1,7 +1,8 @@
 package com.sprint.SprintLite.repository;
 
-import com.sprint.SprintLite.entity.Sprint;
+import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.Story;
+import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.Status;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,6 +16,15 @@ public interface StoryRepository
 
     Long countBySprintidAndStorystatus(
             Sprint sprint,
+            Status status
+    );
+
+    Long countByFeatureid(
+            Feature feature
+    );
+
+    Long countByFeatureidAndStorystatus(
+            Feature feature,
             Status status
     );
 

@@ -1,6 +1,9 @@
 package com.sprint.SprintLite.DashBoard.service;
 
-import com.sprint.SprintLite.dto.*;
+import com.sprint.SprintLite.DashBoard.*;
+import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public interface DashBoardService {
 
@@ -43,5 +46,34 @@ public interface DashBoardService {
             Integer size
     );
 
+
+    Page<StoryListDto> getStories(
+            Integer page,
+            Integer size
+    );
+
+    FeatureProgressDto
+    getFeatureProgress(
+            Integer featureId
+    );
+
+    List<StoryCardDto>
+    getStoriesByFeature(
+            Integer featureId
+    );
+
+    StoryProgressDto
+    getStoryProgress(
+            Integer storyId
+    );
+
+    List<BoardColumnDto>
+    getBoard(
+            Integer sprintId
+    );
+
+    void moveTask(
+            MoveTaskDto dto
+    );
 
 }

@@ -1,4 +1,4 @@
-package com.sprint.SprintLite.dto;
+package com.sprint.SprintLite.DashBoard;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,5 +34,9 @@ public class PMDashboardDto {
     private Integer remainingHours;
 
     private Integer completionRate;
+
+    private Long totalFeatures;
+
+    private String productName;
 
 }

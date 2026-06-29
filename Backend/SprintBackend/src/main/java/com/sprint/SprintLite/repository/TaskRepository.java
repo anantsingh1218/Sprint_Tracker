@@ -1,6 +1,7 @@
 package com.sprint.SprintLite.repository;
 
 import com.sprint.SprintLite.entity.Sprint;
+import com.sprint.SprintLite.entity.Story;
 import com.sprint.SprintLite.entity.Task;
 import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.entity.enums.Status;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 
 
 public interface TaskRepository
@@ -55,4 +57,17 @@ WHERE t.sprintid=:sprint
             Sprint sprint
     );
 
+    Long countByStoryid(
+            Story story
+    );
+
+    Long countByStoryidAndTaskstatus(
+            Story story,
+            Status status
+    );
+
+    List<Task>
+    findBySprintid(
+            Sprint sprint
+    );
 }

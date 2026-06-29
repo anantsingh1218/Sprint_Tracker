@@ -22,7 +22,8 @@ public class PathsConfig {
                 "/register",
                 "/login",
                 "/attachment/**",
-                "/dashboard/**"
+                "/dashboard/**",
+                "/worklog/**"
                 );
     }
 

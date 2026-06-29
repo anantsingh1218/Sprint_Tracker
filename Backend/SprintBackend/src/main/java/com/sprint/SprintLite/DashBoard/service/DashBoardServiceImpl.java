@@ -1,18 +1,16 @@
 package com.sprint.SprintLite.DashBoard.service;
 
-import com.sprint.SprintLite.entity.Product;
-import com.sprint.SprintLite.entity.Sprint;
-import com.sprint.SprintLite.entity.Users;
+import com.sprint.SprintLite.DashBoard.*;
+import com.sprint.SprintLite.entity.*;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
 import com.sprint.SprintLite.entity.enums.Status;
 import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
 import com.sprint.SprintLite.entity.enums.Role;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.sprint.SprintLite.dto.*;
 
 import java.util.List;
 
@@ -33,6 +31,17 @@ public class DashBoardServiceImpl
 
     private final UserProductMappingRepository
             userProductMappingRepository;
+
+    private final FeatureRepository featureRepository;
+
+    private final ProductRepository productRepository;
+
+    private final
+    BoardService boardService;
+
+    private final
+    DashboardMetricsService
+            metricsService;
 
     @Override
     public DashboardResponseDto getDashboard(
@@ -94,18 +103,13 @@ public class DashBoardServiceImpl
                                 Status.DONE
                         );
 
-        Long progress = 0L;
+        Integer progress =
 
-        if(total>0){
-
-            progress =
-                    (
-                            completed
-                                    *100
-                    )
-                            /total;
-
-        }
+                metricsService
+                        .calculateProgress(
+                                total,
+                                completed
+                        );
 
         Long inProgress =
                 taskRepository
@@ -139,6 +143,17 @@ public class DashBoardServiceImpl
                         :
                         0L;
 
+        long totalFeatures =
+                sprint != null
+                        ?
+                        featureRepository
+                        .findBySprintId(
+                                sprint
+                        )
+                        .size()
+                        :
+                        0L;
+
         Long completedStories =
                 sprint!=null
                         ?
@@ -153,35 +168,39 @@ public class DashBoardServiceImpl
         Integer remainingHours =
                 sprint!=null
                         ?
-                        taskRepository
-                        .getRemainingHours(
+                        metricsService
+                        .calculateRemainingHours(
                                 sprint
                         )
                         :
                         0;
 
-        Integer completionRate = 0;
+        Integer completionRate =
 
-        if(
-                totalStories>0
-        ){
+                metricsService
+                        .calculateCompletionRate(
+                                completedStories,
+                                totalStories
+                        );
 
-            completionRate=
-                    (
-                            completedStories
-                                    .intValue()
-                                    *100
-                    )
-                            /
-                            totalStories
-                                    .intValue();
+        String productName =
 
-        }
+                sprint != null
+                        &&
+                        sprint.getProductid()!=null
+
+                        ?
+
+                        sprint
+                        .getProductid()
+                        .getProductname()
+                        :
+                        "No Product";
 
         PMDashboardDto dto =
                 new PMDashboardDto(
                         sprintName,
-                        progress.intValue(),
+                        progress,
                         total,
                         completed,
                         inProgress,
@@ -196,7 +215,9 @@ public class DashBoardServiceImpl
                                 0,
                         completedStories,
                         remainingHours,
-                        completionRate
+                        completionRate,
+                        totalFeatures,
+                        productName
                 );
 
         return new DashboardResponseDto(
@@ -304,19 +325,13 @@ public class DashBoardServiceImpl
                                 Status.DONE
                         );
 
-        Integer completion = 0;
+        Integer completion =
 
-        if(total>0){
-
-            completion=
-                    (
-                            done.intValue()
-                                    *100
-                    )
-                            /
-                            total.intValue();
-
-        }
+                metricsService
+                        .calculateProgress(
+                                total,
+                                done
+                        );
 
         Boolean ready =
                 completion>=80
@@ -436,19 +451,13 @@ public class DashBoardServiceImpl
                                 Status.DONE
                         );
 
-        Integer velocity = 0;
+        Integer velocity =
 
-        if(total>0){
-
-            velocity=
-                    (
-                            completed.intValue()
-                                    *100
-                    )
-                            /
-                            total.intValue();
-
-        }
+                metricsService
+                        .calculateProgress(
+                                total,
+                                completed
+                        );
 
         return new VelocityDto(
 
@@ -592,15 +601,11 @@ public class DashBoardServiceImpl
 
     @Override
     public Object getTasks(
-
             Integer page,
-
             Integer size
-
     ){
 
         Pageable pageable =
-
                 PageRequest.of(
                         page,
                         size
@@ -609,6 +614,276 @@ public class DashBoardServiceImpl
         return taskRepository
                 .findAll(
                         pageable
+                )
+                .map(
+
+                        task ->
+
+                                new TaskListDto(
+
+                                        task.getId(),
+
+                                        task.getTitle(),
+
+                                        task.getTaskstatus() != null
+                                                ?
+                                                task.getTaskstatus().name()
+                                                :
+                                                "UNKNOWN"
+
+                                )
+
+                );
+
+    }
+
+    @Override
+    public Page<StoryListDto>
+    getStories(
+            Integer page,
+            Integer size
+    ){
+
+        Pageable pageable =
+                PageRequest.of(
+                        page,
+                        size
+                );
+
+        return storyRepository
+                .findAll(
+                        pageable
+                )
+                .map(
+                        story ->
+                                new StoryListDto(
+                                        story.getId(),
+                                        story.getTitle(),
+                                        story.getStorystatus()!=null
+                                                ?
+                                                story.getStorystatus().name()
+                                                :
+                                                "UNKNOWN"
+                                )
+                );
+
+    }
+
+    @Override
+    public FeatureProgressDto
+    getFeatureProgress(
+            Integer featureId
+    ){
+
+        Feature feature =
+
+                featureRepository
+                        .findById(
+                                featureId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Feature not found"
+                                        )
+                        );
+
+        Long total =
+
+                storyRepository
+                        .countByFeatureid(
+                                feature
+                        );
+
+        Long completed =
+
+                storyRepository
+                        .countByFeatureidAndStorystatus(
+                                feature,
+                                Status.DONE
+                        );
+
+        Integer completion =
+
+                metricsService
+                        .calculateCompletionRate(
+                                completed,
+                                total
+                        );
+        return new FeatureProgressDto(
+
+                feature.getId(),
+
+                feature.getTitle(),
+
+                total,
+
+                completed,
+
+                completion
+
+        );
+    }
+
+    @Override
+    public List<StoryCardDto>
+    getStoriesByFeature(
+            Integer featureId
+    ){
+
+        Feature feature =
+
+                featureRepository
+                        .findById(
+                                featureId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Feature not found"
+                                        )
+                        );
+
+        return storyRepository
+                .findAll()
+                .stream()
+
+                .filter(
+                        s ->
+                                s.getFeatureid()!=null
+                                        &&
+                                        s.getFeatureid()
+                                                .getId()
+                                                .equals(
+                                                        feature.getId()
+                                                )
+                )
+
+                .map(
+                        s ->
+                                new StoryCardDto(
+
+                                        s.getId(),
+
+                                        s.getTitle(),
+
+                                        s.getStorystatus()!=null
+                                                ?
+
+                                                s.getStorystatus()
+                                                .name()
+
+                                                :
+
+                                                "UNKNOWN"
+
+                                )
+                )
+
+                .toList();
+
+    }
+
+    @Override
+    public StoryProgressDto
+    getStoryProgress(
+            Integer storyId
+    ){
+
+        Story story =
+
+                storyRepository
+                        .findById(
+                                storyId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Story not found"
+                                        )
+                        );
+
+        Long total =
+
+                taskRepository
+                        .countByStoryid(
+                                story
+                        );
+
+        Long completed =
+
+                taskRepository
+                        .countByStoryidAndTaskstatus(
+                                story,
+                                Status.DONE
+                        );
+
+        Integer completion =
+
+                metricsService
+                        .calculateCompletionRate(
+                                completed,
+                                total
+                        );
+
+        return new StoryProgressDto(
+
+                story.getId(),
+
+                story.getTitle(),
+
+                total,
+
+                completed,
+
+                completion
+
+        );
+
+    }
+
+    @Override
+    public List<BoardColumnDto>
+    getBoard(
+            Integer sprintId
+    ){
+
+        return boardService
+                .getBoard(
+                        sprintId
+                );
+
+    }
+
+    @Override
+    public void moveTask(
+            MoveTaskDto dto
+    ){
+
+        Task task =
+
+                taskRepository
+                        .findById(
+                                dto.getTaskId()
+                        )
+                        .orElseThrow(
+                                ()->
+                                        new RuntimeException(
+                                                "Task not found"
+                                        )
+                        );
+
+        task.setTaskstatus(
+
+                Status.valueOf(
+                        dto.getStatus()
+                )
+
+        );
+
+        taskRepository
+                .save(
+                        task
                 );
 
     }

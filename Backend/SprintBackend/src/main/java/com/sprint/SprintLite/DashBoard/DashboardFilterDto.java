@@ -1,4 +1,4 @@
-package com.sprint.SprintLite.dto;
+package com.sprint.SprintLite.DashBoard;
 
 import lombok.Getter;
 import lombok.Setter;

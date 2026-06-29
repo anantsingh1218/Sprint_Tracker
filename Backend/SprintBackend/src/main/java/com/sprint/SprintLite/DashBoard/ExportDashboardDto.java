@@ -1,4 +1,4 @@
-package com.sprint.SprintLite.dto;
+package com.sprint.SprintLite.DashBoard;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +9,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamMemberDto {
+public class ExportDashboardDto {
 
-    private Long assignedTasks;
+    private String reportName;
 
-    private Long completedTasks;
-
-    private Long pendingTasks;
+    private Object data;
 
 }

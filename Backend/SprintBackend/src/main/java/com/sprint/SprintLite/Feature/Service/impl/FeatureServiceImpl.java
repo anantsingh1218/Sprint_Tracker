@@ -3,11 +3,14 @@ package com.sprint.SprintLite.Feature.Service.impl;
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
 import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.Product;
+import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.Status;
 import com.sprint.SprintLite.repository.FeatureRepository;
 import com.sprint.SprintLite.repository.ProductRepository;
 import com.sprint.SprintLite.Feature.Service.IFeatureService;
+import com.sprint.SprintLite.repository.SprintRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -54,9 +57,32 @@ public class FeatureServiceImpl implements IFeatureService {
         return featureRepository.findByProductId(Math.toIntExact(productId));
     }
 
+    @Autowired
+    private SprintRepository sprintRepository;
+
     @Override
-    public List<Feature> getFeaturesBySprint(Long sprintId) {
-        return featureRepository.findBySprintId(Math.toIntExact(sprintId));
+    public List<Feature> getFeaturesBySprint(
+            Long sprintId
+    ){
+
+        Sprint sprint =
+                sprintRepository
+                        .findById(
+                                Math.toIntExact(
+                                        sprintId
+                                )
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new RuntimeException(
+                                                "Sprint not found"
+                                        )
+                        );
+
+        return featureRepository
+                .findBySprintId(
+                        sprint
+                );
     }
 
     @Override
