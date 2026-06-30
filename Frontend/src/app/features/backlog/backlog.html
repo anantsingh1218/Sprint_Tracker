@@ -1,99 +1,99 @@
 <div class="backlog">
-
   <div class="toolbar">
     <h2>Backlog</h2>
-
-    <button mat-raised-button color="primary"
-      (click)="openCreate(WorkItemType.Feature)">
+    <button mat-raised-button color="primary" (click)="openCreate(WorkItemType.Feature)">
       + New Feature
     </button>
   </div>
-
   @for (feature of tree; track feature.id) {
-
     <mat-card class="feature">
       <div class="row">
-
         <span class="arrow" (click)="toggle(feature); $event.stopPropagation()">
           {{ feature.expanded ? '▼' : '▶' }}
         </span>
+
+        <span class="work-item-type type-feature">Feature</span>
 
         <strong class="title" (click)="openEdit(feature)">
           {{ feature.title }}
         </strong>
 
-        <button mat-icon-button [matMenuTriggerFor]="featureMenu">
-          +
-        </button>
+        <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
 
         <mat-menu #featureMenu="matMenu">
-          <button mat-menu-item
-            (click)="openCreate(WorkItemType.Story, feature)">
-            Add Story
-          </button>
+          <button mat-menu-item (click)="openCreate(WorkItemType.Story, feature)">Add Story</button>
         </mat-menu>
-
       </div>
 
       @if (feature.expanded) {
-
         <div class="children">
-
           @for (story of feature.children; track story.id) {
-
             <mat-card class="story">
-
               <div class="row">
-
-                <span class="arrow" (click)="toggle(story)">
+                <span class="arrow" (click)="toggle(story); $event.stopPropagation()">
                   {{ story.expanded ? '▼' : '▶' }}
                 </span>
+
+                <span class="work-item-type type-story">Story</span>
 
                 <span class="title" (click)="openEdit(story)">
                   {{ story.title }}
                 </span>
 
-                <button mat-icon-button [matMenuTriggerFor]="storyMenu">
-                  +
-                </button>
+                <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
 
                 <mat-menu #storyMenu="matMenu">
-                  <button mat-menu-item
-                    (click)="openCreate(WorkItemType.Task, story)">
+                  <button mat-menu-item (click)="openCreate(WorkItemType.Task, story)">
                     Add Task
                   </button>
-
-                  <button mat-menu-item
-                    (click)="openCreate(WorkItemType.Bug, story)">
+                  <button mat-menu-item (click)="openCreate(WorkItemType.Bug, story)">
                     Add Bug
                   </button>
                 </mat-menu>
-
               </div>
 
+              @if (story.expanded) {
+                <div class="children">
+                  @for (taskItem of story.children; track taskItem.id) {
+                    <mat-card class="task" [class.bug]="taskItem.type === WorkItemType.Bug">
+                      <div class="row">
+                        <span class="arrow"></span>
+
+                        <span
+                          class="work-item-type"
+                          [ngClass]="taskItem.type === WorkItemType.Bug ? 'type-bug' : 'type-task'"
+                        >
+                          {{ taskItem.type === WorkItemType.Bug ? 'Bug' : 'Task' }}
+                        </span>
+
+                        <span class="title" (click)="openEdit(taskItem)">
+                          {{ taskItem.title }}
+                        </span>
+
+                        <div style="width: 28px"></div>
+                      </div>
+                    </mat-card>
+                  }
+                </div>
+              }
             </mat-card>
-
           }
-
         </div>
       }
     </mat-card>
-
   }
-
 </div>
 
-<!-- OVERLAY -->
-<app-feature
-  *ngIf="overlayType === WorkItemType.Feature && selectedFeature"
-  [feature]="selectedFeature"
-  (save)="saveFeature($event)"
-  (close)="closeOverlay()">
-</app-feature>
+@if (overlayType === WorkItemType.Feature && selectedFeature) {
+  <app-feature [feature]="selectedFeature" (save)="saveFeature($event)" (close)="closeOverlay()">
+  </app-feature>
+}
 
-<app-story
-  *ngIf="overlayType !== WorkItemType.Feature && selectedStory"
-  [story]="selectedStory"
-  (save)="saveStory($event)"
-  (close)="closeOverlay()">
-</app-story>
+@if (overlayType === WorkItemType.Story && selectedStory) {
+  <app-story [story]="selectedStory" (save)="saveStory($event)" (close)="closeOverlay()">
+  </app-story>
+}
+
+@if ((overlayType === WorkItemType.Task || overlayType === WorkItemType.Bug) && selectedTask) {
+  <app-tasks [task]="selectedTask" (save)="saveTask($event)" (close)="closeOverlay()"> </app-tasks>
+}

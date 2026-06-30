@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +11,13 @@ import { FeatureOverlay } from '../feature-overlay/feature-overlay';
 import { Story } from '../story/story';
 import { IFeature } from '../../models/featureInterface';
 import { IStory } from '../../models/storyInterface';
+import { ApiService } from '../../core/apiService/api-service';
+import { IFeatureResponse } from '../../models/featureResponseInterface';
+import { IStoryResponse } from '../../models/storyResponseInterface';
+import { forkJoin } from 'rxjs';
+import { ITasksResponse } from '../../models/taskResponseInterface';
+import { ITask } from '../../models/taskInterface';
+import { Tasks } from '../tasks/tasks';
 
 interface TreeNode extends WorkItem {
   children: TreeNode[];
@@ -20,7 +27,15 @@ interface TreeNode extends WorkItem {
 @Component({
   selector: 'app-backlog',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatMenuModule, FeatureOverlay, Story],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatMenuModule,
+    FeatureOverlay,
+    Story,
+    Tasks,
+  ],
   templateUrl: './backlog.html',
   styleUrls: ['./backlog.css'],
   animations: [fadeSlide],
@@ -30,19 +45,22 @@ export class Backlog {
 
   tree: TreeNode[] = [];
 
-  selectedWorkItem: WorkItem | null = null;
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
-  selectedEntityItem : IFeature | IStory | null = null;
-
+  selectedTask: ITask | null = null;
   parentItem: WorkItem | null = null;
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
+  features: IFeatureResponse[] = [];
+  stories: IStoryResponse[] = [];
+  tasks: ITasksResponse[] = [];
 
-  constructor(private service: WorkItemService) {
-    this.service.items$.subscribe((items) => {
-      this.tree = this.buildTree(items);
-    });
+  constructor(
+    private service: WorkItemService,
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef,
+  ) {
+    this.getBacklog();
   }
 
   // ---------- TREE ----------
@@ -70,6 +88,7 @@ export class Backlog {
 
   toggle(node: TreeNode) {
     node.expanded = !node.expanded;
+    this.tree = [...this.tree];
   }
 
   // ---------- CREATE ----------
@@ -79,15 +98,16 @@ export class Backlog {
 
     const draft = this.service.createEmptyItem(type, parent?.id ?? null);
 
-    this.selectedWorkItem = draft;
-    this.selectedEntityItem =
-      type === WorkItemType.Feature ? this.toFeature(draft) : this.toStory(draft);
-    switch(type){
-      case WorkItemType.Feature : 
+    switch (type) {
+      case WorkItemType.Feature:
         this.selectedFeature = this.toFeature(draft);
         break;
-      case WorkItemType.Story :
+      case WorkItemType.Story:
         this.selectedStory = this.toStory(draft);
+        break;
+      case WorkItemType.Task:
+        this.selectedTask = this.toTask(draft);
+        break;
     }
 
     this.isOverlayOpen = true;
@@ -100,16 +120,16 @@ export class Backlog {
 
     const fresh = this.service.items.find((i) => i.id === item.id) ?? item;
 
-    this.selectedWorkItem = fresh;
-
-    this.selectedEntityItem =
-      item.type === WorkItemType.Feature ? this.toFeature(fresh) : this.toStory(fresh);
-    switch(item.type){
-      case WorkItemType.Feature : 
+    switch (item.type) {
+      case WorkItemType.Feature:
         this.selectedFeature = this.toFeature(fresh);
         break;
-      case WorkItemType.Story :
+      case WorkItemType.Story:
         this.selectedStory = this.toStory(fresh);
+        break;
+      case WorkItemType.Task:
+        this.selectedTask = this.toTask(fresh);
+        break;
     }
     this.isOverlayOpen = true;
   }
@@ -127,6 +147,11 @@ export class Backlog {
   // ---------- SAVE STORY ----------
   saveStory(updated: IStory) {
     const workItem: WorkItem = this.fromStory(updated);
+    this.save(workItem);
+  }
+
+  saveTask(updated: ITask) {
+    const workItem: WorkItem = this.fromTask(updated);
     this.save(workItem);
   }
 
@@ -189,6 +214,22 @@ export class Backlog {
     };
   }
 
+  toTask(item: WorkItem): ITask {
+    return {
+      id: item.id,
+      title: item.title,
+      description: '',
+      status: item.status,
+      priority: 'Medium',
+      estimatedHours: 0,
+      remainingHours: 0,
+      storyId: item.parentId ? this.extractNumericId(item.parentId) : null,
+      sprintId: null,
+      userId: null,
+      comments: [],
+    };
+  }
+
   fromFeature(f: IFeature): WorkItem {
     return {
       id: f.id,
@@ -204,18 +245,145 @@ export class Backlog {
       id: s.id,
       title: s.title,
       type: WorkItemType.Story,
-      parentId: s.featureId ? `F${s.featureId}1` : null,
+      parentId: s.featureId ? `F${s.featureId}` : null,
       status: s.status,
     };
   }
-  private resetOverlayState() {
-  this.isOverlayOpen = false;
-  this.overlayType = null;
-  this.parentItem = null;
 
-  this.selectedWorkItem = null;
-  this.selectedFeature = null;
-  this.selectedStory = null;
-  this.selectedEntityItem = null;
-}
+  fromTask(t: ITask): WorkItem {
+    return {
+      id: t.id,
+      title: t.title,
+      type: WorkItemType.Task,
+      parentId: t.storyId ? `S${t.storyId}` : null,
+      status: t.status,
+    };
+  }
+
+  private resetOverlayState() {
+    this.isOverlayOpen = false;
+    this.overlayType = null;
+    this.parentItem = null;
+
+    this.selectedFeature = null;
+    this.selectedStory = null;
+    this.selectedTask = null;
+  }
+
+  private mapFeature(feature: IFeatureResponse): WorkItem {
+    return {
+      id: `F${feature.id}`,
+      title: feature.title,
+      type: WorkItemType.Feature,
+      parentId: null,
+      status: feature.featureStatus,
+    };
+  }
+
+  private mapStory(story: IStoryResponse): WorkItem {
+    return {
+      id: `S${story.id}`,
+      title: story.title,
+      type: WorkItemType.Story,
+      parentId: `F${story.featureId}`,
+      status: story.storyStatus,
+    };
+  }
+
+  private mapTask(task: ITasksResponse): WorkItem {
+    return {
+      id: `T${task.id}`,
+      title: task.title,
+      type: WorkItemType.Task,
+      parentId: `S${task.storyId}`,
+      status: task.taskStatus,
+    };
+  }
+
+  private buildTreeWithChildren(
+    features: WorkItem[],
+    stories: WorkItem[],
+    tasks: WorkItem[],
+  ): TreeNode[] {
+    // 1. Create a universal lookup map
+    const map = new Map<string, TreeNode>();
+
+    // 2. Add Features to the map
+    features.forEach((f) => {
+      map.set(this.normalizeId(f.id), {
+        ...f,
+        children: [],
+        expanded: true,
+      });
+    });
+
+    // 3. Add Stories to the map AND push them to their Feature parents
+    stories.forEach((s) => {
+      const normalizedStoryId = this.normalizeId(s.id);
+      const parentId = this.normalizeId(s.parentId);
+
+      // Create the story node shell in our map so its upcoming tasks can find it
+      const storyNode: TreeNode = {
+        ...s,
+        children: [],
+        expanded: false,
+      };
+      map.set(normalizedStoryId, storyNode);
+
+      // Attach story node to its feature parent
+      const parentFeature = map.get(parentId);
+      if (parentFeature) {
+        parentFeature.children.push(storyNode);
+      }
+    });
+
+    // 4. Push Tasks to their Story parents (which now confidently exist in the map!)
+    tasks.forEach((t) => {
+      const parentId = this.normalizeId(t.parentId);
+      const parentStory = map.get(parentId);
+
+      if (parentStory) {
+        parentStory.children.push({
+          ...t,
+          children: [],
+          expanded: false,
+        });
+      } else {
+        console.warn(
+          `Orphaned task detected: Task ${t.id} looks for parent ${t.parentId} but it wasn't found.`,
+        );
+      }
+    });
+
+    // 5. Return ONLY the root level nodes (Features)
+    // We filter the full map values down to items that have no parentId
+    return Array.from(map.values()).filter((node) => node.parentId === null);
+  }
+
+  private getBacklog() {
+    forkJoin({
+      features: this.apiService.getRequest<IFeatureResponse[]>('/backlog/getAllFeatures'),
+      stories: this.apiService.getRequest<IStoryResponse[]>('/backlog/getAllStories'),
+      tasks: this.apiService.getRequest<ITasksResponse[]>('/backlog/getAllTasks'),
+    }).subscribe({
+      next: ({ features, stories, tasks }) => {
+        const featureNodes = features.map((f) => this.mapFeature(f));
+        const storyNodes = stories.map((s) => this.mapStory(s));
+        const taskNodes = tasks.map((t) => this.mapTask(t));
+
+        // Overwrite tree variable with a brand new array reference
+        this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes)];
+
+        // Force Angular to scan and render the UI now that asynchronous data is ready
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching backlog data', err);
+      },
+    });
+  }
+
+  private normalizeId(id: any): string {
+    return String(id).replace(/\[|\]/g, '').trim();
+  }
 }

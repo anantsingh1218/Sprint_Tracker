@@ -5,6 +5,9 @@
   font-family: 'Segoe UI', Arial, sans-serif;
 }
 
+/* =========================
+   TOOLBAR
+   ========================= */
 .toolbar {
   display: flex;
   justify-content: space-between;
@@ -17,85 +20,127 @@ h2 {
   color: #323130;
 }
 
-/* CARD RESET (Azure style is NOT card-heavy) */
+/* =========================
+   BASE CARD
+   ========================= */
 mat-card {
   box-shadow: none !important;
   border: 1px solid #edebe9;
-  border-radius: 2px;
+  border-radius: 3px;
   background: #fff;
 }
 
-/* FEATURE ROW */
-.feature {
-  margin-bottom: 10px;
-  padding: 10px 12px;
-  border-left: 4px solid #0078d4;
-}
-
-/* STORY ROW */
-.story {
-  margin: 6px 0 0 24px;
-  padding: 8px 10px;
-  border-left: 3px solid #2b88d8;
-}
-
-/* TASK ROW */
-.task {
-  margin: 4px 0 0 48px;
-  padding: 6px 10px;
-  border-left: 3px solid #107c10;
-  background: #ffffff;
-}
-
-/* BUG STYLE */
-.task.bug {
-  border-left-color: #d13438;
-}
-
-/* ROW LAYOUT */
+/* =========================
+   ROW LAYOUT
+   ========================= */
 .row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  min-height: 32px;
+  gap: 10px;
+  min-height: 34px;
 }
 
-/* TITLE AREA */
+/* title */
 .title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   flex: 1;
   cursor: pointer;
   color: #323130;
 }
 
-/* HOVER like Azure DevOps */
-.feature:hover,
-.story:hover,
-.task:hover {
-  background: #f3f2f1;
-}
-
-/* EXPAND ARROW */
+/* =========================
+   EXPAND ARROW
+   ========================= */
 .arrow {
   width: 18px;
   text-align: center;
   color: #605e5c;
   font-size: 12px;
-  user-select: none;
+  cursor: pointer;
 }
 
-/* CHILD CONTAINER */
+/* =========================
+   CHILD INDENTATION
+   ========================= */
 .children {
   margin-top: 6px;
+  margin-left: 18px;
 }
 
-/* "+" button like DevOps inline actions */
+/* =========================
+   HOVER EFFECT
+   ========================= */
+.feature:hover,
+.story:hover,
+.task:hover {
+  background: #f3f2f1;
+}
+/* =====================================================
+   WORK ITEM TYPES (CORE VISUAL SYSTEM)
+   ===================================================== */
+
+/* FEATURE */
+.feature {
+  border-left: 6px solid #0f6cbd;
+  background: #f5faff;
+}
+
+/* STORY */
+.story {
+  border-left: 5px solid #2b88d8;
+  background: #f8fbff;
+}
+
+/* TASK (if used later) */
+.task {
+  border-left: 5px solid #107c10;
+  background: #f3fff5;
+}
+
+/* BUG override */
+.task.bug {
+  border-left-color: #d13438;
+  background: #fff5f5;
+}
+
+/* =====================================================
+   TYPE BADGES (VERY IMPORTANT FOR RECOGNITION)
+   ===================================================== */
+.work-item-type {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* badge colors */
+.type-feature {
+  background: #dbeafe;
+  color: #0f4a85;
+}
+
+.type-story {
+  background: #e8f0fe;
+  color: #1e4db7;
+}
+
+.type-task {
+  background: #e7f9ed;
+  color: #0f6a2a;
+}
+
+.type-bug {
+  background: #fde7e9;
+  color: #a4262c;
+}
+
+/* =========================
+   BUTTON (Azure-like minimal)
+   ========================= */
 button[mat-icon-button] {
   width: 28px;
   height: 28px;
-  line-height: 28px;
   font-size: 18px;
   opacity: 0.6;
 }
@@ -103,31 +148,16 @@ button[mat-icon-button] {
 button[mat-icon-button]:hover {
   opacity: 1;
   background: rgba(0, 120, 212, 0.08);
-  border-radius: 2px;
+  border-radius: 3px;
 }
 
-.details-panel {
-  position: fixed;
-  right: 0;
-  top: 64px;
-  width: 320px;
-  height: calc(100vh - 64px);
-  background: #ffffff;
-  border-left: 1px solid #edebe9;
-  padding: 16px;
-  box-shadow: -2px 0 6px rgba(0,0,0,0.05);
-  overflow: auto;
-}
-
-.details-panel h3 {
-  margin-top: 0;
-  color: #323130;
-}
-
+/* =========================
+   OVERLAY (unchanged)
+   ========================= */
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   justify-content: center;
   align-items: center;

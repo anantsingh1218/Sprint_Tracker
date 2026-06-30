@@ -36,8 +36,16 @@ export class ApiService {
   }
 
   getRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
+    let headers = new HttpHeaders();
+    
+    const jwtToken: string | null = this.authService.getToken();
+
+    if (jwtToken) {
+      headers = headers.set('Authorization', 'Bearer ' + jwtToken);
+    }
     return this.http
       .get<T>(`${this.apiUrl}${endpoint}`, {
+        headers,
         params: this.buildParams(requestParams),
       })
       .pipe(catchError(this.apiErrorHandler));
@@ -94,13 +102,6 @@ export class ApiService {
       .pipe(catchError(this.apiErrorHandler));
   }
 
-  // deleteRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
-  //   return this.http
-  //     .delete<T>(`${this.apiUrl}${endpoint}`, {
-  //       params: this.buildParams(requestParams),
-  //     })
-  //     .pipe(catchError(this.apiErrorHandler));
-  // }
   deleteRequest<T>(
     endpoint: string,
     options?: {
