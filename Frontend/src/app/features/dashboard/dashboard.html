@@ -1,25 +1,288 @@
-<h2>SprintLite Dashboard</h2>
+<div class="dashboard">
+  <div class="dashboard-header">
 
-<div class="dashboard-grid">
+    <div>
 
-  <div class="card">
-    <h3>Active Sprint</h3>
-    <p>Spring 1 - Authentication Module</p>
+        <h1>Dashboard</h1>
+
+        <p>
+            Track your sprint progress and product delivery.
+        </p>
+
+    </div>
+
+</div>
+  <div class="cards">
+
+      <div class="card">
+
+          <div class="label">
+              Products
+          </div>
+
+          <div class="value">
+              {{ dashboard?.dashboard?.totalProducts }}
+          </div>
+
+      </div>
+
+      <div class="card">
+
+          <div class="label">
+              Active Sprints
+          </div>
+
+          <div class="value">
+              {{ dashboard?.dashboard?.activeSprints }}
+          </div>
+
+      </div>
+
+      <div class="card">
+
+          <div class="label">
+              Stories
+          </div>
+
+          <div class="value">
+              {{ dashboard?.dashboard?.totalStories }}
+          </div>
+
+      </div>
+
+      <div class="card">
+
+          <div class="label">
+              Tasks
+          </div>
+
+          <div class="value">
+              {{ dashboard?.dashboard?.totalTasks }}
+          </div>
+
+      </div>
+
+      <div class="card">
+
+          <div class="label">
+              Completed Tasks
+          </div>
+
+          <div class="value">
+              {{ dashboard?.dashboard?.completedTasks }}
+          </div>
+
+      </div>
+
+      <div class="card">
+
+          <div class="label">
+              Blocked Tasks
+          </div>
+
+          <div class="value">
+              {{ dashboard?.dashboard?.blockedTasks }}
+          </div>
+
+      </div>
+
   </div>
+  <div class="product-filter">
 
-  <div class="card">
-    <h3>Total Tasks</h3>
-    <p>24</p>
-  </div>
+    <label class="filter-label">
+        Product
+    </label>
 
-  <div class="card">
-    <h3>Blocked Tasks</h3>
-    <p>3</p>
-  </div>
+    <select
+        class="product-dropdown"
+        [(ngModel)]="selectedProductId"
+        (change)="onProductChange()"
+    >
 
-  <div class="card">
-    <h3>Bugs Reported</h3>
-    <p>7</p>
-  </div>
+        <option
+            *ngFor="let product of products"
+            [value]="product.productId">
 
+            {{ product.productName }}
+
+        </option>
+
+    </select>
+
+</div>
+  <div class="product-card">
+
+    <div class="product-header">
+
+        <div>
+
+            <h3>{{ selectedProduct?.productName }}</h3>
+
+            <span>{{ selectedProduct?.sprintName }}</span>
+
+        </div>
+
+        <div class="progress-circle">
+
+            {{ selectedProduct?.progress }}%
+
+        </div>
+
+    </div>
+
+    <div class="progress-section">
+
+        <div class="progress-label">
+
+            Sprint Progress
+
+            <span>{{ selectedProduct?.progress }}%</span>
+
+        </div>
+
+        <div class="progress-track">
+
+            <div
+                class="progress-fill"
+                [style.width.%]="selectedProduct?.progress">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-item">
+
+            <span>Features</span>
+
+            <strong>{{ selectedProduct?.totalFeatures }}</strong>
+
+        </div>
+
+        <div class="stat-item">
+
+            <span>Stories</span>
+
+            <strong>{{ selectedProduct?.totalStories }}</strong>
+
+        </div>
+
+        <div class="stat-item">
+
+            <span>Tasks</span>
+
+            <strong>{{ selectedProduct?.totalTasks }}</strong>
+
+        </div>
+
+        <div class="stat-item success">
+
+            <span>Completed</span>
+
+            <strong>{{ selectedProduct?.completedTasks }}</strong>
+
+        </div>
+
+        <div class="stat-item warning">
+
+            <span>Pending</span>
+
+            <strong>{{ selectedProduct?.pendingTasks }}</strong>
+
+        </div>
+
+        <div class="stat-item danger">
+
+            <span>Blocked</span>
+
+            <strong>{{ selectedProduct?.blockedTasks }}</strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+  <div class="health-card">
+
+    <div class="health-header">
+
+        <h3>Portfolio Health</h3>
+
+        <span class="status-badge"
+              [class.ready]="releaseReadiness?.releaseReady"
+              [class.not-ready]="!releaseReadiness?.releaseReady">
+
+            {{ releaseReadiness?.releaseReady ? 'Ready' : 'Not Ready' }}
+
+        </span>
+
+    </div>
+
+    <div class="health-row">
+
+        <span>Sprint</span>
+
+        <strong>{{ releaseReadiness?.sprintName }}</strong>
+
+    </div>
+
+    <div class="health-row">
+
+        <span>Product</span>
+
+        <strong>{{ releaseReadiness?.productName }}</strong>
+
+    </div>
+
+    <div class="health-row">
+
+        <span>Open Bugs</span>
+
+        <strong>{{ releaseReadiness?.openBugs }}</strong>
+
+    </div>
+
+    <div class="health-row">
+
+        <span>Blocked Tasks</span>
+
+        <strong>{{ releaseReadiness?.blockedTasks }}</strong>
+
+    </div>
+
+    <div class="completion-section">
+
+        <div class="completion-label">
+
+            <span>Release Completion</span>
+
+            <strong>{{ releaseReadiness?.completion }}%</strong>
+
+        </div>
+
+        <div class="progress-track">
+
+            <div class="progress-fill"
+                 [style.width.%]="releaseReadiness?.completion">
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  <app-analytics-section
+
+    [velocity]="velocity"
+
+    [burndown]="burndown"
+
+    [teamCapacity]="teamCapacity"
+
+    [releaseReadiness]="releaseReadiness">
+    
+  </app-analytics-section>
 </div>

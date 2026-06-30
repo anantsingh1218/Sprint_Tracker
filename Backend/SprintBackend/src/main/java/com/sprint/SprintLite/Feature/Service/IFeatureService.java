@@ -20,5 +20,7 @@ public interface IFeatureService {
 
     Feature updateFeature(Long featureId, CreateFeatureRequest feature);
 
+    Feature updateFeatureStatus(Long featureId, Status status);
+
     void deleteFeature(Long featureId);
 }

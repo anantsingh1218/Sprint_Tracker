@@ -12,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -43,188 +45,196 @@ public class DashBoardServiceImpl
     DashboardMetricsService
             metricsService;
 
-    @Override
-    public DashboardResponseDto getDashboard(
-            Integer userId
-    ){
+    private Sprint getActiveSprint(Users user, Integer productId) {
 
-        Users user =
-                usersRepository
-                        .findById(userId)
-                        .orElseThrow(
-                                ()->
-                                        new RuntimeException(
-                                                "User not found"
-                                        )
-                        );
+        if (productId != null) {
 
-        Role role =
-                user.getRole();
+            Product product = productRepository
+                    .findById(productId)
+                    .orElseThrow(() ->
+                            new RuntimeException("Product not found"));
 
-        if(
-                role ==
-                        Role.ROLE_PM
-                        ||
-                        role ==
-                                Role.ROLE_Scrum_Master
-        ){
-            return getPMDashboard();
+            return sprintRepository
+                    .findByProductidAndStatus(
+                            product,
+                            SprintStatus.ACTIVE
+                    )
+                    .orElse(null);
         }
 
-        return getTeamDashboard(
-                user
-        );
+        List<UserProductMapping> mappings =
+                userProductMappingRepository.findByUserid(user);
 
+        if (mappings.isEmpty()) {
+            return null;
+        }
+
+        Product product = mappings.get(0).getProductid();
+
+        return sprintRepository
+                .findByProductidAndStatus(
+                        product,
+                        SprintStatus.ACTIVE
+                )
+                .orElse(null);
     }
 
-    private DashboardResponseDto
-    getPMDashboard(){
+    @Override
+    public DashboardResponseDto getDashboard(Integer userId) {
 
-        var sprint =
-                sprintRepository
-                        .findFirstByStatus(
-                                SprintStatus.ACTIVE
-                        )
-                        .orElse(null);
+        Users user = usersRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
-        String sprintName =
-                sprint != null
-                        ?
-                        sprint.getSprintName()
-                        :
-                        "No Sprint";
+        Role role = user.getRole();
 
-        Long total =
-                taskRepository.count();
+        if (role == Role.ROLE_PM ||
+                role == Role.ROLE_Scrum_Master) {
 
-        Long completed =
-                taskRepository
-                        .countByTaskstatus(
-                                Status.DONE
-                        );
+            return getPMDashboard(user);
+        }
 
-        Integer progress =
+        return getTeamDashboard(user);
+    }
 
-                metricsService
-                        .calculateProgress(
-                                total,
-                                completed
-                        );
+    private DashboardResponseDto getPMDashboard(Users user) {
 
-        Long inProgress =
-                taskRepository
-                        .countByTaskstatus(
-                                Status.IN_PROGRESS
-                        );
+        List<UserProductMapping> mappings =
+                userProductMappingRepository.findByUserid(user);
 
-        Long blocked =
-                taskRepository
-                        .countByTaskstatus(
-                                Status.BLOCKED
-                        );
+        List<ProductSummaryDto> products = new ArrayList<>();
 
-        Integer totalHours =
-                sprint != null
-                        ?
-                        taskRepository
-                        .getTotalEstimatedHours(
-                                sprint
-                        )
-                        :
-                        0;
+        long totalFeatures = 0;
+        long totalStories = 0;
+        long totalTasks = 0;
+        long completedTasks = 0;
+        long blockedTasks = 0;
 
-        Long totalStories =
-                sprint!=null
-                        ?
-                        storyRepository
-                        .countBySprintid(
-                                sprint
-                        )
-                        :
-                        0L;
+        int activeSprints = 0;
+        long totalCompletedStories = 0;
 
-        long totalFeatures =
-                sprint != null
-                        ?
-                        featureRepository
-                        .findBySprintId(
-                                sprint
-                        )
-                        .size()
-                        :
-                        0L;
+        for (UserProductMapping mapping : mappings) {
 
-        Long completedStories =
-                sprint!=null
-                        ?
-                        storyRepository
-                        .countBySprintidAndStorystatus(
-                                sprint,
-                                Status.DONE
-                        )
-                        :
-                        0L;
+            Product product = mapping.getProductid();
 
-        Integer remainingHours =
-                sprint!=null
-                        ?
-                        metricsService
-                        .calculateRemainingHours(
-                                sprint
-                        )
-                        :
-                        0;
+            Sprint sprint =
+                    sprintRepository
+                            .findByProductidAndStatus(
+                                    product,
+                                    SprintStatus.ACTIVE
+                            )
+                            .orElse(null);
 
-        Integer completionRate =
+            if (sprint == null)
+                continue;
 
-                metricsService
-                        .calculateCompletionRate(
-                                completedStories,
-                                totalStories
-                        );
+            activeSprints++;
 
-        String productName =
+            Long stories =
+                    storyRepository.countBySprintid(sprint);
 
-                sprint != null
-                        &&
-                        sprint.getProductid()!=null
+            Long completedStories =
+                    storyRepository.countBySprintidAndStorystatus(
+                            sprint,
+                            Status.DONE
+                    );
 
-                        ?
+            Long features =
+                    (long) featureRepository
+                            .findBySprintId(sprint)
+                            .size();
 
-                        sprint
-                        .getProductid()
-                        .getProductname()
-                        :
-                        "No Product";
+            Long tasks =
+                    taskRepository.countBySprintid(sprint);
+
+            Long completed =
+                    taskRepository.countBySprintidAndTaskstatus(
+                            sprint,
+                            Status.DONE
+                    );
+
+            Long blocked =
+                    taskRepository.countBySprintidAndTaskstatus(
+                            sprint,
+                            Status.BLOCKED
+                    );
+
+            Integer progress =
+                    metricsService.calculateProgress(
+                            tasks,
+                            completed
+                    );
+
+            Long pendingTasks =
+                    tasks - completed;
+
+
+            products.add(
+
+                    new ProductSummaryDto(
+
+                            product.getId(),
+
+                            product.getProductname(),
+
+                            sprint.getSprintName(),
+
+                            progress,
+
+                            features,
+
+                            stories,
+
+                            completedStories,
+
+                            tasks,
+
+                            completed,
+
+                            pendingTasks,
+
+                            blocked
+
+                    )
+
+            );
+
+            totalFeatures += features;
+            totalStories += stories;
+            totalCompletedStories += completedStories;
+            totalTasks += tasks;
+            completedTasks += completed;
+            blockedTasks += blocked;
+        }
 
         PMDashboardDto dto =
                 new PMDashboardDto(
-                        sprintName,
-                        progress,
-                        total,
-                        completed,
-                        inProgress,
-                        blocked,
-                        totalHours,
-                        totalStories,
-                        sprint!=null
-                                ?
-                                sprint
-                                .getSprintDuration()
-                                :
-                                0,
-                        completedStories,
-                        remainingHours,
-                        completionRate,
+
+                        mappings.size(),
+
+                        activeSprints,
+
                         totalFeatures,
-                        productName
+
+                        totalStories,
+
+                        totalCompletedStories,
+
+                        totalTasks,
+
+                        completedTasks,
+
+                        blockedTasks,
+
+                        products
+
                 );
 
         return new DashboardResponseDto(
                 "MANAGEMENT",
                 dto
         );
-
     }
     private DashboardResponseDto
     getTeamDashboard(
@@ -265,15 +275,14 @@ public class DashBoardServiceImpl
     @Override
     public ReleaseReadinessDto
     getReleaseReadiness(
-            Integer userId
+            Integer userId,
+            Integer productId
     ){
 
         Users user =
-                usersRepository
-                        .findById(
-                                userId
-                        )
-                        .orElseThrow();
+                usersRepository.findById(userId)
+                        .orElseThrow(() ->
+                                new RuntimeException("User not found"));
 
         var mapping =
                 userProductMappingRepository
@@ -292,16 +301,7 @@ public class DashBoardServiceImpl
                         null;
 
         Sprint sprint =
-                product!=null
-                        ?
-                        sprintRepository
-                        .findByProductidAndStatus(
-                                product,
-                                SprintStatus.ACTIVE
-                        )
-                        .orElse(null)
-                        :
-                        null;
+                getActiveSprint(user, productId);
 
         Long blocked =
                 taskRepository
@@ -369,8 +369,16 @@ public class DashBoardServiceImpl
     @Override
     public TeamCapacityDto
     getTeamCapacity(
-            Integer userId
+            Integer userId,
+            Integer productId
     ){
+        Users user =
+                usersRepository.findById(userId)
+                        .orElseThrow(() ->
+                                new RuntimeException("User not found"));
+
+        Sprint sprint =
+                getActiveSprint(user, productId);
 
         Integer total =
                 Math.toIntExact(
@@ -413,30 +421,15 @@ public class DashBoardServiceImpl
     @Override
     public VelocityDto
     getVelocity(
-            Integer userId
+            Integer userId,
+            Integer productId
     ){
 
-        Sprint sprint =
-                sprintRepository
-                        .findFirstByStatus(
-                                SprintStatus.ACTIVE
-                        )
-                        .orElse(null);
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
 
-        if(
-                sprint
-                        ==
-                        null
-        ){
-
-            return new VelocityDto(
-                    "Not Planned Yet",
-                    0L,
-                    0L,
-                    0
-            );
-
-        }
+        Sprint sprint = getActiveSprint(user, productId);
 
         Long total =
                 storyRepository
@@ -476,28 +469,17 @@ public class DashBoardServiceImpl
     @Override
     public BurndownDto
     getBurndown(
-            Integer userId
+            Integer userId,
+            Integer productId
     ){
 
+        Users user =
+                usersRepository.findById(userId)
+                        .orElseThrow(() ->
+                                new RuntimeException("User not found"));
+
         Sprint sprint =
-                sprintRepository
-                        .findFirstByStatus(
-                                SprintStatus.ACTIVE
-                        )
-                        .orElse(null);
-
-        if(
-                sprint
-                        ==
-                        null
-        ){
-
-            return new BurndownDto(
-                    "Not Planned Yet",
-                    List.of()
-            );
-
-        }
+                getActiveSprint(user, productId);
 
         Long total =
                 taskRepository.count();
@@ -555,25 +537,25 @@ public class DashBoardServiceImpl
     @Override
     public DashboardSummaryDto
     getSummary(
-            Integer userId
+            Integer userId, Integer productId
     ){
 
         return new DashboardSummaryDto(
 
                 getReleaseReadiness(
-                        userId
+                        userId, productId
                 ),
 
                 getTeamCapacity(
-                        userId
+                        userId, productId
                 ),
 
                 getVelocity(
-                        userId
+                        userId, productId
                 ),
 
                 getBurndown(
-                        userId
+                        userId, productId
                 )
         );
     }
@@ -581,12 +563,12 @@ public class DashBoardServiceImpl
     @Override
     public ExportDashboardDto
     exportDashboard(
-            Integer userId
+            Integer userId, Integer productId
     ){
 
         DashboardSummaryDto summary =
                 getSummary(
-                        userId
+                        userId, productId
                 );
 
         return new ExportDashboardDto(
@@ -886,6 +868,25 @@ public class DashBoardServiceImpl
                         task
                 );
 
+    }
+
+    @Override
+    public List<ProductDropdownDto> getProducts(Integer userId) {
+
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        List<UserProductMapping> mappings =
+                userProductMappingRepository.findByUserid(user);
+
+        return mappings.stream()
+                .map(mapping -> new ProductDropdownDto(
+                        mapping.getProductid().getId(),
+                        mapping.getProductid().getProductname()
+                ))
+                .sorted(Comparator.comparing(ProductDropdownDto::getProductName))
+                .toList();
     }
 
 }

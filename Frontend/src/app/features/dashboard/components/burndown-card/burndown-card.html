@@ -1,0 +1,30 @@
+<div
+    class="analytics-card"
+    *ngIf="burndown"
+>
+
+    <div class="card-header">
+
+        <h3>
+
+            Burndown Chart
+
+        </h3>
+
+        <span>
+
+            {{burndown.sprintName}}
+
+        </span>
+
+    </div>
+
+    <div class="chart-container">
+
+        <canvas #chartCanvas>
+
+        </canvas>
+
+    </div>
+
+</div>

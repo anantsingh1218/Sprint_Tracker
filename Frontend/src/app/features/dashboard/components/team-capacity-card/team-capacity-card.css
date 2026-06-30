@@ -1,0 +1,81 @@
+.analytics-card{
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:24px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+    height:100%;
+
+}
+
+.card-header{
+
+    margin-bottom:20px;
+
+}
+
+.member-count{
+
+    font-size:42px;
+
+    font-weight:700;
+
+    color:#2563eb;
+
+    margin-bottom:18px;
+
+}
+
+.progress-track{
+
+    height:10px;
+
+    background:#e5e7eb;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    background:#2563eb;
+
+}
+
+.stats{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    margin-top:24px;
+
+    gap:15px;
+
+}
+
+.stats span{
+
+    color:#6b7280;
+
+    font-size:13px;
+
+}
+
+.stats strong{
+
+    display:block;
+
+    font-size:24px;
+
+    margin-top:6px;
+
+}

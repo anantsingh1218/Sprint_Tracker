@@ -1,0 +1,44 @@
+.analytics-section{
+
+    margin-top:40px;
+
+}
+
+.section-header{
+
+    margin-bottom:20px;
+
+}
+
+.section-header h2{
+
+    margin:0;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+.section-header p{
+
+    margin-top:8px;
+
+    color:#6b7280;
+
+}
+
+.analytics-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(
+        auto-fit,
+        minmax(420px,1fr)
+    );
+
+    gap:24px;
+
+    align-items:stretch;
+
+}

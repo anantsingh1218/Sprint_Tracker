@@ -29,6 +29,16 @@ public interface TaskRepository
             Status status
     );
 
+
+    Long countBySprintid(
+            Sprint sprint
+    );
+
+    Long countBySprintidAndTaskstatus(
+            Sprint sprint,
+            Status status
+    );
+
     List<Task> findBySprintid_Id(Long sprintId);
     @Query("""
             SELECT COALESCE(

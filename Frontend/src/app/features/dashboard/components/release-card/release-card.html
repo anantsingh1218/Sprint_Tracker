@@ -1,0 +1,46 @@
+<div class="analytics-card" *ngIf="releaseReadiness">
+
+    <div class="card-header">
+
+        <h3>🚀 Release Readiness</h3>
+
+    </div>
+
+    <div
+        class="status"
+        [class.ready]="releaseReadiness.releaseReady"
+        [class.not-ready]="!releaseReadiness.releaseReady">
+
+        {{ releaseReadiness.releaseReady ? 'Ready' : 'Not Ready' }}
+
+    </div>
+
+    <div class="stats">
+
+        <div>
+
+            <span>Completion</span>
+
+            <strong>{{ releaseReadiness.completion }}%</strong>
+
+        </div>
+
+        <div>
+
+            <span>Open Bugs</span>
+
+            <strong>{{ releaseReadiness.openBugs }}</strong>
+
+        </div>
+
+        <div>
+
+            <span>Blocked Tasks</span>
+
+            <strong>{{ releaseReadiness.blockedTasks }}</strong>
+
+        </div>
+
+    </div>
+
+</div>

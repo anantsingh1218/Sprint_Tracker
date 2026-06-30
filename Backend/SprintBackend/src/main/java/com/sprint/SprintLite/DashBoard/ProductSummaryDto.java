@@ -1,24 +1,22 @@
 package com.sprint.SprintLite.DashBoard;
-
-import com.sprint.SprintLite.DashBoard.ProductSummaryDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PMDashboardDto {
+public class ProductSummaryDto {
 
-    // Overall Dashboard
+    private Integer productId;
 
-    private Integer totalProducts;
+    private String productName;
 
-    private Integer activeSprints;
+    private String sprintName;
+
+    private Integer progress;
 
     private Long totalFeatures;
 
@@ -30,8 +28,8 @@ public class PMDashboardDto {
 
     private Long completedTasks;
 
-    private Long blockedTasks;
+    private Long pendingTasks;
 
-    private List<ProductSummaryDto> products;
+    private Long blockedTasks;
 
 }

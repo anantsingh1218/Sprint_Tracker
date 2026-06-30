@@ -1,0 +1,53 @@
+<div
+    class="analytics-card"
+    *ngIf="velocity"
+>
+
+    <div class="card-header">
+
+        <h3>
+            Sprint Velocity
+        </h3>
+
+        <span class="badge">
+            {{ velocity.sprintName }}
+        </span>
+
+    </div>
+
+    <div class="velocity-score">
+
+        {{ velocity.velocity }}%
+
+    </div>
+
+    <div class="progress-track">
+
+        <div
+            class="progress-fill"
+            [style.width.%]="velocity.velocity">
+        </div>
+
+    </div>
+
+    <div class="story-info">
+
+        <div>
+
+            <span>Completed</span>
+
+            <strong>{{ velocity.completedStories }}</strong>
+
+        </div>
+
+        <div>
+
+            <span>Total Stories</span>
+
+            <strong>{{ velocity.totalStories }}</strong>
+
+        </div>
+
+    </div>
+
+</div>

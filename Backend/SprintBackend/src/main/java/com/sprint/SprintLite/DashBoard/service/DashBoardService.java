@@ -14,31 +14,35 @@ public interface DashBoardService {
 
     ReleaseReadinessDto
     getReleaseReadiness(
-            Integer userId);
+            Integer userId,
+            Integer productId);
 
     TeamCapacityDto
     getTeamCapacity(
-            Integer userId
+            Integer userId,
+            Integer productId
     );
 
     VelocityDto
     getVelocity(
-            Integer userId
+            Integer userId,
+            Integer productId
     );
 
     BurndownDto
     getBurndown(
-            Integer userId
+            Integer userId,
+            Integer productId
     );
 
     DashboardSummaryDto
     getSummary(
-            Integer userId
+            Integer userId, Integer productId
     );
 
     ExportDashboardDto
     exportDashboard(
-            Integer userId
+            Integer userId, Integer productId
     );
 
     Object getTasks(
@@ -75,5 +79,7 @@ public interface DashBoardService {
     void moveTask(
             MoveTaskDto dto
     );
+
+    List<ProductDropdownDto> getProducts(Integer userId);
 
 }

@@ -1,0 +1,107 @@
+.analytics-card{
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:24px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+
+    transition:.25s;
+
+}
+
+.analytics-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:20px;
+
+}
+
+.badge{
+
+    background:#2563eb;
+
+    color:white;
+
+    padding:5px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+}
+
+.velocity-score{
+
+    font-size:52px;
+
+    font-weight:700;
+
+    color:#2563eb;
+
+    margin-bottom:20px;
+
+}
+
+.progress-track{
+
+    height:10px;
+
+    background:#eef2f7;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    background:#2563eb;
+
+}
+
+.story-info{
+
+    margin-top:24px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+}
+
+.story-info span{
+
+    display:block;
+
+    color:#6b7280;
+
+    font-size:13px;
+
+}
+
+.story-info strong{
+
+    display:block;
+
+    margin-top:6px;
+
+    font-size:26px;
+
+}

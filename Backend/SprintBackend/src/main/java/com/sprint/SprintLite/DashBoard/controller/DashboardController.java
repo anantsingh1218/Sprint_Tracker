@@ -45,88 +45,56 @@ public class DashboardController {
 
     }
 
-    @GetMapping(
-            "/release/{userId}"
-    )
-    public ReleaseReadinessDto
-    release(
-            @PathVariable
-            Integer userId
+    @GetMapping("/release/{userId}")
+    public ReleaseReadinessDto getReleaseReadiness(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) Integer productId
     ){
-
-        return dashboardService
-                .getReleaseReadiness(
-                        userId
-                );
-
+        return dashboardService.getReleaseReadiness(
+                userId,
+                productId
+        );
     }
 
-    @GetMapping(
-            "/team-capacity/{userId}"
-    )
-
-    public TeamCapacityDto
-    teamCapacity(
-            @PathVariable
-            Integer userId
+    @GetMapping("/team-capacity/{userId}")
+    public TeamCapacityDto getTeamCapacity(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) Integer productId
     ){
-
-        return dashboardService
-                .getTeamCapacity(
-                        userId
-                );
-
+        return dashboardService.getTeamCapacity(
+                userId,
+                productId
+        );
     }
 
-    @GetMapping(
-            "/velocity/{userId}"
-    )
-
-    public VelocityDto
-    velocity(
-            @PathVariable
-            Integer userId
-    ){
-
-        return dashboardService
-                .getVelocity(
-                        userId
-                );
-
+    @GetMapping("/velocity/{userId}")
+    public VelocityDto getVelocity(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) Integer productId
+    ) {
+        return dashboardService.getVelocity(userId, productId);
     }
 
-    @GetMapping(
-            "/burndown/{userId}"
-    )
-
-    public BurndownDto
-    burndown(
-            @PathVariable
-            Integer userId
+    @GetMapping("/burndown/{userId}")
+    public BurndownDto getBurndown(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) Integer productId
     ){
-
-        return dashboardService
-                .getBurndown(
-                        userId
-                );
-
+        return dashboardService.getBurndown(
+                userId,
+                productId
+        );
     }
 
-    @GetMapping(
-            "/summary/{userId}"
-    )
-
-    public DashboardSummaryDto
-    summary(
-            @PathVariable
-            Integer userId
+    @GetMapping("/summary/{userId}")
+    public DashboardSummaryDto getSummary(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) Integer productId
     ){
-
-        return dashboardService
-                .getSummary(
-                        userId
-                );
-
+        return dashboardService.getSummary(
+                userId,
+                productId
+        );
     }
 
     @GetMapping(
@@ -136,12 +104,13 @@ public class DashboardController {
     public ExportDashboardDto
     export(
             @PathVariable
-            Integer userId
+            Integer userId,
+            @RequestParam(required = false) Integer productId
     ){
 
         return dashboardService
                 .exportDashboard(
-                        userId
+                        userId, productId
                 );
 
     }
@@ -288,6 +257,13 @@ public class DashboardController {
                         dto
                 );
 
+    }
+
+    @GetMapping("/products/{userId}")
+    public List<ProductDropdownDto> getProducts(
+            @PathVariable Integer userId
+    ) {
+        return dashboardService.getProducts(userId);
     }
 
 }

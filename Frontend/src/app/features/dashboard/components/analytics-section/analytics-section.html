@@ -1,0 +1,45 @@
+<div class="analytics-section">
+
+    <div class="section-header">
+
+        <h2>Analytics</h2>
+
+        <p>
+            Monitor sprint performance and delivery metrics.
+        </p>
+
+    </div>
+
+    <div class="analytics-grid">
+
+        <!-- Velocity -->
+
+        <app-velocity-card
+            *ngIf="velocity"
+            [velocity]="velocity">
+        </app-velocity-card>
+
+        <!-- Team Capacity -->
+
+        <app-team-capacity-card
+            *ngIf="teamCapacity"
+            [teamCapacity]="teamCapacity">
+        </app-team-capacity-card>
+
+        <!-- Burndown -->
+
+        <app-burndown-card
+            *ngIf="burndown"
+            [burndown]="burndown">
+        </app-burndown-card>
+
+        <!-- Release Readiness -->
+
+        <app-release-card
+            *ngIf="releaseReadiness"
+            [releaseReadiness]="releaseReadiness">
+        </app-release-card>
+
+    </div>
+
+</div>
