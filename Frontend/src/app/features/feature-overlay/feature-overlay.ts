@@ -1,8 +1,11 @@
 import {
   Component,
   EventEmitter,
+  Inject,
   Input,
   OnChanges,
+  OnInit,
+  Optional,
   Output,
   signal,
   SimpleChanges,
@@ -14,15 +17,18 @@ import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
 import { HttpErrorResponse } from '@angular/common/http';
 import { IFeature } from '../../models/featureInterface';
+import { WorkItemType } from '../../models/workItem';
+
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-story',
+  selector: 'app-feature',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './feature-overlay.html',
   styleUrl: './feature-overlay.css',
 })
-export class FeatureOverlay implements OnChanges {
+export class FeatureOverlay implements OnInit, OnChanges {
   @Input() feature!: IFeature;
   @Output() save = new EventEmitter<IFeature>();
   @Output() close = new EventEmitter<void>();
@@ -31,7 +37,14 @@ export class FeatureOverlay implements OnChanges {
   isAttachmentView = false;
   attachmentUploadStatus = signal('');
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    @Optional()
+    private dialogRef: MatDialogRef<FeatureOverlay>,
+    @Optional()
+    @Inject(MAT_DIALOG_DATA)
+    private dialogData: { feature?: IFeature } | null,
+  ) {}
 
   newComment = '';
 
@@ -52,10 +65,19 @@ export class FeatureOverlay implements OnChanges {
   ];
 
   saveFeature() {
+    if (this.dialogRef) {
+      this.dialogRef.close(this.feature);
+      return;
+    }
+
     this.save.emit(this.feature);
   }
 
   closeOverlay() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      return;
+    }
     this.close.emit();
   }
 
@@ -81,7 +103,7 @@ export class FeatureOverlay implements OnChanges {
   }
 
   loadAttachments() {
-    this.apiService.getAttachments('feature', this.feature.id).subscribe({
+    this.apiService.getAttachments(WorkItemType.Feature, this.apiService.toApiWorkItemId(this.feature.id)).subscribe({
       next: (data) => {
         this.attachments.set(data.fileToBeFetched);
       },
@@ -94,8 +116,21 @@ export class FeatureOverlay implements OnChanges {
     });
   }
 
+  ngOnInit(): void {
+    if (this.dialogData?.feature) {
+      this.feature = this.dialogData.feature;
+    }
+
+    this.feature.comments ??= [];
+
+    if (this.feature.id) {
+      this.loadAttachments();
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['story'] && this.feature?.id) {
+    if (changes['feature'] && this.feature?.id) {
+      this.feature.comments ??= [];
       this.loadAttachments();
     }
   }
@@ -111,13 +146,15 @@ export class FeatureOverlay implements OnChanges {
   uploadFiles() {
     if (!this.selectedFiles().length) return;
 
-    this.apiService.uploadAttachments('feature', this.feature.id, this.selectedFiles()).subscribe({
-      next: (res: Attachment[]) => {
-        this.selectedFiles.set([]);
-        this.attachmentUploadStatus.set('Files uploaded Successfully');
-        this.attachments.set(res);
-      },
-    });
+    this.apiService
+      .uploadAttachments(WorkItemType.Feature, this.apiService.toApiWorkItemId(this.feature.id), this.selectedFiles())
+      .subscribe({
+        next: (res: Attachment[]) => {
+          this.selectedFiles.set([]);
+          this.attachmentUploadStatus.set('Files uploaded Successfully');
+          this.attachments.set(res);
+        },
+      });
   }
 
   deleteAttachment(filename: string) {

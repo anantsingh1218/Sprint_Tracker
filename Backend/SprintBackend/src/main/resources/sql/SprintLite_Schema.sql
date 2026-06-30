@@ -120,6 +120,7 @@ CREATE TABLE TASKTABLE (
 
 CREATE TABLE BUGS (
                       ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                      TITLE varchar,
                       BUGSTATUS STATUS,
                       PRIORITY PRIORITY,
                       DESCRIPTION text,

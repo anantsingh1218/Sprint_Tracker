@@ -12,37 +12,38 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IComment, IStory } from '../../models/storyInterface';
+import { IComment } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
 import { HttpErrorResponse } from '@angular/common/http';
 import { WorkItemType } from '../../models/workItem';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-
+import { IBug } from '../../models/bugInterface';
 
 @Component({
-  selector: 'app-story',
+  selector: 'app-bug',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './story.html',
-  styleUrl: './story.css',
+  templateUrl: './bug.html',
+  styleUrl: './bug.css',
 })
-export class Story implements OnInit, OnChanges {
-  @Input() story!: IStory;
-  @Output() save = new EventEmitter<IStory>();
+export class Bug implements OnInit, OnChanges {
+  @Input() bug!: IBug;
+  @Output() save = new EventEmitter<IBug>();
   @Output() close = new EventEmitter<void>();
   selectedFiles = signal<File[]>([]);
   attachments = signal<Attachment[]>([]);
   isAttachmentView = false;
   attachmentUploadStatus = signal('');
 
-  constructor(private apiService: ApiService,
+  constructor(
+    private apiService: ApiService,
     @Optional()
-    private dialogRef: MatDialogRef<Story>,
+    private dialogRef: MatDialogRef<Bug>,
     @Optional()
     @Inject(MAT_DIALOG_DATA)
-    private dialogData: { story?: IStory } | null,
+    private dialogData: { bug?: IBug } | null,
   ) {}
 
   newComment = '';
@@ -53,7 +54,7 @@ export class Story implements OnInit, OnChanges {
     { id: 3, name: 'Mike Johnson' },
   ];
 
-  features = [
+  stories = [
     { id: 1, name: 'Login Module' },
     { id: 2, name: 'Sprint Module' },
   ];
@@ -63,13 +64,13 @@ export class Story implements OnInit, OnChanges {
     { id: 2, name: 'Sprint 2' },
   ];
 
-  saveStory() {
+  saveBug() {
     if (this.dialogRef) {
-      this.dialogRef.close(this.story);
+      this.dialogRef.close(this.bug);
       return;
     }
 
-    this.save.emit(this.story);
+    this.save.emit(this.bug);
   }
 
   closeOverlay() {
@@ -89,8 +90,8 @@ export class Story implements OnInit, OnChanges {
       text: this.newComment,
       createdAt: new Date().toISOString(),
     };
-    this.story.comments ??= [];
-    this.story.comments.push(comment);
+    this.bug.comments ??= [];
+    this.bug.comments.push(comment);
     this.newComment = '';
   }
 
@@ -103,7 +104,7 @@ export class Story implements OnInit, OnChanges {
   }
 
   loadAttachments() {
-    this.apiService.getAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.story.id)).subscribe({
+    this.apiService.getAttachments(WorkItemType.Bug, this.apiService.toApiWorkItemId(this.bug.id)).subscribe({
       next: (data) => {
         this.attachments.set(data.fileToBeFetched);
       },
@@ -117,20 +118,23 @@ export class Story implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    if (this.dialogData?.story) {
-      this.story = this.dialogData.story;
+    // Checks updated dialogData type safely
+    if (this.dialogData?.bug) {
+      this.bug = this.dialogData.bug;
     }
 
-    this.story.comments ??= [];
-
-    if (this.story.id) {
-      this.loadAttachments();
+    // Safe Check: Prevents runtime crashing if 'bug' is missing entirely upon modal opening
+    if (this.bug) {
+      this.bug.comments ??= [];
+      if (this.bug.id) {
+        this.loadAttachments();
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['story'] && this.story?.id) {
-      this.story.comments ??= [];
+    if (changes['bug'] && this.bug?.id) {
+      this.bug.comments ??= [];
       this.loadAttachments();
     }
   }
@@ -146,7 +150,7 @@ export class Story implements OnInit, OnChanges {
   uploadFiles() {
     if (!this.selectedFiles().length) return;
 
-    this.apiService.uploadAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.story.id), this.selectedFiles()).subscribe({
+    this.apiService.uploadAttachments(WorkItemType.Bug, this.apiService.toApiWorkItemId(this.bug.id), this.selectedFiles()).subscribe({
       next: (res: Attachment[]) => {
         this.selectedFiles.set([]);
         this.attachmentUploadStatus.set('Files uploaded Successfully');

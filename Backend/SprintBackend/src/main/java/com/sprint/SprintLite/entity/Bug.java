@@ -24,6 +24,9 @@ public class Bug extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Column(name = "title", length = Integer.MAX_VALUE)
+    private String title;
+
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "bugstatus", columnDefinition = "status")

@@ -12,6 +12,7 @@ import { pmGuard } from './core/guards/pm-guard';
 import { DsuComponent } from './features/DSU/dsu';
 import { ForgotPassword } from './features/forgot-password/forgot-password';
 import { FeatureList } from './features/feature-list/feature-list';
+import { BugList } from './features/bug-list/bug-list';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -37,9 +38,9 @@ export const routes: Routes = [
       { path: 'backlog', component: Backlog },
       { path: 'board', component: Board },
       { path: 'story', component: StoryList },
-      { path: 'dsu', component: DsuComponent }
-
+      { path: 'dsu', component: DsuComponent },
       { path: 'feature', component: FeatureList },
+      { path: 'bugs', component: BugList },
     ],
   },
 
