@@ -1,4 +1,4 @@
-package com.sprint.SprintLite.dto;
+package com.sprint.SprintLite.backlog.dto;
 
 import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;

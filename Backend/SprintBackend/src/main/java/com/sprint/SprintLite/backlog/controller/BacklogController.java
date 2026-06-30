@@ -1,9 +1,11 @@
 package com.sprint.SprintLite.backlog.controller;
 
+import com.sprint.SprintLite.backlog.dto.BugResponseDto;
 import com.sprint.SprintLite.backlog.service.IBacklogService;
-import com.sprint.SprintLite.dto.FeatureResponseDto;
-import com.sprint.SprintLite.dto.StoryResponseDto;
-import com.sprint.SprintLite.dto.TaskResponseDto;
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
+import com.sprint.SprintLite.backlog.dto.StoryResponseDto;
+import com.sprint.SprintLite.backlog.dto.TaskResponseDto;
+import com.sprint.SprintLite.entity.Bug;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +51,17 @@ public class BacklogController {
         }
         else{
             return ResponseEntity.ok(taskResponseDtoList);
+        }
+    }
+
+    @GetMapping("/getAllBugs")
+    public ResponseEntity<List<BugResponseDto>> getAllBugsForBacklog(){
+        List<BugResponseDto> bugResponseDtoList = backlogService.getAllBugs();
+        if (bugResponseDtoList.isEmpty()){
+            throw new EntityNotFoundException("Bugs not found");
+        }
+        else{
+            return ResponseEntity.ok(bugResponseDtoList);
         }
     }
 }

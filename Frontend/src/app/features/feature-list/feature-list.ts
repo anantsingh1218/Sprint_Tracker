@@ -75,7 +75,7 @@ export class FeatureList {
 
   openCreateFeature() {
     this.selectedFeature = {
-      id: 'F' + this.features.length + 1,
+      id: 'F' + (this.features.length + 1),
       title: '',
       description: '',
 

@@ -1,16 +1,16 @@
 package com.sprint.SprintLite.backlog.service.impl;
 
+import com.sprint.SprintLite.backlog.dto.BugResponseDto;
 import com.sprint.SprintLite.backlog.service.IBacklogService;
-import com.sprint.SprintLite.dto.FeatureResponseDto;
-import com.sprint.SprintLite.dto.StoryResponseDto;
-import com.sprint.SprintLite.dto.TaskResponseDto;
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
+import com.sprint.SprintLite.backlog.dto.StoryResponseDto;
+import com.sprint.SprintLite.backlog.dto.TaskResponseDto;
+import com.sprint.SprintLite.entity.Bug;
 import com.sprint.SprintLite.entity.Feature;
-import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.Story;
 import com.sprint.SprintLite.entity.Task;
 import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +22,8 @@ public class BacklogServiceImpl implements IBacklogService {
     private final FeatureRepository featureRepository;
     private final StoryRepository storyRepository;
     private final TaskRepository taskRepository;
+    private final BugRepository bugRepository;
+
     @Override
     public List<FeatureResponseDto> getAllFeatures() {
         List<FeatureResponseDto> featureResponseDtosList = new ArrayList<FeatureResponseDto>();
@@ -88,5 +90,29 @@ public class BacklogServiceImpl implements IBacklogService {
             taskResponseDtoList.add(taskResponseDto);
         });
         return taskResponseDtoList;
+    }
+
+    @Override
+    public List<BugResponseDto> getAllBugs() {
+        List<BugResponseDto> bugResponseDtoList = new ArrayList<BugResponseDto>();
+        List<Bug> bugList = bugRepository.findAll();
+        bugList.forEach(bug -> {
+            BugResponseDto taskResponseDto = new BugResponseDto(
+                    bug.getId(),
+                    bug.getTitle(),
+                    bug.getDescription(),
+                    bug.getBugstatus(),
+                    bug.getPriority(),
+                    bug.getAssignedto().getUsername(),
+                    bug.getStoryid().getId(),
+                    bug.getStoryid().getTitle(),
+                    bug.getSprintid().getSprintName(),
+                    bug.getOriginalestimatehours(),
+                    bug.getRemainingestimatehours(),
+                    bug.getReopencount()
+            );
+            bugResponseDtoList.add(taskResponseDto);
+        });
+        return bugResponseDtoList;
     }
 }

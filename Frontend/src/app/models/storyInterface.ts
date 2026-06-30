@@ -1,4 +1,4 @@
-import { WorkStatus } from "./workItem";
+import { WorkStatus } from './workItem';
 
 export interface IStory {
   id: string;
@@ -19,7 +19,6 @@ export interface IStory {
 }
 
 export interface IComment {
-
   userId: number;
   text: string;
   createdAt: string;

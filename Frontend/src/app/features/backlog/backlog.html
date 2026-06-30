@@ -94,6 +94,10 @@
   </app-story>
 }
 
-@if ((overlayType === WorkItemType.Task || overlayType === WorkItemType.Bug) && selectedTask) {
+@if ((overlayType === WorkItemType.Task) && selectedTask) {
   <app-tasks [task]="selectedTask" (save)="saveTask($event)" (close)="closeOverlay()"> </app-tasks>
+}
+
+@if ((overlayType === WorkItemType.Bug) && selectedBug) {
+  <app-bug [bug]="selectedBug" (save)="saveBug($event)" (close)="closeOverlay()"> </app-bug>
 }

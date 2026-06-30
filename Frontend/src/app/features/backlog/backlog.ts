@@ -18,6 +18,9 @@ import { forkJoin } from 'rxjs';
 import { ITasksResponse } from '../../models/taskResponseInterface';
 import { ITask } from '../../models/taskInterface';
 import { Tasks } from '../tasks/tasks';
+import { IBug } from '../../models/bugInterface';
+import { IBugResponse } from '../../models/bugResponseInterface';
+import { Bug } from '../bug/bug';
 
 interface TreeNode extends WorkItem {
   children: TreeNode[];
@@ -35,6 +38,7 @@ interface TreeNode extends WorkItem {
     FeatureOverlay,
     Story,
     Tasks,
+    Bug,
   ],
   templateUrl: './backlog.html',
   styleUrls: ['./backlog.css'],
@@ -48,12 +52,14 @@ export class Backlog {
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
   selectedTask: ITask | null = null;
+  selectedBug: IBug | null = null;
   parentItem: WorkItem | null = null;
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
   features: IFeatureResponse[] = [];
   stories: IStoryResponse[] = [];
   tasks: ITasksResponse[] = [];
+  bugs: IBugResponse[] = [];
 
   constructor(
     private service: WorkItemService,
@@ -108,6 +114,9 @@ export class Backlog {
       case WorkItemType.Task:
         this.selectedTask = this.toTask(draft);
         break;
+      case WorkItemType.Bug:
+        this.selectedBug = this.toBug(draft);
+        break;
     }
 
     this.isOverlayOpen = true;
@@ -129,6 +138,9 @@ export class Backlog {
         break;
       case WorkItemType.Task:
         this.selectedTask = this.toTask(fresh);
+        break;
+      case WorkItemType.Bug:
+        this.selectedBug = this.toBug(fresh);
         break;
     }
     this.isOverlayOpen = true;
@@ -152,6 +164,11 @@ export class Backlog {
 
   saveTask(updated: ITask) {
     const workItem: WorkItem = this.fromTask(updated);
+    this.save(workItem);
+  }
+
+  saveBug(updated: IBug) {
+    const workItem: WorkItem = this.fromBug(updated);
     this.save(workItem);
   }
 
@@ -230,6 +247,23 @@ export class Backlog {
     };
   }
 
+  toBug(item: WorkItem): IBug {
+    return {
+      id: item.id,
+      title: item.title,
+      description: '',
+      status: item.status,
+      priority: 'Medium',
+      estimatedHours: 0,
+      remainingHours: 0,
+      reopenCount: 0,
+      storyId: item.parentId ? this.extractNumericId(item.parentId) : null,
+      sprintId: null,
+      assignedTo: null,
+      comments: [],
+    };
+  }
+
   fromFeature(f: IFeature): WorkItem {
     return {
       id: f.id,
@@ -260,6 +294,16 @@ export class Backlog {
     };
   }
 
+  fromBug(b: IBug): WorkItem {
+    return {
+      id: b.id,
+      title: b.title,
+      type: WorkItemType.Bug,
+      parentId: b.storyId ? `S${b.storyId}` : null,
+      status: b.status,
+    };
+  }
+
   private resetOverlayState() {
     this.isOverlayOpen = false;
     this.overlayType = null;
@@ -268,6 +312,7 @@ export class Backlog {
     this.selectedFeature = null;
     this.selectedStory = null;
     this.selectedTask = null;
+    this.selectedBug = null;
   }
 
   private mapFeature(feature: IFeatureResponse): WorkItem {
@@ -300,10 +345,21 @@ export class Backlog {
     };
   }
 
+  private mapBug(bug: IBugResponse): WorkItem {
+    return {
+      id: `B${bug.id}`,
+      title: bug.title,
+      type: WorkItemType.Bug,
+      parentId: `S${bug.storyId}`,
+      status: bug.bugStatus,
+    };
+  }
+
   private buildTreeWithChildren(
     features: WorkItem[],
     stories: WorkItem[],
     tasks: WorkItem[],
+    bugs: WorkItem[],
   ): TreeNode[] {
     // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
@@ -355,7 +411,25 @@ export class Backlog {
       }
     });
 
-    // 5. Return ONLY the root level nodes (Features)
+    // 5. Push Bugs to their Story parents (which now confidently exist in the map!)
+    bugs.forEach((b) => {
+      const parentId = this.normalizeId(b.parentId);
+      const parentStory = map.get(parentId);
+
+      if (parentStory) {
+        parentStory.children.push({
+          ...b,
+          children: [],
+          expanded: false,
+        });
+      } else {
+        console.warn(
+          `Orphaned task detected: Bug ${b.id} looks for parent ${b.parentId} but it wasn't found.`,
+        );
+      }
+    });
+
+    // 6. Return ONLY the root level nodes (Features)
     // We filter the full map values down to items that have no parentId
     return Array.from(map.values()).filter((node) => node.parentId === null);
   }
@@ -365,14 +439,17 @@ export class Backlog {
       features: this.apiService.getRequest<IFeatureResponse[]>('/backlog/getAllFeatures'),
       stories: this.apiService.getRequest<IStoryResponse[]>('/backlog/getAllStories'),
       tasks: this.apiService.getRequest<ITasksResponse[]>('/backlog/getAllTasks'),
+      bugs: this.apiService.getRequest<IBugResponse[]>('/backlog/getAllBugs'),
+
     }).subscribe({
-      next: ({ features, stories, tasks }) => {
+      next: ({ features, stories, tasks, bugs }) => {
         const featureNodes = features.map((f) => this.mapFeature(f));
         const storyNodes = stories.map((s) => this.mapStory(s));
         const taskNodes = tasks.map((t) => this.mapTask(t));
+        const bugNodes = bugs.map((b) => this.mapBug(b));
 
         // Overwrite tree variable with a brand new array reference
-        this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes)];
+        this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];
 
         // Force Angular to scan and render the UI now that asynchronous data is ready
         this.cdr.detectChanges();

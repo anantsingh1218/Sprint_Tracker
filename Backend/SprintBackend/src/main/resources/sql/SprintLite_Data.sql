@@ -87,15 +87,15 @@ VALUES
 -- =========================
 -- BUGS
 -- =========================
-INSERT INTO Bugs (bugStatus, priority, description, assignedTo, storyId, sprintId, originalEstimateHours, remainingEstimateHours, createdAt, createdBy, updatedAt, updatedBy)
+INSERT INTO Bugs (title, bugStatus, priority, description, assignedTo, storyId, sprintId, originalEstimateHours, remainingEstimateHours, createdAt, createdBy, updatedAt, updatedBy)
 VALUES
-    ('OPEN', 'CRITICAL', 'Lead page crashes on save', 2, 1, 1, 6, 6,
+    ('Lead Page Crash','OPEN', 'CRITICAL', 'Lead page crashes on save', 2, 1, 1, 6, 6,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('IN_PROGRESS', 'HIGH', 'Duplicate lead creation issue', 2, 1, 1, 8, 3,
+    ('Lead Creation Dupliaction','IN_PROGRESS', 'HIGH', 'Duplicate lead creation issue', 2, 1, 1, 8, 3,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('OPEN', 'MEDIUM', 'Dashboard timeout issue', 2, 3, 2, 10, 10,
+    ('Dashboard Timeout Bug','OPEN', 'MEDIUM', 'Dashboard timeout issue', 2, 3, 2, 10, 10,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
 
 
