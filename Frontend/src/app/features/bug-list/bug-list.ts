@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { Bug } from '../bug/bug';
 import { IBug } from '../../models/bugInterface';
+import { Priority, WorkStatus } from '../../models/workItem';
 
 @Component({
   selector: 'app-story-list',
@@ -23,14 +24,14 @@ export class BugList {
     title: 'Login Page UI',
     description: 'Build login screen with validation',
 
-    status: 'todo',
-    priority: 'Medium',
+    status: WorkStatus.OPEN,
+    priority: Priority.MEDIUM,
     estimatedHours: 8,
     remainingHours: 5,
 
     storyId: 0,
-    sprintId: 0,
-    assignedTo: 0,
+    sprintId: 'Sprint 1',
+    assignedTo: 'User 1',
     reopenCount: 0,
 
     comments: [
@@ -47,14 +48,14 @@ export class BugList {
     title: 'Sprint API Integration',
     description: 'Connect sprint module to backend',
 
-    status: 'in-progress',
-    priority: 'High',
+    status: WorkStatus.IN_PROGRESS,
+    priority: Priority.HIGH,
     estimatedHours: 8,
     remainingHours: 5,
 
     storyId: 1,
-    sprintId: 3,
-    assignedTo: 1,
+    sprintId: 'Sprint 2',
+    assignedTo: 'User 3',
     reopenCount: 2,
 
     comments: [
@@ -81,8 +82,8 @@ export class BugList {
     title: '',
     description: '',
 
-    status: 'todo',
-    priority: 'Medium',
+    status: WorkStatus.OPEN,
+    priority: Priority.LOW,
     estimatedHours: 0,
     remainingHours: 0,
 

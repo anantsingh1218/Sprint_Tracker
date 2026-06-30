@@ -3,11 +3,16 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ITaskService;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl.TaskServiceImpl;
 import com.sprint.SprintLite.dto.CreateTaskRequest;
+import com.sprint.SprintLite.dto.GetAllResponseDto;
+import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.entity.Task;
+import com.sprint.SprintLite.repository.TaskRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
     @RestController
@@ -16,6 +21,8 @@ import java.util.List;
     @RequiredArgsConstructor
     public class TaskController {
         private final TaskServiceImpl taskService;
+        private final TaskRepository taskRepository;
+
         @PostMapping("/add")
         public ResponseEntity<Task> addTask(
                 @RequestBody CreateTaskRequest request) {
@@ -67,6 +74,20 @@ import java.util.List;
             taskService.deleteTask(id);
 
             return ResponseEntity.ok("Task deleted successfully");
+        }
+
+        @GetMapping("/getAllTasks")
+        public ResponseEntity<List<GetAllResponseDto>> getAllProducts(){
+            List<Task> taskList = taskRepository.findAll();
+            if (taskList.isEmpty()){
+                throw new EntityNotFoundException("No Tasks registered");
+            }
+            List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
+            taskList.forEach(task -> {
+                GetAllResponseDto getAllResponseDto = new GetAllResponseDto(task.getId(), task.getTitle());
+                getAllResponseDtoList.add(getAllResponseDto);
+            });
+            return ResponseEntity.ok(getAllResponseDtoList);
         }
 
     }

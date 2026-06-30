@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { FeatureOverlay } from '../feature-overlay/feature-overlay';
 import { IFeature } from '../../models/featureInterface';
+import { Priority, WorkStatus } from '../../models/workItem';
 
 @Component({
   selector: 'app-feature-list',
@@ -23,14 +24,14 @@ export class FeatureList {
       title: 'Login Page UI',
       description: 'Build login screen with validation',
 
-      status: 'todo',
-      priority: 'Medium',
+      status: WorkStatus.OPEN,
+      priority: Priority.MEDIUM,
       estimatedStoryPoints: 8,
       remainingStoryPoint: 5,
 
-      productId: 0,
-      sprintId: 0,
-      userId: 0,
+      productId: 'FSM',
+      sprintId: 'Sprint 1',
+      userId: 'User 1',
 
       comments: [
         {
@@ -46,14 +47,14 @@ export class FeatureList {
       title: 'Sprint API Integration',
       description: 'Connect sprint module to backend',
 
-      status: 'in-progress',
-      priority: 'High',
+      status: WorkStatus.IN_PROGRESS,
+      priority: Priority.HIGH,
       estimatedStoryPoints: 8,
       remainingStoryPoint: 5,
 
-      productId: 1,
-      sprintId: 3,
-      userId: 1,
+      productId: 'Starwatch',
+      sprintId: 'Sprint 2',
+      userId: 'User 2',
 
       comments: [
         {
@@ -79,8 +80,8 @@ export class FeatureList {
       title: '',
       description: '',
 
-      status: 'todo',
-      priority: 'Medium',
+      status: WorkStatus.OPEN,
+      priority: Priority.LOW,
       estimatedStoryPoints: 0,
       remainingStoryPoint: 0,
 

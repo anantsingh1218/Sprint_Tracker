@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
-import { WorkItem, WorkItemType } from '../../models/workItem';
+import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
 import { WorkItemService } from '../../services/workItemService';
 import { fadeSlide } from '../../animations/workItemAnimations';
 import { FeatureOverlay } from '../feature-overlay/feature-overlay';
@@ -203,15 +203,15 @@ export class Backlog {
     return {
       id: item.id,
       title: item.title,
-      description: '',
+      description: item.description,
       status: item.status,
-      priority: 'Medium',
-      estimatedStoryPoints: 0,
-      remainingStoryPoint: 0,
-      productId: null,
-      sprintId: null,
-      userId: null,
-      comments: [],
+      priority: item.priority,
+      estimatedStoryPoints: item.estimatedPoints,
+      remainingStoryPoint: item.remainingPoints,
+      productId: item.productCategory,
+      sprintId: item.sprintName,
+      userId: item.assignedTo,
+      comments: item.comments,
     };
   }
 
@@ -219,15 +219,15 @@ export class Backlog {
     return {
       id: item.id,
       title: item.title,
-      body: '',
+      body: item.description,
       status: item.status,
-      priority: 'Medium',
-      estimatedStoryPoints: 0,
-      remainingStoryPoint: 0,
+      priority: item.priority,
+      estimatedStoryPoints: item.estimatedPoints,
+      remainingStoryPoint: item.remainingPoints,
       featureId: item.parentId ? this.extractNumericId(item.parentId) : null,
-      sprintId: null,
-      userId: null,
-      comments: [],
+      sprintId: item.sprintName,
+      userId: item.assignedTo,
+      comments: item.comments,
     };
   }
 
@@ -237,13 +237,13 @@ export class Backlog {
       title: item.title,
       description: '',
       status: item.status,
-      priority: 'Medium',
-      estimatedHours: 0,
-      remainingHours: 0,
+      priority: item.priority,
+      estimatedHours: item.estimatedPoints,
+      remainingHours: item.remainingPoints,
       storyId: item.parentId ? this.extractNumericId(item.parentId) : null,
-      sprintId: null,
-      userId: null,
-      comments: [],
+      sprintId: item.sprintName,
+      userId: item.assignedTo,
+      comments: item.comments,
     };
   }
 
@@ -253,7 +253,7 @@ export class Backlog {
       title: item.title,
       description: '',
       status: item.status,
-      priority: 'Medium',
+      priority: item.priority,
       estimatedHours: 0,
       remainingHours: 0,
       reopenCount: 0,
@@ -271,6 +271,15 @@ export class Backlog {
       type: WorkItemType.Feature,
       parentId: null,
       status: f.status,
+      description: f.description,
+      sprintName: f.sprintId,
+      priority: f.priority,
+      assignedTo: f.userId,
+      productCategory: f.productId,
+      reopenCount: 0,
+      estimatedPoints: f.estimatedStoryPoints,
+      remainingPoints: f.remainingStoryPoint,
+      comments: f.comments,
     };
   }
 
@@ -281,6 +290,15 @@ export class Backlog {
       type: WorkItemType.Story,
       parentId: s.featureId ? `F${s.featureId}` : null,
       status: s.status,
+      description: s.body,
+      sprintName: s.sprintId,
+      priority: s.priority,
+      assignedTo: s.userId,
+      productCategory: null,
+      reopenCount: 0,
+      estimatedPoints: s.estimatedStoryPoints,
+      remainingPoints: s.remainingStoryPoint,
+      comments: s.comments,
     };
   }
 
@@ -291,6 +309,15 @@ export class Backlog {
       type: WorkItemType.Task,
       parentId: t.storyId ? `S${t.storyId}` : null,
       status: t.status,
+      description: t.description,
+      sprintName: t.sprintId,
+      priority: t.priority,
+      assignedTo: t.userId,
+      productCategory: null,
+      reopenCount: 0,
+      estimatedPoints: t.estimatedHours,
+      remainingPoints: t.remainingHours,
+      comments: t.comments,
     };
   }
 
@@ -301,6 +328,15 @@ export class Backlog {
       type: WorkItemType.Bug,
       parentId: b.storyId ? `S${b.storyId}` : null,
       status: b.status,
+      description: b.description,
+      sprintName: b.sprintId,
+      priority: b.priority,
+      assignedTo: b.assignedTo,
+      productCategory: null,
+      reopenCount: b.reopenCount,
+      estimatedPoints: b.estimatedHours,
+      remainingPoints: b.remainingHours,
+      comments: b.comments,
     };
   }
 
@@ -322,6 +358,15 @@ export class Backlog {
       type: WorkItemType.Feature,
       parentId: null,
       status: feature.featureStatus,
+      description: feature.description,
+      sprintName: feature.sprintName,
+      priority: feature.priority,
+      assignedTo: feature.assignedTo,
+      productCategory: feature.productName,
+      reopenCount: 0,
+      estimatedPoints: feature.estimatedStoryPoints,
+      remainingPoints: feature.remainingStoryPoints,
+      comments: [],
     };
   }
 
@@ -332,6 +377,15 @@ export class Backlog {
       type: WorkItemType.Story,
       parentId: `F${story.featureId}`,
       status: story.storyStatus,
+      description: story.description,
+      sprintName: story.sprintName,
+      priority: story.storyPriority,
+      assignedTo: story.assignedTo,
+      productCategory: null,
+      reopenCount: 0,
+      estimatedPoints: story.estimatedStoryPoints,
+      remainingPoints: story.remainingStoryPoints,
+      comments: [],
     };
   }
 
@@ -342,6 +396,15 @@ export class Backlog {
       type: WorkItemType.Task,
       parentId: `S${task.storyId}`,
       status: task.taskStatus,
+      description: task.description,
+      sprintName: task.sprintName,
+      priority: task.taskPriority,
+      assignedTo: task.assignedTo,
+      productCategory: null,
+      reopenCount: 0,
+      estimatedPoints: task.estimatedHours,
+      remainingPoints: task.remainingHours,
+      comments: [],
     };
   }
 
@@ -352,6 +415,15 @@ export class Backlog {
       type: WorkItemType.Bug,
       parentId: `S${bug.storyId}`,
       status: bug.bugStatus,
+      description: bug.description,
+      sprintName: bug.sprintName,
+      priority: bug.bugPriority,
+      assignedTo: bug.assignedTo,
+      productCategory: null,
+      reopenCount: bug.reopenCount,
+      estimatedPoints: bug.estimatedHours,
+      remainingPoints: bug.remainingHours,
+      comments: [],
     };
   }
 
@@ -447,6 +519,10 @@ export class Backlog {
         const storyNodes = stories.map((s) => this.mapStory(s));
         const taskNodes = tasks.map((t) => this.mapTask(t));
         const bugNodes = bugs.map((b) => this.mapBug(b));
+
+        const allItems: WorkItem[] = [...featureNodes, ...storyNodes, ...taskNodes, ...bugNodes]
+
+        this.service.update(allItems)
 
         // Overwrite tree variable with a brand new array reference
         this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];

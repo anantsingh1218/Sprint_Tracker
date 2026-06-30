@@ -1,11 +1,11 @@
-import { WorkStatus } from "./workItem";
+import { Priority, WorkStatus } from "./workItem";
 
 export interface IFeatureResponse {
   id: number;
   title: string;
   description: string;
   featureStatus: WorkStatus;
-  priority: 'Low' | 'Medium' | 'High';
+  priority: Priority;
   sprintName: string;
   remainingStoryPoints: number;
   estimatedStoryPoints: number;
