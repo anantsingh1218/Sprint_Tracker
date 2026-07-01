@@ -41,6 +41,7 @@ public class BugServiceImpl implements IBugService {
         bug.setDescription(request.getDescription());
         bug.setBugstatus(request.getBugstatus());
         bug.setPriority(request.getPriority());
+        bug.setTitle(request.getTitle());
         bug.setStoryid(story);
         bug.setSprintid(sprint);
         bug.setAssignedto(assignedUser);

@@ -32,6 +32,8 @@ CREATE TYPE STATUS AS ENUM (
     'CLOSED'
     );
 
+
+
 -- =========================
 -- TABLES
 -- =========================

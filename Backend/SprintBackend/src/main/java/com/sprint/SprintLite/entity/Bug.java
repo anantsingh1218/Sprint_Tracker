@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
 import jakarta.persistence.*;
@@ -49,14 +50,17 @@ public class Bug extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignedto")
+    @JsonIgnore
     private Users assignedto;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "storyid")
+    @JsonIgnore
     private Story storyid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sprintid")
+    @JsonIgnore
     private Sprint sprintid;
 
     @Column(name = "originalestimatehours")
