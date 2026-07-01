@@ -24,6 +24,7 @@ export class WorkItemService {
   }
 
   private generateId(type: WorkItemType): string {
+    this.syncCountersFromItems(this.itemsSubject.value);
     const prefixMap: Record<WorkItemType, string> = {
       [WorkItemType.Feature]: 'F',
       [WorkItemType.Story]: 'S',

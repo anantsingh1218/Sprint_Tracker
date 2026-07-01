@@ -33,23 +33,36 @@ VALUES
 -- =========================
 -- SPRINT
 -- =========================
-INSERT INTO Sprint (sprintName, sprintDuration, status, productId, startDate, endDate)
+INSERT INTO Sprint (sprintName, sprintDuration, status, productId, startDate, endDate,createdAt, createdBy, updatedAt, updatedBy)
 VALUES
-    ('Sprint 1', 15, 'ACTIVE', 1, '2026-06-01', '2026-06-15'),
-    ('Sprint 2', 15, 'PLANNED', 2, '2026-06-16', '2026-06-30');
+    ('Sprint 1', 15, 'ACTIVE', 1, '2026-06-01', '2026-06-15',CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
+    ('Sprint 2', 15, 'PLANNED', 2, '2026-06-16', '2026-06-30',CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
 
 
 -- =========================
 -- FEATURE
 -- =========================
-INSERT INTO FeatureTable (title, description, productId, sprintId, featureStatus, priority, estimatedStoryPoints, remainingStoryPoints, createdAt, createdBy, updatedAt, updatedBy)
+INSERT INTO FeatureTable (
+    title,
+    description,
+    userid,
+    productid,
+    sprintid,
+    featurestatus,
+    priority,
+    estimatedstorypoints,
+    remainingstorypoints,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy
+)
 VALUES
-    ('Lead Management', 'Manage customer leads', 1, 1, 'IN_PROGRESS', 'HIGH', 8, 3,
+    ('Lead Management', 'Manage customer leads', 1, 1, 1, 'IN_PROGRESS', 'HIGH', 8, 3,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('Business Dashboards', 'Analytics dashboards', 2, 2, 'OPEN', 'MEDIUM', 13, 13,
+    ('Business Dashboards', 'Analytics dashboards', 1, 2, 2, 'OPEN', 'MEDIUM', 13, 13,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
-
 
 -- =========================
 -- STORY

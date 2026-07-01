@@ -4,7 +4,7 @@ import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
 
 public record StoryResponseDto(
-        Integer id,
+        String storyCode,
         String title,
         String description,
         String featureName,

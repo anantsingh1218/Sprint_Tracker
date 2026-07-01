@@ -1,11 +1,18 @@
 package com.sprint.SprintLite.dto;
 
-import lombok.Data;
+import com.sprint.SprintLite.entity.enums.Priority;
+import com.sprint.SprintLite.entity.enums.Status;
 
-@Data
-public class CreateFeatureRequest {
-    String title;
-    String description;
-    Long productId;
-    String Comments;
+public record CreateFeatureRequest (
+    String featureTitle,
+    String description,
+    String productCategory,
+    String sprintName,
+    String assignedTo,
+    Status featureStatus,
+    Priority featurePriority,
+    Integer estimatedStoryPoints,
+    Integer remainingStoryPoints,
+    String comments
+){
 }

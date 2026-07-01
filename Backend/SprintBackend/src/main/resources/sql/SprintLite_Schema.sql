@@ -43,7 +43,13 @@ CREATE TABLE SPRINT (
                         STATUS SPRINTSTATUS,
                         PRODUCTID integer,
                         STARTDATE date,
-                        ENDDATE date
+                        ENDDATE date,
+                        CREATEDAT timestamp,
+                        CREATEDBY varchar,
+                        UPDATEDAT timestamp,
+                        UPDATEDBY varchar,
+                        SPRINT_CODE varchar(50) GENERATED ALWAYS AS ('SP' || ID) STORED
+
 );
 
 CREATE TABLE USERS (
@@ -66,7 +72,8 @@ CREATE TABLE PRODUCTTABLE (
                               CREATEDAT timestamp,
                               CREATEDBY varchar,
                               UPDATEDAT timestamp,
-                              UPDATEDBY varchar
+                              UPDATEDBY varchar,
+                              PRODUCT_CODE varchar(50) GENERATED ALWAYS AS ('P' || PRODUCTID) STORED
 );
 
 CREATE TABLE FEATURETABLE (
@@ -75,6 +82,7 @@ CREATE TABLE FEATURETABLE (
                               DESCRIPTION text,
                               PRODUCTID integer,
                               SPRINTID integer,
+                              USERID integer,
                               FEATURESTATUS STATUS,
                               PRIORITY PRIORITY,
                               ESTIMATEDSTORYPOINTS integer,
@@ -82,7 +90,8 @@ CREATE TABLE FEATURETABLE (
                               CREATEDAT timestamp,
                               CREATEDBY varchar,
                               UPDATEDAT timestamp,
-                              UPDATEDBY varchar
+                              UPDATEDBY varchar,
+                              FEATURE_CODE varchar(50) GENERATED ALWAYS AS ('F' || FEATUREID) STORED
 );
 
 CREATE TABLE STORYTABLE (
@@ -98,7 +107,8 @@ CREATE TABLE STORYTABLE (
                             CREATEDAT timestamp,
                             CREATEDBY varchar,
                             UPDATEDAT timestamp,
-                            UPDATEDBY varchar
+                            UPDATEDBY varchar,
+                            STORY_CODE varchar(50) GENERATED ALWAYS AS ('S' || ID) STORED
 );
 
 CREATE TABLE TASKTABLE (
@@ -115,7 +125,8 @@ CREATE TABLE TASKTABLE (
                            CREATEDAT timestamp,
                            CREATEDBY varchar,
                            UPDATEDAT timestamp,
-                           UPDATEDBY varchar
+                           UPDATEDBY varchar,
+                           TASK_CODE varchar(50) GENERATED ALWAYS AS ('T' || ID) STORED
 );
 
 CREATE TABLE BUGS (
@@ -133,7 +144,8 @@ CREATE TABLE BUGS (
                       CREATEDAT timestamp,
                       CREATEDBY varchar,
                       UPDATEDAT timestamp,
-                      UPDATEDBY varchar
+                      UPDATEDBY varchar,
+                      BUGS_CODE varchar(50) GENERATED ALWAYS AS ('B' || ID) STORED
 );
 
 CREATE TABLE ATTACHMENTS (
@@ -212,6 +224,9 @@ ALTER TABLE FEATURETABLE
 
 ALTER TABLE FEATURETABLE
     ADD FOREIGN KEY (SPRINTID) REFERENCES SPRINT(ID);
+
+ALTER TABLE FEATURETABLE
+    ADD FOREIGN KEY (USERID) REFERENCES USERS(ID);
 
 ALTER TABLE STORYTABLE
     ADD FOREIGN KEY (FEATUREID) REFERENCES FEATURETABLE(FEATUREID);
