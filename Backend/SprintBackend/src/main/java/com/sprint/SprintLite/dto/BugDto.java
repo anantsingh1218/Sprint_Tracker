@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 public class BugDto {
     private String description;
+    private String  title;
     private Status bugstatus;
     private Priority priority;
 
