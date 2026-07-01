@@ -1,33 +1,34 @@
-<div class="page">
-  <!-- HEADER -->
-  <div class="header">
-    <h2>Bugs</h2>
-
-    <button class="btn-primary" (click)="openCreateBug()">+ Create Bugs</button>
-  </div>
-
-  <!-- LIST -->
-  <div class="story-grid">
-    <div class="story-card" *ngFor="let bug of bugs" (click)="openBug(bug)">
-      <h3>{{ bug.title }}</h3>
-
-      <p class="desc">
-        {{ bug.description || 'No description available' }}
-      </p>
-
-      <div class="meta">
-        <span class="status">{{ bug.status }}</span>
-        <span class="points">{{ bug.remainingHours }} pts</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- OVERLAY -->
-  <app-bug
-    *ngIf="isBugOpen"
-    [bug]="selectedBug"
-    (close)="closeBug()"
-    (save)="saveBug($event)"
-  >
-  </app-bug>
+<div class="bug-header">
+  <h2>Bugs</h2>
+  <button (click)="openCreateBug()">+ Create Bug</button>
 </div>
+
+<div class="bug-grid">
+  <div class="bug-card" *ngFor="let bug of bugs">
+
+    <div (click)="openBug(bug)">
+      <h3>{{ bug.title }}</h3>
+      <p>{{ bug.description }}</p>
+    </div>
+
+    <p>
+      {{ bug.comments || 'No comments available' }}
+    </p>
+
+    <div class="meta">
+      <span>{{ bug.bugstatus }}</span>
+      <span>{{ bug.priority }}</span>
+      <span>{{ bug.remainingestimatehours }} hrs</span>
+    </div>
+
+    <button (click)="deleteBug(bug.id)">Delete</button>
+
+  </div>
+</div>
+
+<app-bug
+  *ngIf="isBugOpen"
+  [bug]="selectedBug"
+  (save)="saveBug($event)"
+  (close)="closeBug()">
+</app-bug>

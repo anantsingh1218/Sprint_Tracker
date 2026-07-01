@@ -1,111 +1,88 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
+import { BugService } from '../bug/bug.service';
 import { Bug } from '../bug/bug';
-import { IBug } from '../../models/bugInterface';
 
 @Component({
-  selector: 'app-story-list',
+  selector: 'app-bug-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, Bug],
+  imports: [CommonModule, Bug],
   templateUrl: './bug-list.html',
-  styleUrl: './bug-list.css',
+  styleUrl: './bug-list.css'
 })
-export class BugList {
+export class BugList implements OnInit {
+
+  bugs: any[] = [];
   isBugOpen = false;
+  selectedBug: any;
 
-  selectedBug!: IBug;
+  constructor(private bugService: BugService) {}
 
-  bugs: IBug[] = [
-  {
-    id: 'B101',
-    title: 'Login Page UI',
-    description: 'Build login screen with validation',
-
-    status: 'todo',
-    priority: 'Medium',
-    estimatedHours: 8,
-    remainingHours: 5,
-
-    storyId: 0,
-    sprintId: 0,
-    assignedTo: 0,
-    reopenCount: 0,
-
-    comments: [
-      {
-        userId: 0,
-        text: 'Story created',
-        createdAt: new Date().toISOString()
-      }
-    ]
-  },
-
-  {
-    id: 'B102',
-    title: 'Sprint API Integration',
-    description: 'Connect sprint module to backend',
-
-    status: 'in-progress',
-    priority: 'High',
-    estimatedHours: 8,
-    remainingHours: 5,
-
-    storyId: 1,
-    sprintId: 3,
-    assignedTo: 1,
-    reopenCount: 2,
-
-    comments: [
-      {
-        userId: 1,
-        text: 'Working on API contract',
-        createdAt: new Date().toISOString()
-      }
-    ]
+  ngOnInit() {
+    this.loadBugs();
   }
-  ];
-  openBug(bug: IBug) {
+
+  loadBugs() {
+    this.bugService.getAllBugs().subscribe({
+      next: (res: any) => {
+        console.log("Fetched Bugs:", res);
+        this.bugs = res;
+      },
+
+      error: (err: any) => {
+        console.error("Fetch Error:", err);
+      }
+    });
+  }
+
+  openBug(bug: any) {
     this.selectedBug = { ...bug };
     this.isBugOpen = true;
   }
 
-  closeBug() {
-    this.isBugOpen = false;
+  openCreateBug() {
+   this.selectedBug = {
+  title: '',
+  description: '',
+  bugstatus: '',
+  priority: '',
+  assignedto: 0,
+  sprintid: 0,
+  storyid: 0,
+  originalestimatehours: 0,
+  remainingestimatehours: 0,
+  comments: ''
+};
+    this.isBugOpen = true;
   }
 
-  openCreateBug() {
-  this.selectedBug = {
-    id: 'B' + (this.bugs.length + 1),
-    title: '',
-    description: '',
+  saveBug(bug: any) {
+    this.bugService.createBug(bug).subscribe({
+      next: (res: any) => {
+        console.log("Bug Created:", res);
+        this.loadBugs();
+        this.closeBug();
+      },
 
-    status: 'todo',
-    priority: 'Medium',
-    estimatedHours: 0,
-    remainingHours: 0,
+      error: (err: any) => {
+        console.error("Create Error:", err);
+      }
+    });
+  }
 
-    storyId: null,
-    sprintId: null,
-    assignedTo: null,
-    reopenCount: 0,
+  deleteBug(id: number) {
+    this.bugService.deleteBug(id).subscribe({
+      next: () => {
+        this.loadBugs();
+      },
 
-    comments: []
-  };
+      error: (err: any) => {
+        console.error("Delete Error:", err);
+      }
+    });
+  }
 
-  this.isBugOpen = true;
-}
-
-  saveBug(updated: IBug) {
-    const index = this.bugs.findIndex((b) => b.id === updated.id);
-
-    if (index >= 0) {
-      this.bugs[index] = updated;
-    } else {
-      this.bugs.push(updated);
-    }
-
-    this.closeBug();
+  closeBug() {
+    this.isBugOpen = false;
   }
 }
