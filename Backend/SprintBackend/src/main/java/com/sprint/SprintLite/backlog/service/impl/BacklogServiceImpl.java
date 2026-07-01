@@ -30,7 +30,7 @@ public class BacklogServiceImpl implements IBacklogService {
         List<Feature> featureList = featureRepository.findAll();
         featureList.forEach(feature -> {
             FeatureResponseDto featureResponseDto = new FeatureResponseDto(
-                    feature.getId(),
+                    feature.getFeatureCode(),
                     feature.getTitle(),
                     feature.getDescription(),
                     feature.getFeatureStatus(),
@@ -52,7 +52,7 @@ public class BacklogServiceImpl implements IBacklogService {
         List<Story> storyList = storyRepository.findAll();
         storyList.forEach(story -> {
             StoryResponseDto storyResponseDto = new StoryResponseDto(
-                    story.getId(),
+                    story.getStoryCode(),
                     story.getTitle(),
                     story.getBody(),
                     story.getFeatureid().getTitle(),
@@ -75,7 +75,7 @@ public class BacklogServiceImpl implements IBacklogService {
         List<Task> taskList = taskRepository.findAll();
         taskList.forEach(task -> {
             TaskResponseDto taskResponseDto = new TaskResponseDto(
-                    task.getId(),
+                    task.getTaskCode(),
                     task.getTitle(),
                     task.getBody(),
                     task.getStoryid().getTitle(),
@@ -98,7 +98,7 @@ public class BacklogServiceImpl implements IBacklogService {
         List<Bug> bugList = bugRepository.findAll();
         bugList.forEach(bug -> {
             BugResponseDto taskResponseDto = new BugResponseDto(
-                    bug.getId(),
+                    bug.getBugCode(),
                     bug.getTitle(),
                     bug.getDescription(),
                     bug.getBugstatus(),

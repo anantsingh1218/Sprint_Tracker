@@ -1,15 +1,15 @@
 import { IComment } from './storyInterface';
-import { WorkStatus } from './workItem';
+import { Priority, WorkStatus } from './workItem';
 
 export interface IBug {
   id: string;
   title: string;
   description: string;
   storyId: number | null;
-  sprintId: number | null;
-  assignedTo: number | null;
+  sprintId: string | null;
+  assignedTo: string | null;
   status: WorkStatus;
-  priority: string;
+  priority: Priority;
   estimatedHours: number;
   remainingHours: number;
   reopenCount: number;

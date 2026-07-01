@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { WorkItem, WorkItemType } from '../models/workItem';
+import { Priority, WorkItem, WorkItemType, WorkStatus } from '../models/workItem';
 
 @Injectable({ providedIn: 'root' })
 export class WorkItemService {
@@ -14,29 +14,8 @@ export class WorkItemService {
     Task: 0,
     Bug: 0,
   };
-  private itemsSubject = new BehaviorSubject<WorkItem[]>([
-    {
-      id: 'F1',
-      title: 'User Management',
-      type: WorkItemType.Feature,
-      status: 'todo',
-      parentId: null,
-    },
-    {
-      id: 'S1',
-      title: 'Login System',
-      type: WorkItemType.Story,
-      parentId: 'F1',
-      status: 'in-progress',
-    },
-    {
-      id: 'T1',
-      title: 'Build login UI',
-      type: WorkItemType.Task,
-      parentId: 'S1',
-      status: 'done',
-    },
-  ]);
+  
+  private itemsSubject = new BehaviorSubject<WorkItem[]>([]);
 
   items$ = this.itemsSubject.asObservable();
 
@@ -45,6 +24,7 @@ export class WorkItemService {
   }
 
   private generateId(type: WorkItemType): string {
+    this.syncCountersFromItems(this.itemsSubject.value);
     const prefixMap: Record<WorkItemType, string> = {
       [WorkItemType.Feature]: 'F',
       [WorkItemType.Story]: 'S',
@@ -107,10 +87,19 @@ export class WorkItemService {
     return {
       // id: '',
       id: this.generateId(type),
-      title: 'New Feature',
+      title: 'New Work Item',
       type,
       parentId,
-      status: 'todo',
+      status: WorkStatus.OPEN,
+      description: '',
+      sprintName: '',
+      priority: Priority.LOW,
+      assignedTo: '',
+      productCategory: '',
+      reopenCount: 0,
+      estimatedPoints: 0,
+      remainingPoints: 0,
+      comments: [],
     };
   }
 }

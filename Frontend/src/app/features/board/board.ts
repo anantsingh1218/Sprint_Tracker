@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatCardModule } from '@angular/material/card';
 
-import { WorkItem } from '../../models/workItem';
+import { WorkItem, WorkStatus } from '../../models/workItem';
 import { WorkItemService } from '../../services/workItemService';
 import { fadeSlide } from '../../animations/workItemAnimations';
 
@@ -27,9 +27,9 @@ export class Board {
 
   constructor(private service: WorkItemService) {
     this.service.items$.subscribe(items => {
-      this.todo = items.filter(i => i.status === 'todo');
-      this.inProgress = items.filter(i => i.status === 'in-progress');
-      this.done = items.filter(i => i.status === 'done');
+      this.todo = items.filter(i => i.status === WorkStatus.OPEN);
+      this.inProgress = items.filter(i => i.status === WorkStatus.IN_PROGRESS);
+      this.done = items.filter(i => i.status === WorkStatus.DONE);
     });
   }
 

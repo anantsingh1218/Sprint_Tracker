@@ -1,5 +1,6 @@
 import {
   Component,
+  ChangeDetectorRef,
   EventEmitter,
   Inject,
   Input,
@@ -20,6 +21,7 @@ import { IFeature } from '../../models/featureInterface';
 import { WorkItemType } from '../../models/workItem';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { GetAllEntity } from '../../models/getAllEntityInterface';
 
 @Component({
   selector: 'app-feature',
@@ -36,33 +38,20 @@ export class FeatureOverlay implements OnInit, OnChanges {
   attachments = signal<Attachment[]>([]);
   isAttachmentView = false;
   attachmentUploadStatus = signal('');
+  newComment = '';
+  users: GetAllEntity[] = [];
+  products: GetAllEntity[] = [];
+  sprints: GetAllEntity[] = [];
 
   constructor(
     private apiService: ApiService,
+    private cdr: ChangeDetectorRef,
     @Optional()
     private dialogRef: MatDialogRef<FeatureOverlay>,
     @Optional()
     @Inject(MAT_DIALOG_DATA)
     private dialogData: { feature?: IFeature } | null,
   ) {}
-
-  newComment = '';
-
-  users = [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Sarah Lee' },
-    { id: 3, name: 'Mike Johnson' },
-  ];
-
-  products = [
-    { id: 1, name: 'FSM' },
-    { id: 2, name: 'Starwatch' },
-  ];
-
-  sprints = [
-    { id: 1, name: 'Sprint 1' },
-    { id: 2, name: 'Sprint 2' },
-  ];
 
   saveFeature() {
     if (this.dialogRef) {
@@ -94,8 +83,8 @@ export class FeatureOverlay implements OnInit, OnChanges {
     this.newComment = '';
   }
 
-  getUserName(userId: number | null): string {
-    return this.users.find((u) => u.id === userId)?.name || 'Unassigned';
+  getUserName(userId: any): string {
+    return this.users.find((u) => u.id === userId || u.name === userId)?.name || 'Unassigned';
   }
 
   toggleAttachmentsView() {
@@ -103,17 +92,19 @@ export class FeatureOverlay implements OnInit, OnChanges {
   }
 
   loadAttachments() {
-    this.apiService.getAttachments(WorkItemType.Feature, this.apiService.toApiWorkItemId(this.feature.id)).subscribe({
-      next: (data) => {
-        this.attachments.set(data.fileToBeFetched);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.attachments.set([]);
-        if (err.status === 500) {
-          this.attachmentUploadStatus.set('Resource not found');
-        }
-      },
-    });
+    this.apiService
+      .getAttachments(WorkItemType.Feature, this.apiService.toApiWorkItemId(this.feature.id))
+      .subscribe({
+        next: (data) => {
+          this.attachments.set(data.fileToBeFetched);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.attachments.set([]);
+          if (err.status === 500) {
+            this.attachmentUploadStatus.set('Resource not found');
+          }
+        },
+      });
   }
 
   ngOnInit(): void {
@@ -122,7 +113,7 @@ export class FeatureOverlay implements OnInit, OnChanges {
     }
 
     this.feature.comments ??= [];
-
+    this.loadDropdownData();
     if (this.feature.id) {
       this.loadAttachments();
     }
@@ -133,6 +124,32 @@ export class FeatureOverlay implements OnInit, OnChanges {
       this.feature.comments ??= [];
       this.loadAttachments();
     }
+  }
+
+  loadDropdownData() {
+    this.apiService.getRequest<GetAllEntity[]>('/user/getAllUsers').subscribe({
+      next: (data) => {
+        this.users = data;
+        this.cdr.detectChanges(); // Force UI Update
+      },
+      error: (err) => console.error('Failed to load users', err),
+    });
+
+    this.apiService.getRequest<GetAllEntity[]>('/product/getAllProducts').subscribe({
+      next: (data) => {
+        this.products = data;
+        this.cdr.detectChanges(); // Force UI Update
+      },
+      error: (err) => console.error('Failed to load products', err),
+    });
+
+    this.apiService.getRequest<GetAllEntity[]>('/sprint/getAllSprints').subscribe({
+      next: (data) => {
+        this.sprints = data;
+        this.cdr.detectChanges(); // Force UI Update
+      },
+      error: (err) => console.error('Failed to load sprints', err),
+    });
   }
 
   onFileSelected(event: any) {
@@ -147,7 +164,11 @@ export class FeatureOverlay implements OnInit, OnChanges {
     if (!this.selectedFiles().length) return;
 
     this.apiService
-      .uploadAttachments(WorkItemType.Feature, this.apiService.toApiWorkItemId(this.feature.id), this.selectedFiles())
+      .uploadAttachments(
+        WorkItemType.Feature,
+        this.apiService.toApiWorkItemId(this.feature.id),
+        this.selectedFiles(),
+      )
       .subscribe({
         next: (res: Attachment[]) => {
           this.selectedFiles.set([]);

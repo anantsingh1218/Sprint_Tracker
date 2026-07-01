@@ -4,7 +4,7 @@ import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
 
 public record TaskResponseDto(
-        Integer id,
+        String taskCode,
         String title,
         String description,
         String storyName,

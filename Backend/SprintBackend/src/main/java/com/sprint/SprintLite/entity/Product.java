@@ -3,6 +3,8 @@ package com.sprint.SprintLite.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GeneratedColumn;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
@@ -18,6 +20,11 @@ public class Product extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "productid", nullable = false)
     private Integer id;
+
+//    @Generated
+    @GeneratedColumn(value = "'P' || productid")
+    @Column(name = "product_code", insertable = false, updatable = false)
+    private String productCode;
 
     @Column(name = "productname", length = Integer.MAX_VALUE)
     private String productname;

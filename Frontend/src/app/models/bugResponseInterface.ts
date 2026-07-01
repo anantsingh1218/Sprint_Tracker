@@ -1,4 +1,4 @@
-import { WorkStatus } from "./workItem";
+import { Priority, WorkStatus } from "./workItem";
 
 /*
 public record BugResponseDto(
@@ -21,7 +21,7 @@ export interface IBugResponse{
     title: string,
     description: string,
     bugStatus: WorkStatus,
-    bugPriority: string,
+    bugPriority: Priority,
     assignedTo: string,
     storyId: number,
     storyName: string,

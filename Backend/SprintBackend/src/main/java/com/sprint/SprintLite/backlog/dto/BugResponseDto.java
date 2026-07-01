@@ -4,7 +4,7 @@ import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
 
 public record BugResponseDto(
-        Integer id,
+        String bugCode,
         String title,
         String description,
         Status bugStatus,

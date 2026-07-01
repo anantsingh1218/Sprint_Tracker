@@ -5,10 +5,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -17,11 +20,16 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "sprint")
-public class Sprint {
+public class Sprint extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+//    @Generated
+    @GeneratedColumn(value = "'SP' || id")
+    @Column(name = "sprint_code", insertable = false, updatable = false)
+    private String sprintCode;
 
     @Column(name = "sprintname", length = Integer.MAX_VALUE)
     private String sprintName;
@@ -40,10 +48,10 @@ public class Sprint {
     private Product productid;
 
     @Column(name = "startdate")
-    private LocalDate startDate;
+    private Instant startDate;
 
     @Column(name = "enddate")
-    private LocalDate endDate;
+    private Instant endDate;
     @NonNull
     @OneToMany(mappedBy = "sprintid")
     private Set<Bug> bugs = new LinkedHashSet<>();
