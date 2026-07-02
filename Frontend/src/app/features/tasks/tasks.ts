@@ -1,36 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { SprintService } from '../../core/sprint/sprint';
 import { TaskService } from '../../core/task/task';
 
-import {
-  CdkDragDrop,
-  DragDropModule
-} from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
+import { ITask } from '../../models/taskInterface';
 
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    DragDropModule,
-    MatAutocompleteModule,
-    MatInputModule
-  ],
+  imports: [CommonModule, FormsModule, DragDropModule, MatAutocompleteModule, MatInputModule],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
 })
-export class Tasks {
+export class Tasks implements OnChanges {
+  @Input() task: ITask | null = null;
+  @Output() save = new EventEmitter<any>();
+  @Output() close = new EventEmitter<void>();
 
   showTaskModal = false;
   showEditModal = false;
-
   selectedSprintId = '';
 
   users = ['User 1', 'User 2', 'User 3', 'User 4', 'User 5'];
@@ -42,15 +36,43 @@ export class Tasks {
     status: 'Open',
     assignedTo: '',
     originalEstimate: '',
-    remainingEstimate: ''
+    remainingEstimate: '',
+    storyId: null as number | null
   };
 
   editTask: any = null;
 
   constructor(
     private sprintService: SprintService,
-    private taskService: TaskService
+    private taskService: TaskService,
   ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['task'] && this.task) {
+      if (this.task.title === '') {
+        // It's a brand new task draft being created from the Backlog row
+        this.newTask = {
+          title: '',
+          description: '',
+          priority: this.task.priority || 'Medium',
+          status: this.task.status || 'Open',
+          assignedTo: '',
+          originalEstimate: String(this.task.estimatedHours || ''),
+          remainingEstimate: String(this.task.remainingHours || ''),
+          storyId: this.task.storyId
+        };
+        this.showTaskModal = true;
+      } else {
+        // It's an existing task being opened for modification
+        this.editTask = { 
+          ...this.task,
+          originalEstimate: this.task.estimatedHours,
+          remainingEstimate: this.task.remainingHours
+        };
+        this.showEditModal = true;
+      }
+    }
+  }
 
   get sprints() {
     return this.sprintService.getSprints();
@@ -61,34 +83,27 @@ export class Tasks {
   }
 
   get filteredUsers() {
-    const search =
-      (this.editTask?.assignedTo || this.newTask.assignedTo || '').toLowerCase();
+    const search = (this.editTask?.assignedTo || this.newTask.assignedTo || '').toLowerCase();
 
-    return this.users.filter(user =>
-      user.toLowerCase().includes(search)
-    );
+    return this.users.filter((user) => user.toLowerCase().includes(search));
   }
 
   get filteredTasks() {
     if (!this.selectedSprintId) return this.allTasks;
 
-    return this.allTasks.filter(
-      t => t.sprintId === this.selectedSprintId
-    );
+    return this.allTasks.filter((t) => t.sprintId === this.selectedSprintId);
   }
 
   get todoTasks() {
-    return this.filteredTasks.filter(t => t.status === 'Open');
+    return this.filteredTasks.filter((t) => t.status === 'Open');
   }
 
   get inProgressTasks() {
-    return this.filteredTasks.filter(t => t.status === 'In Progress');
+    return this.filteredTasks.filter((t) => t.status === 'In Progress');
   }
 
   get doneTasks() {
-    return this.filteredTasks.filter(
-      t => t.status === 'Done' || t.status === 'Closed'
-    );
+    return this.filteredTasks.filter((t) => t.status === 'Done' || t.status === 'Closed');
   }
 
   openTaskForm() {
@@ -97,6 +112,7 @@ export class Tasks {
 
   closeTaskForm() {
     this.showTaskModal = false;
+    this.close.emit();
   }
 
   openEditTask(task: any) {
@@ -107,6 +123,7 @@ export class Tasks {
   closeEditTask() {
     this.showEditModal = false;
     this.editTask = null;
+    this.close.emit();
   }
 
   createTask() {
@@ -127,7 +144,7 @@ export class Tasks {
 
     this.taskService.addTask({
       ...this.newTask,
-      sprintId: this.selectedSprintId
+      sprintId: this.selectedSprintId,
     });
 
     this.newTask = {
@@ -137,7 +154,8 @@ export class Tasks {
       status: 'Open',
       assignedTo: '',
       originalEstimate: '',
-      remainingEstimate: ''
+      remainingEstimate: '',
+      storyId: null as number | null
     };
 
     this.closeTaskForm();
@@ -162,8 +180,7 @@ export class Tasks {
   }
 
   drop(event: CdkDragDrop<any[]>, newStatus: string) {
-    const task =
-      event.previousContainer.data[event.previousIndex];
+    const task = event.previousContainer.data[event.previousIndex];
 
     this.taskService.updateTaskStatus(task, newStatus);
   }

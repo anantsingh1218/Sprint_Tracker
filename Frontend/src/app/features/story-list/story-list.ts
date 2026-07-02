@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { Story } from '../story/story';
 import { IStory } from '../../models/storyInterface';
+import { Priority, WorkStatus } from '../../models/workItem';
 
 @Component({
   selector: 'app-story-list',
@@ -19,18 +20,18 @@ export class StoryList {
 
   stories: IStory[] = [
   {
-    id: 101,
+    id: 'S101',
     title: 'Login Page UI',
     body: 'Build login screen with validation',
 
-    status: 'New',
-    priority: 'Medium',
+    status: WorkStatus.OPEN,
+    priority: Priority.MEDIUM,
     estimatedStoryPoints: 8,
     remainingStoryPoint: 5,
 
     featureId: 0,
-    sprintId: 0,
-    userId: 0,
+    sprintId: 'Sprint 1',
+    userId: 'User 1',
 
     comments: [
       {
@@ -42,18 +43,18 @@ export class StoryList {
   },
 
   {
-    id: 102,
+    id: 'S102',
     title: 'Sprint API Integration',
     body: 'Connect sprint module to backend',
 
-    status: 'Active',
-    priority: 'High',
+    status: WorkStatus.IN_PROGRESS,
+    priority: Priority.HIGH,
     estimatedStoryPoints: 8,
     remainingStoryPoint: 5,
 
     featureId: 1,
-    sprintId: 3,
-    userId: 1,
+    sprintId: 'Sprint 2',
+    userId: 'User 2',
 
     comments: [
       {
@@ -75,12 +76,12 @@ export class StoryList {
 
   openCreateStory() {
   this.selectedStory = {
-    id: this.stories.length + 1,
+    id: 'S' + (this.stories.length + 1),
     title: '',
     body: '',
 
-    status: 'New',
-    priority: 'Medium',
+    status: WorkStatus.OPEN,
+    priority: Priority.LOW,
     estimatedStoryPoints: 0,
     remainingStoryPoint: 0,
 

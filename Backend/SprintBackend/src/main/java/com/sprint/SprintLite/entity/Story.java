@@ -5,6 +5,8 @@ import com.sprint.SprintLite.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
@@ -22,6 +24,11 @@ public class Story extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+//    @Generated
+    @GeneratedColumn(value = "'S' || id")
+    @Column(name = "story_code", insertable = false, updatable = false)
+    private String storyCode;
 
     @Column(name = "title", length = Integer.MAX_VALUE)
     private String title;

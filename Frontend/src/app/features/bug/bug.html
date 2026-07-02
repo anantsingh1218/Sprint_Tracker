@@ -1,0 +1,92 @@
+<div class="overlay">
+  <div class="modal">
+
+    <h2>Create Bug</h2>
+
+    <!-- Bug Title -->
+    <label>Bug Title</label>
+    <input
+      [(ngModel)]="bug.title"
+      placeholder="Enter Bug Title"
+    />
+
+    <!-- Description -->
+    <label>Description</label>
+    <textarea
+      [(ngModel)]="bug.description"
+      placeholder="Enter Bug Description">
+    </textarea>
+
+    <!-- Story ID -->
+    <label>Story ID</label>
+    <input
+      [(ngModel)]="bug.storyid"
+      type="number"
+      placeholder="Enter Story ID"
+    />
+
+    <!-- Sprint ID -->
+    <label>Sprint ID</label>
+    <input
+      [(ngModel)]="bug.sprintid"
+      type="number"
+      placeholder="Enter Sprint ID"
+    />
+
+    <!-- Assigned User ID -->
+    <label>Assigned User ID</label>
+    <input
+      [(ngModel)]="bug.assignedto"
+      type="number"
+      placeholder="Enter Assigned User ID"
+    />
+
+    <!-- Status -->
+    <label>Status</label>
+    <select [(ngModel)]="bug.bugstatus">
+      <option value="">Select Status</option>
+      <option value="OPEN">OPEN</option>
+      <option value="IN_PROGRESS">IN_PROGRESS</option>
+      <option value="BLOCKED">BLOCKED</option>
+      <option value="DONE">DONE</option>
+      <option value="CLOSED">CLOSED</option>
+    </select>
+
+    <!-- Priority -->
+    <label>Priority</label>
+    <select [(ngModel)]="bug.priority">
+      <option value="">Select Priority</option>
+      <option value="LOW">LOW</option>
+      <option value="MEDIUM">MEDIUM</option>
+      <option value="HIGH">HIGH</option>
+    </select>
+
+    <!-- Original Estimate -->
+    <label>Original Estimate Hours</label>
+    <input
+      [(ngModel)]="bug.originalestimatehours"
+      type="number"
+      placeholder="Enter Original Estimate Hours"
+    />
+
+    <!-- Remaining Estimate -->
+    <label>Remaining Estimate Hours</label>
+    <input
+      [(ngModel)]="bug.remainingestimatehours"
+      type="number"
+      placeholder="Enter Remaining Estimate Hours"
+    />
+
+    <!-- Comments -->
+    <label>Comments</label>
+    <textarea
+      [(ngModel)]="bug.comments"
+      placeholder="Enter Comments">
+    </textarea>
+
+    <!-- Buttons -->
+    <button (click)="saveBug()">Save Bug</button>
+    <button (click)="closeOverlay()">Close</button>
+
+  </div>
+</div>

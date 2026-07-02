@@ -1,23 +1,20 @@
+import { Priority, WorkStatus } from './workItem';
+
 export interface IStory {
-  id: number;
+  id: string;
   title: string;
   body: string;
-
   featureId: number | null;
-  sprintId: number | null;
-  userId: number | null;
-
-  status: 'New' | 'Active' | 'Resolved' | 'Closed';
-  priority: 'Low' | 'Medium' | 'High';
-
+  sprintId: string | null;
+  userId: string | null;
+  status: WorkStatus;
+  priority: Priority;
   estimatedStoryPoints: number;
   remainingStoryPoint: number;
-
   comments: IComment[];
 }
 
 export interface IComment {
-
   userId: number;
   text: string;
   createdAt: string;

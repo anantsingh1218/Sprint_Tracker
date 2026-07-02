@@ -35,12 +35,16 @@ public class PathsConfig {
         return List.of(
 //                "/**"
                 "/dashboard/**",
+                "/user/**",
+                "/backlog/**",
                 "/feature/**",
                 "/product/**",
                 "/sprint/**",
                 "/story/**",
                 "/task/**",
-                "/DSU/**"
+                "/DSU/**",
+                "/Bug/**",
+                "/profile/**"
         );
     }
 

@@ -1,8 +1,11 @@
 import {
   Component,
   EventEmitter,
+  Inject,
   Input,
   OnChanges,
+  OnInit,
+  Optional,
   Output,
   signal,
   SimpleChanges,
@@ -13,6 +16,10 @@ import { IComment, IStory } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
 import { HttpErrorResponse } from '@angular/common/http';
+import { WorkItemType } from '../../models/workItem';
+
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+
 
 @Component({
   selector: 'app-story',
@@ -21,7 +28,7 @@ import { HttpErrorResponse } from '@angular/common/http';
   templateUrl: './story.html',
   styleUrl: './story.css',
 })
-export class Story implements OnChanges {
+export class Story implements OnInit, OnChanges {
   @Input() story!: IStory;
   @Output() save = new EventEmitter<IStory>();
   @Output() close = new EventEmitter<void>();
@@ -30,7 +37,13 @@ export class Story implements OnChanges {
   isAttachmentView = false;
   attachmentUploadStatus = signal('');
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService,
+    @Optional()
+    private dialogRef: MatDialogRef<Story>,
+    @Optional()
+    @Inject(MAT_DIALOG_DATA)
+    private dialogData: { story?: IStory } | null,
+  ) {}
 
   newComment = '';
 
@@ -51,10 +64,20 @@ export class Story implements OnChanges {
   ];
 
   saveStory() {
+    if (this.dialogRef) {
+      this.dialogRef.close(this.story);
+      return;
+    }
+
     this.save.emit(this.story);
   }
 
   closeOverlay() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+      return;
+    }
+
     this.close.emit();
   }
 
@@ -66,7 +89,7 @@ export class Story implements OnChanges {
       text: this.newComment,
       createdAt: new Date().toISOString(),
     };
-
+    this.story.comments ??= [];
     this.story.comments.push(comment);
     this.newComment = '';
   }
@@ -80,7 +103,7 @@ export class Story implements OnChanges {
   }
 
   loadAttachments() {
-    this.apiService.getAttachments('story', this.story.id).subscribe({
+    this.apiService.getAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.story.id)).subscribe({
       next: (data) => {
         this.attachments.set(data.fileToBeFetched);
       },
@@ -93,8 +116,21 @@ export class Story implements OnChanges {
     });
   }
 
+  ngOnInit(): void {
+    if (this.dialogData?.story) {
+      this.story = this.dialogData.story;
+    }
+
+    this.story.comments ??= [];
+
+    if (this.story.id) {
+      this.loadAttachments();
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['story'] && this.story?.id) {
+      this.story.comments ??= [];
       this.loadAttachments();
     }
   }
@@ -110,7 +146,7 @@ export class Story implements OnChanges {
   uploadFiles() {
     if (!this.selectedFiles().length) return;
 
-    this.apiService.uploadAttachments('story', this.story.id, this.selectedFiles()).subscribe({
+    this.apiService.uploadAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.story.id), this.selectedFiles()).subscribe({
       next: (res: Attachment[]) => {
         this.selectedFiles.set([]);
         this.attachmentUploadStatus.set('Files uploaded Successfully');

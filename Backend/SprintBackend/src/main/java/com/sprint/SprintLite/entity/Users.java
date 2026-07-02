@@ -57,4 +57,8 @@ public class Users extends BaseEntity {
     @NonNull
     @OneToMany(mappedBy = "userid")
     private Set<Worklog> worklogs = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "userid", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Feature> features = new LinkedHashSet<>();
+
 }

@@ -1,11 +1,13 @@
 package com.sprint.SprintLite.Feature.Controller;
 
-import ch.qos.logback.core.status.Status;
-import com.sprint.SprintLite.Feature.Service.impl.FeatureServiceImpl;
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
-import com.sprint.SprintLite.dto.CreateProductRequest;
-import com.sprint.SprintLite.entity.Feature;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.Feature.Service.IFeatureService;
+import com.sprint.SprintLite.entity.Product;
+import com.sprint.SprintLite.entity.Sprint;
+import com.sprint.SprintLite.repository.ProductRepository;
+import com.sprint.SprintLite.repository.SprintRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,64 +18,59 @@ import java.util.List;
 @RequestMapping("/feature")
 @RequiredArgsConstructor
 public class FeatureController {
-    private final FeatureServiceImpl featureService;
+    private final IFeatureService featureService;
+    private final ProductRepository productRepository;
+    private final SprintRepository sprintRepository;
 
     @PostMapping("/add")
-    public ResponseEntity<Feature> addFeature(@RequestBody CreateFeatureRequest request) {
-        Feature feature = featureService.createFeature(request);
-        return ResponseEntity.ok().body(feature);
+    public ResponseEntity<RegisterResponseDto> addFeature(@RequestBody CreateFeatureRequest request) {
+        RegisterResponseDto registerResponseDto = featureService.createFeature(request);
+        return ResponseEntity.ok(registerResponseDto);
     }
 
-    @GetMapping("/{featureId}")
-    public ResponseEntity<Feature> getFeatureById(@PathVariable Long featureId) {
-        Feature feature = featureService.getFeatureById(featureId);
-        return ResponseEntity.ok().body(feature);
+    @GetMapping("/{featureCode}")
+    public ResponseEntity<FeatureResponseDto> getFeatureById(@PathVariable String featureCode) {
+        FeatureResponseDto featureResponseDto = featureService.getFeatureByFeatureCode(featureCode);
+        return ResponseEntity.ok(featureResponseDto);
     }
 
     @GetMapping
-    public ResponseEntity<List<Feature>> getAllFeatures() {
-        List<Feature> features = featureService.getAllFeatures();
-        return ResponseEntity.ok().body(features);
+    public ResponseEntity<List<FeatureResponseDto>> getAllFeatures() {
+        List<FeatureResponseDto> features = featureService.getAllFeatures();
+        return ResponseEntity.ok(features);
     }
 
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<Feature>> getFeatureByProductId(@PathVariable Long productId) {
-        List<Feature> features = featureService.getFeaturesByProduct(productId);
-        return ResponseEntity.ok().body(features);
+    @GetMapping("/product/{productCode}")
+    public ResponseEntity<List<FeatureResponseDto>> getFeatureByProductId(@PathVariable String productCode) {
+        Product product = productRepository.findProductByProductCode(productCode);
+        List<FeatureResponseDto> featureResponseDtoList = featureService.getFeaturesByProduct(product);
+        return ResponseEntity.ok(featureResponseDtoList);
     }
 
-    @GetMapping("/sprint/{sprintId}")
-    public ResponseEntity<List<Feature>> getFeatureBySprintId(@PathVariable Long sprintId) {
-        List<Feature> features = featureService.getFeaturesBySprint(sprintId);
-        return ResponseEntity.ok().body(features);
+    @GetMapping("/sprint/{sprintCode}")
+    public ResponseEntity<List<FeatureResponseDto>> getFeatureBySprintId(@PathVariable String sprintCode) {
+        Sprint sprint = sprintRepository.findSprintBySprintCode(sprintCode);
+        List<FeatureResponseDto> featureResponseDtoList = featureService.getFeaturesBySprint(sprint);
+        return ResponseEntity.ok(featureResponseDtoList);
     }
-
 
     // Update Full Feature
-    @PutMapping("/{featureId}")
-    public ResponseEntity<Feature> updateFeature(
-            @PathVariable Long featureId,
+    @PutMapping("/{featureCode}")
+    public ResponseEntity<FeatureResponseDto> updateFeature(
+            @PathVariable String featureCode,
             @RequestBody CreateFeatureRequest feature) {
-
-        Feature updatedFeature =
-                featureService.updateFeature(featureId, feature);
-
-        return ResponseEntity.ok(updatedFeature);
+        FeatureResponseDto updatedFeatureDto =
+                featureService.updateFeature(featureCode, feature);
+        return ResponseEntity.ok(updatedFeatureDto);
     }
-
 
     // Delete Feature
-    @DeleteMapping("/{featureId}")
-    public ResponseEntity<String> deleteFeature(
-            @PathVariable Long featureId) {
-
-        featureService.deleteFeature(featureId);
-
-        return ResponseEntity.ok("Feature deleted successfully");
+    @DeleteMapping("/{featureCode}")
+    public ResponseEntity<RegisterResponseDto> deleteFeature(
+            @PathVariable String featureCode) {
+        RegisterResponseDto registerResponseDto = featureService.deleteFeature(featureCode);
+        return ResponseEntity.ok(registerResponseDto);
     }
-
-
-
 }
 
 

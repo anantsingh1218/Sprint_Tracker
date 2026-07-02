@@ -3,8 +3,11 @@ package com.sprint.SprintLite.entity;
 import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
@@ -23,11 +26,21 @@ public class Feature extends BaseEntity {
     @Column(name = "featureid", nullable = false)
     private Integer id;
 
+//    @Generated
+    @GeneratedColumn(value = "'F' || featureid")
+    @Column(name = "feature_code", insertable = false, updatable = false)
+    private String featureCode;
+
     @Column(name = "title", length = Integer.MAX_VALUE)
     private String title;
 
     @Column(name = "description", length = Integer.MAX_VALUE)
     private String description;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "userid", nullable = false)
+    private Users userid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "productid")
@@ -55,6 +68,5 @@ public class Feature extends BaseEntity {
     @NonNull
     @OneToMany(mappedBy = "featureid")
     private Set<Story> storytables = new LinkedHashSet<>();
-
 
 }

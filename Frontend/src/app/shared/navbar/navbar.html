@@ -1,4 +1,5 @@
 <div class="navbar">
+
   <!-- CENTER: Search -->
   <div class="center">
     <input type="text" placeholder="Search work items, sprints..." />
@@ -6,16 +7,37 @@
 
   <!-- RIGHT: Actions -->
   <div class="right">
+
     @if (isProjectManager) {
-      <button class="btn" (click)="navigateToRegister()">Register New User</button>
+      <button class="btn" (click)="navigateToRegister()">
+        Register New User
+      </button>
     }
 
-    <div class="avatar">
-      @if (username) {
-        {{ username[0] | uppercase}}
-      } @else {
-        A
-      }
+    <!-- Profile Container -->
+    <div class="profile-container">
+
+      <div class="avatar" (click)="goToProfile()">
+        @if (username) {
+          {{ username[0] | uppercase }}
+        } @else {
+          A
+        }
+      </div>
+
+      <div class="dropdown-menu">
+
+        <div class="dropdown-item" (click)="goToProfile()">
+          Profile
+        </div>
+
+        <div class="dropdown-item" (click)="logout()">
+          Logout
+        </div>
+
+      </div>
+
     </div>
+
   </div>
 </div>

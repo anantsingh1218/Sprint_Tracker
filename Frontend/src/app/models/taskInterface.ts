@@ -1,8 +1,16 @@
-export type TaskStatus = 'Todo' | 'InProgress' | 'Done';
+import { IComment } from "./storyInterface";
+import { Priority, WorkStatus } from "./workItem";
 
-export interface Task {
+export interface ITask {
   id: string;
-  sprintId: string;
   title: string;
-  status: TaskStatus;
+  description: string;
+  storyId: number | null;
+  sprintId: string | null;
+  userId: string | null;
+  status: WorkStatus;
+  priority: Priority;
+  estimatedHours: number;
+  remainingHours: number;
+  comments: IComment[];
 }

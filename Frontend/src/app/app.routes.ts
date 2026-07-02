@@ -9,10 +9,13 @@ import { Board } from './features/board/board';
 import { StoryList } from './features/story-list/story-list';
 import { Register } from './features/register/register';
 import { pmGuard } from './core/guards/pm-guard';
+import { DsuComponent } from './features/DSU/dsu';
 import { ForgotPassword } from './features/forgot-password/forgot-password';
 import { FeatureList } from './features/feature-list/feature-list';
 import { TeamDashboard } from './features/dashboard/TeamDashboard/teamDashboard';
 
+import { BugList } from './features/bug-list/bug-list';
+import { Profile } from './features/profile/profile';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -25,7 +28,7 @@ export const routes: Routes = [
     component: Register,
     canActivate: [pmGuard]
   },
-  
+
 
   // APP routes (WITH layout)
   {
@@ -39,7 +42,10 @@ export const routes: Routes = [
       { path: 'backlog', component: Backlog },
       { path: 'board', component: Board },
       { path: 'story', component: StoryList },
+      { path: 'dsu', component: DsuComponent },
       { path: 'feature', component: FeatureList },
+      { path: 'bugs', component: BugList },
+      { path: 'profile', component: Profile },
     ],
   },
 

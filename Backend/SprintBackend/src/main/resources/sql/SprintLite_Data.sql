@@ -32,23 +32,36 @@ VALUES
 -- =========================
 -- SPRINT
 -- =========================
-INSERT INTO Sprint (sprintName, sprintDuration, status, productId, startDate, endDate)
+INSERT INTO Sprint (sprintName, sprintDuration, status, productId, startDate, endDate,createdAt, createdBy, updatedAt, updatedBy)
 VALUES
-    ('Sprint 1', 15, 'ACTIVE', 1, '2026-06-01', '2026-06-15'),
-    ('Sprint 2', 15, 'PLANNED', 2, '2026-06-16', '2026-06-30');
+    ('Sprint 1', 15, 'ACTIVE', 1, '2026-06-01', '2026-06-15',CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
+    ('Sprint 2', 15, 'PLANNED', 2, '2026-06-16', '2026-06-30',CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
 
 
 -- =========================
 -- FEATURE
 -- =========================
-INSERT INTO FeatureTable (title, description, productId, sprintId, featureStatus, priority, estimatedStoryPoints, remainingStoryPoints, createdAt, createdBy, updatedAt, updatedBy)
+INSERT INTO FeatureTable (
+    title,
+    description,
+    userid,
+    productid,
+    sprintid,
+    featurestatus,
+    priority,
+    estimatedstorypoints,
+    remainingstorypoints,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy
+)
 VALUES
-    ('Lead Management', 'Manage customer leads', 1, 1, 'IN_PROGRESS', 'HIGH', 8, 3,
+    ('Lead Management', 'Manage customer leads', 1, 1, 1, 'IN_PROGRESS', 'HIGH', 8, 3,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('Business Dashboards', 'Analytics dashboards', 2, 2, 'OPEN', 'MEDIUM', 13, 13,
+    ('Business Dashboards', 'Analytics dashboards', 1, 2, 2, 'OPEN', 'MEDIUM', 13, 13,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
-
 
 -- =========================
 -- STORY
@@ -86,15 +99,15 @@ VALUES
 -- =========================
 -- BUGS
 -- =========================
-INSERT INTO Bugs (bugStatus, priority, description, assignedTo, storyId, sprintId, originalEstimateHours, remainingEstimateHours, createdAt, createdBy, updatedAt, updatedBy)
+INSERT INTO Bugs (title, bugStatus, priority, description, assignedTo, storyId, sprintId, originalEstimateHours, remainingEstimateHours, createdAt, createdBy, updatedAt, updatedBy)
 VALUES
-    ('OPEN', 'CRITICAL', 'Lead page crashes on save', 2, 1, 1, 6, 6,
+    ('Lead Page Crash','OPEN', 'CRITICAL', 'Lead page crashes on save', 2, 1, 1, 6, 6,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('IN_PROGRESS', 'HIGH', 'Duplicate lead creation issue', 2, 1, 1, 8, 3,
+    ('Lead Creation Dupliaction','IN_PROGRESS', 'HIGH', 'Duplicate lead creation issue', 2, 1, 1, 8, 3,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('OPEN', 'MEDIUM', 'Dashboard timeout issue', 2, 3, 2, 10, 10,
+    ('Dashboard Timeout Bug','OPEN', 'MEDIUM', 'Dashboard timeout issue', 2, 3, 2, 10, 10,
      CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
 
 
