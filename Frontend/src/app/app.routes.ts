@@ -11,6 +11,8 @@ import { Register } from './features/register/register';
 import { pmGuard } from './core/guards/pm-guard';
 import { ForgotPassword } from './features/forgot-password/forgot-password';
 import { FeatureList } from './features/feature-list/feature-list';
+import { TeamDashboard } from './features/dashboard/TeamDashboard/teamDashboard';
+
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -31,6 +33,7 @@ export const routes: Routes = [
     component: Layout,
     children: [
       { path: 'dashboard', component: Dashboard },
+      { path: 'teamDashboard', component: TeamDashboard},
       { path: 'sprints', component: Sprint },
       { path: 'tasks', component: Tasks },
       { path: 'backlog', component: Backlog },

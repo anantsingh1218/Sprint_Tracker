@@ -22,7 +22,6 @@ public class PathsConfig {
                 "/register",
                 "/login",
                 "/attachment/**",
-                "/dashboard/**",
                 "/worklog/**",
                 "/attachment/**",
                 "/forgot-password",
@@ -35,6 +34,7 @@ public class PathsConfig {
     public List<String> securedPaths() {
         return List.of(
 //                "/**"
+                "/dashboard/**",
                 "/feature/**",
                 "/product/**",
                 "/sprint/**",

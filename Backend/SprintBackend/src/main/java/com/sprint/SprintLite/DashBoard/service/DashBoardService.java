@@ -7,42 +7,30 @@ import java.util.List;
 
 public interface DashBoardService {
 
-    DashboardResponseDto
-    getDashboard(
-            Integer userId
-    );
+    DashboardResponseDto getDashboard();
 
-    ReleaseReadinessDto
-    getReleaseReadiness(
-            Integer userId,
-            Integer productId);
-
-    TeamCapacityDto
-    getTeamCapacity(
-            Integer userId,
+    ReleaseReadinessDto getReleaseReadiness(
             Integer productId
     );
 
-    VelocityDto
-    getVelocity(
-            Integer userId,
+    TeamCapacityDto getTeamCapacity(
             Integer productId
     );
 
-    BurndownDto
-    getBurndown(
-            Integer userId,
+    VelocityDto getVelocity(
             Integer productId
     );
 
-    DashboardSummaryDto
-    getSummary(
-            Integer userId, Integer productId
+    BurndownDto getBurndown(
+            Integer productId
     );
 
-    ExportDashboardDto
-    exportDashboard(
-            Integer userId, Integer productId
+    DashboardSummaryDto getSummary(
+            Integer productId
+    );
+
+    ExportDashboardDto exportDashboard(
+            Integer productId
     );
 
     Object getTasks(
@@ -50,29 +38,24 @@ public interface DashBoardService {
             Integer size
     );
 
-
     Page<StoryListDto> getStories(
             Integer page,
             Integer size
     );
 
-    FeatureProgressDto
-    getFeatureProgress(
+    FeatureProgressDto getFeatureProgress(
             Integer featureId
     );
 
-    List<StoryCardDto>
-    getStoriesByFeature(
+    List<StoryCardDto> getStoriesByFeature(
             Integer featureId
     );
 
-    StoryProgressDto
-    getStoryProgress(
+    StoryProgressDto getStoryProgress(
             Integer storyId
     );
 
-    List<BoardColumnDto>
-    getBoard(
+    List<BoardColumnDto> getBoard(
             Integer sprintId
     );
 
@@ -80,6 +63,9 @@ public interface DashBoardService {
             MoveTaskDto dto
     );
 
-    List<ProductDropdownDto> getProducts(Integer userId);
+    List<ProductDropdownDto> getProducts();
 
+    TaskListDto getFocusTask();
+
+    List<WorklogDto> getRecentWorklogs();
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DashboardService } from '../../services/dashboardService';
 import { DashboardResponse } from './models/dashboard.model';
 import { CommonModule } from '@angular/common';
@@ -10,260 +10,275 @@ import { ReleaseReadiness } from './models/dashboard.model';
 import { TeamCapacity } from './models/dashboard.model';
 import { VelocityCard } from './components/velocity-card/velocity-card';
 import { AnalyticsSection } from './components/analytics-section/analytics-section';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, FormsModule, AnalyticsSection],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css'
+    selector: 'app-dashboard',
+    standalone: true,
+    imports: [CommonModule, FormsModule, AnalyticsSection],
+    templateUrl: './dashboard.html',
+    styleUrl: './dashboard.css'
 })
 export class Dashboard implements OnInit {
 
-  loading = true;
+    loading = true;
 
-  dashboard?: DashboardResponse;
+    dashboard?: DashboardResponse;
 
-  products: ProductDropdown[] = [];
+    products: ProductDropdown[] = [];
 
-  selectedProductId!: number;
+    selectedProductId!: number;
 
-  selectedProduct: any;
-  velocity?: Velocity;
+    selectedProduct: any;
 
-burndown?: Burndown;
+    velocity?: Velocity;
 
-teamCapacity?: TeamCapacity;
+    burndown?: Burndown;
 
-releaseReadiness?: ReleaseReadiness;
+    teamCapacity?: TeamCapacity;
 
-private updateSelectedProduct(): void {
+    releaseReadiness?: ReleaseReadiness;
 
-    if (
-        !this.dashboard ||
-        !this.dashboard.dashboard ||
-        !this.dashboard.dashboard.products ||
-        !this.selectedProductId
-    ) {
-        return;
-    }
+    private updateSelectedProduct(): void {
 
-    this.selectedProduct =
-        this.dashboard.dashboard.products.find(
-            (p: any) => p.productId === this.selectedProductId
-        );
-
-}
-
-  constructor(
-    private dashboardService: DashboardService
-  ) {}
-
-  ngOnInit(): void {
-
-    this.fetchDashboard();
-
-}
-
-  fetchDashboard(): void {
-
-    const userId = 1;
-
-    this.dashboardService.getDashboard(userId)
-      .subscribe({
-
-        next: (res) => {
-
-    this.dashboard = res;
-
-    console.log("Dashboard Response:", res);
-
-    this.loading = false;
-
-    // Only after dashboard is loaded
-    this.fetchProducts();
-
-},
-
-        error: (err) => {
-
-          this.loading = false;
-          console.error(err);
-
+        if (
+            !this.dashboard ||
+            !this.dashboard.dashboard ||
+            !this.dashboard.dashboard.products ||
+            !this.selectedProductId
+        ) {
+            return;
         }
 
-      });
+        this.selectedProduct =
+            this.dashboard.dashboard.products.find(
+                (p: any) => p.productId === this.selectedProductId
+            );
 
-  }
+    }
 
-  fetchProducts(): void {
+    constructor(
 
-    const userId = 1;
+        private dashboardService: DashboardService,
+        private cdr: ChangeDetectorRef,
+        private router: Router
 
-    this.dashboardService
-        .getProducts(userId)
-        .subscribe({
+    ) { }
 
-           next: (res) => {
+    ngOnInit(): void {
 
-    this.products = res;
+        this.fetchDashboard();
+        this.cdr.detectChanges();
 
-    if (this.products.length > 0) {
+    }
 
-        this.selectedProductId = this.products[0].productId;
+    fetchDashboard(): void {
+
+        this.dashboardService.getDashboard()
+            .subscribe({
+
+                next: (res) => {
+                    console.log("Dashboard Response =", res);
+
+                    console.log("Role =", res.role);
+
+                    if (res.role === "ROLE_QA" || res.role === "ROLE_BA" || res.role === "ROLE_Developer") {
+
+                        console.log("Redirecting...");
+
+                        this.router.navigate(['/teamDashboard']);
+
+                        return;
+                    }
+
+                    this.dashboard = res;
+
+                    console.log("Dashboard Response:", res);
+
+                    this.loading = false;
+
+                    // Only after dashboard is loaded
+                    this.fetchProducts();
+
+                },
+
+                error: (err) => {
+
+                    this.loading = false;
+                    console.error(err);
+
+                }
+
+            });
+        this.cdr.detectChanges();
+
+    }
+
+    fetchProducts(): void {
+
+        this.dashboardService
+            .getProducts()
+            .subscribe({
+
+                next: (res) => {
+
+                    this.products = res;
+
+                    if (this.products.length > 0) {
+
+                        this.selectedProductId = this.products[0].productId;
+
+                        this.updateSelectedProduct();
+
+                        this.onProductChange();
+
+                    }
+
+                },
+
+                error: (err) => {
+
+                    console.error(err);
+
+                }
+
+            });
+        this.cdr.detectChanges();
+
+    }
+
+    onProductChange(): void {
 
         this.updateSelectedProduct();
 
-        this.onProductChange();
+        console.log("Fetching Analytics...");
+
+        this.fetchVelocity();
+
+        this.fetchBurndown();
+
+        this.fetchTeamCapacity();
+
+        this.fetchReleaseReadiness();
+
+        this.cdr.detectChanges();
 
     }
 
-},
+    fetchVelocity(): void {
 
-            error: (err) => {
 
-                console.error(err);
+        if (!this.selectedProductId) {
 
-            }
+            return;
 
-        });
+        }
 
-}
+        this.dashboardService.getVelocity(
+            this.selectedProductId
+        )
+            .subscribe({
 
-onProductChange(): void {
+                next: (res) => {
 
-  this.updateSelectedProduct();
+                    this.velocity = res;
 
-  console.log("Fetching Analytics...");
+                    console.log(
+                        "Velocity",
+                        res
+                    );
 
-  this.fetchVelocity();
+                },
 
-  this.fetchBurndown();
+                error: (err) => {
 
-  this.fetchTeamCapacity();
+                    console.error(err);
 
-  this.fetchReleaseReadiness();
+                }
 
-}
-
-fetchVelocity(): void {
-
-    const userId = 1;
-
-    if(!this.selectedProductId){
-
-        return;
+            });
+        this.cdr.detectChanges();
 
     }
 
-    this.dashboardService
-        .getVelocity(
-            userId,
+    fetchBurndown(): void {
+
+        this.dashboardService.getBurndown(
             this.selectedProductId
         )
-        .subscribe({
+            .subscribe({
 
-            next:(res)=>{
+                next: (res) => {
 
-                this.velocity = res;
+                    this.burndown = res;
 
-                console.log(
-                    "Velocity",
-                    res
-                );
+                },
 
-            },
+                error: (err) => {
 
-            error:(err)=>{
+                    console.error(err);
 
-                console.error(err);
+                }
 
-            }
+            });
+        this.cdr.detectChanges();
 
-        });
+    }
 
-}
+    fetchTeamCapacity(): void {
 
-fetchBurndown(): void {
+        if (!this.selectedProductId) {
+            return;
+        }
 
-    const userId = 1;
+        this.dashboardService
+            .getTeamCapacity(this.selectedProductId)
+            .subscribe({
 
-    this.dashboardService
-        .getBurndown(
-            userId,
-            this.selectedProductId
-        )
-        .subscribe({
+                next: (res: TeamCapacity) => {
 
-            next:(res)=>{
+                    this.teamCapacity = res;
 
-                this.burndown = res;
+                    console.log("Team Capacity", res);
 
-            },
+                },
 
-            error:(err)=>{
+                error: (err: any) => {
 
-                console.error(err);
+                    console.error(err);
 
-            }
+                }
 
-        });
+            });
+        this.cdr.detectChanges();
 
-}
+    }
 
-fetchTeamCapacity(): void {
+    fetchReleaseReadiness(): void {
 
-    const userId = 1;
+        if (!this.selectedProductId) {
+            return;
+        }
 
-    this.dashboardService
-        .getTeamCapacity(
-            userId,
-            this.selectedProductId
-        )
-        .subscribe({
+        this.dashboardService
+            .getReleaseReadiness(this.selectedProductId)
+            .subscribe({
 
-            next:(res)=>{
+                next: (res: ReleaseReadiness) => {
 
-                this.teamCapacity = res;
+                    this.releaseReadiness = res;
 
-            },
+                    console.log("Release Readiness", res);
 
-            error:(err)=>{
+                },
 
-                console.error(err);
+                error: (err: any) => {
 
-            }
+                    console.error(err);
 
-        });
+                }
 
-}
-
-fetchReleaseReadiness(): void {
-
-    const userId = 1;
-
-    this.dashboardService
-        .getReleaseReadiness(
-            userId,
-            this.selectedProductId
-        )
-        .subscribe({
-
-            next: (res) => {
-
-              console.log("Release Readiness:", res);
-
-              this.releaseReadiness = res;
-
-            },
-
-            error:(err)=>{
-
-                console.error(err);
-
-            }
-
-        });
-
-}
+            });
+        this.cdr.detectChanges();
+    }
 }

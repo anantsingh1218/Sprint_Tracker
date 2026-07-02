@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { Velocity } from '../../models/dashboard.model';
@@ -31,6 +31,18 @@ import { TeamCapacityCard } from '../team-capacity-card/team-capacity-card';
   styleUrl: './analytics-section.css'
 })
 export class AnalyticsSection {
+
+  constructor(private cdr : ChangeDetectorRef){
+    // this.cdr.detectChanges();
+  }
+
+  // ngOnInit(): void {
+  //   this.cdr.detectChanges(); 
+  // }
+
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   this.cdr.detectChanges();
+  // }
 
   @Input() velocity?: Velocity;
 

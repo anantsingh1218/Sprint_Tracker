@@ -1,14 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { TeamDashboardResponse } from '../features/dashboard/models/team-dashboard.model';
 import { ApiService } from '../core/apiService/api-service';
-import { DashboardResponse } from '../features/dashboard/models/dashboard.model';
-import { ProductDropdown } from '../features/dashboard/models/dashboard.model';
-import { Burndown } from '../features/dashboard/models/dashboard.model';
-import { TeamCapacity } from '../features/dashboard/models/dashboard.model';
-import { ReleaseReadiness } from '../features/dashboard/models/dashboard.model';
-import { Velocity } from '../features/dashboard/models/dashboard.model';
-
+import { Task } from '../features/dashboard/models/task.model';
+import { Story } from '../features/dashboard/models/story.model';
+import { Worklog } from '../features/dashboard/models/worklog.model';
+import {
+  DashboardResponse,
+  ProductDropdown,
+  Burndown,
+  TeamCapacity,
+  ReleaseReadiness,
+  Velocity
+} from '../features/dashboard/models/dashboard.model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,75 +23,121 @@ export class DashboardService {
     private api: ApiService
   ) {}
 
-  getDashboard(userId: number): Observable<DashboardResponse> {
+  getDashboard(): Observable<DashboardResponse> {
 
     return this.api.getRequest<DashboardResponse>(
-      `/dashboard/${userId}`
+      '/dashboard'
     );
 
   }
 
-  getProducts(userId: number): Observable<ProductDropdown[]> {
+  getTeamDashboard() {
+    return this.api.getRequest<TeamDashboardResponse>('/dashboard');
+}
+
+  getProducts(): Observable<ProductDropdown[]> {
 
     return this.api.getRequest<ProductDropdown[]>(
-        `/dashboard/products/${userId}`
+      '/dashboard/products'
     );
 
-}
+  }
 
-getBurndown(
-    userId:number,
-    productId:number
-){
-
-    return this.api.getRequest<Burndown>(
-        `/dashboard/burndown/${userId}`,
-        {
-            productId
-        }
-    );
-
-}
-getTeamCapacity(
-    userId:number,
-    productId:number
-){
-
-    return this.api.getRequest<TeamCapacity>(
-        `/dashboard/team-capacity/${userId}`,
-        {
-            productId
-        }
-    );
-
-}
-
-getReleaseReadiness(
-    userId:number,
-    productId:number
-){
-
-    return this.api.getRequest<ReleaseReadiness>(
-        `/dashboard/release/${userId}`,
-        {
-            productId
-        }
-    );
-
-}
-
-getVelocity(
-    userId: number,
-    productId: number
-){
+  getVelocity(productId: number): Observable<Velocity> {
 
     return this.api.getRequest<Velocity>(
-        `/dashboard/velocity/${userId}`,
-        {
-            productId
-        }
+      '/dashboard/velocity',
+      {
+        productId
+      }
+    );
+
+  }
+
+  getBurndown(productId: number): Observable<Burndown> {
+
+    return this.api.getRequest<Burndown>(
+      '/dashboard/burndown',
+      {
+        productId
+      }
+    );
+
+  }
+
+  getTeamCapacity(productId: number): Observable<TeamCapacity> {
+
+    return this.api.getRequest<TeamCapacity>(
+      '/dashboard/team-capacity',
+      {
+        productId
+      }
+    );
+
+  }
+
+  getReleaseReadiness(productId: number): Observable<ReleaseReadiness> {
+
+    return this.api.getRequest<ReleaseReadiness>(
+      '/dashboard/release',
+      {
+        productId
+      }
+    );
+
+  }
+
+  getSummary(productId: number) {
+
+    return this.api.getRequest(
+      '/dashboard/summary',
+      {
+        productId
+      }
+    );
+
+  }
+
+  exportDashboard(productId: number) {
+
+    return this.api.getRequest(
+      '/dashboard/export',
+      {
+        productId
+      }
+    );
+
+  }
+
+  getMyTasks() {
+
+    return this.api.getRequest<Task[]>(
+        '/dashboard/tasks'
     );
 
 }
 
+getMyStories() {
+
+    return this.api.getRequest<any>(
+        '/dashboard/stories'
+    );
+
+}
+
+getFocusTask() {
+
+    return this.api.getRequest<Task>(
+        '/dashboard/focus-task'
+    );
+
+}
+
+getRecentWorklogs() {
+
+    return this.api.getRequest<Worklog[]>(
+        '/dashboard/recent-worklogs'
+    );
+
+}
 }

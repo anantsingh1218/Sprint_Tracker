@@ -35,13 +35,34 @@ export class ApiService {
     return params;
   }
 
-  getRequest<T>(endpoint: string, requestParams?: Record<string, any>): Observable<T> {
-    return this.http
-      .get<T>(`${this.apiUrl}${endpoint}`, {
-        params: this.buildParams(requestParams),
-      })
-      .pipe(catchError(this.apiErrorHandler));
+  getRequest<T>(
+  endpoint: string,
+  requestParams?: Record<string, any>
+): Observable<T> {
+
+  let headers = new HttpHeaders();
+
+  const jwtToken = this.authService.getToken();
+
+  if (jwtToken) {
+    headers = headers.set(
+      'Authorization',
+      'Bearer ' + jwtToken
+    );
   }
+
+  return this.http
+    .get<T>(
+      `${this.apiUrl}${endpoint}`,
+      {
+        headers,
+        params: this.buildParams(requestParams),
+      }
+    )
+    .pipe(
+      catchError(this.apiErrorHandler)
+    );
+}
 
   postRequest<T>(
     endpoint: string,

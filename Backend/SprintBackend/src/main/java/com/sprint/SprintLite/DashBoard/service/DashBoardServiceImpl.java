@@ -11,7 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -31,19 +34,43 @@ public class DashBoardServiceImpl
 
     private final BugRepository bugRepository;
 
-    private final UserProductMappingRepository
-            userProductMappingRepository;
+    private final UserProductMappingRepository userProductMappingRepository;
 
     private final FeatureRepository featureRepository;
 
     private final ProductRepository productRepository;
 
-    private final
-    BoardService boardService;
+    private final BoardService boardService;
 
-    private final
-    DashboardMetricsService
-            metricsService;
+    private final DashboardMetricsService metricsService;
+
+    private final WorklogRepository worklogRepository;
+
+
+    private Users getLoggedInUser() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        System.out.println("Authentication = " + authentication);
+
+        System.out.println("Principal = " + authentication.getPrincipal());
+
+        System.out.println("Name = " + authentication.getName());
+
+        System.out.println("Authorities = " + authentication.getAuthorities());
+
+        String username = authentication.getName();
+
+        return usersRepository
+                .findByUsername(username)
+                .orElseThrow(() ->
+                        new RuntimeException("Authenticated user not found"));
+
+    }
+
 
     private Sprint getActiveSprint(Users user, Integer productId) {
 
@@ -80,12 +107,9 @@ public class DashBoardServiceImpl
     }
 
     @Override
-    public DashboardResponseDto getDashboard(Integer userId) {
+    public DashboardResponseDto getDashboard() {
 
-        Users user = usersRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+        Users user = getLoggedInUser();
 
         Role role = user.getRole();
 
@@ -93,9 +117,11 @@ public class DashBoardServiceImpl
                 role == Role.ROLE_Scrum_Master) {
 
             return getPMDashboard(user);
+
         }
 
         return getTeamDashboard(user);
+
     }
 
     private DashboardResponseDto getPMDashboard(Users user) {
@@ -275,14 +301,10 @@ public class DashBoardServiceImpl
     @Override
     public ReleaseReadinessDto
     getReleaseReadiness(
-            Integer userId,
             Integer productId
     ){
 
-        Users user =
-                usersRepository.findById(userId)
-                        .orElseThrow(() ->
-                                new RuntimeException("User not found"));
+        Users user = getLoggedInUser();
 
         var mapping =
                 userProductMappingRepository
@@ -369,13 +391,9 @@ public class DashBoardServiceImpl
     @Override
     public TeamCapacityDto
     getTeamCapacity(
-            Integer userId,
             Integer productId
     ){
-        Users user =
-                usersRepository.findById(userId)
-                        .orElseThrow(() ->
-                                new RuntimeException("User not found"));
+        Users user = getLoggedInUser();
 
         Sprint sprint =
                 getActiveSprint(user, productId);
@@ -421,13 +439,10 @@ public class DashBoardServiceImpl
     @Override
     public VelocityDto
     getVelocity(
-            Integer userId,
             Integer productId
     ){
 
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+        Users user = getLoggedInUser();
 
         Sprint sprint = getActiveSprint(user, productId);
 
@@ -469,14 +484,10 @@ public class DashBoardServiceImpl
     @Override
     public BurndownDto
     getBurndown(
-            Integer userId,
             Integer productId
     ){
 
-        Users user =
-                usersRepository.findById(userId)
-                        .orElseThrow(() ->
-                                new RuntimeException("User not found"));
+        Users user = getLoggedInUser();
 
         Sprint sprint =
                 getActiveSprint(user, productId);
@@ -536,39 +547,28 @@ public class DashBoardServiceImpl
 
     @Override
     public DashboardSummaryDto
-    getSummary(
-            Integer userId, Integer productId
-    ){
+    getSummary(Integer productId){
 
         return new DashboardSummaryDto(
 
-                getReleaseReadiness(
-                        userId, productId
-                ),
+                getReleaseReadiness(productId),
 
-                getTeamCapacity(
-                        userId, productId
-                ),
+                getTeamCapacity(productId),
 
-                getVelocity(
-                        userId, productId
-                ),
+                getVelocity(productId),
 
-                getBurndown(
-                        userId, productId
-                )
+                getBurndown(productId)
+
         );
     }
 
     @Override
     public ExportDashboardDto
-    exportDashboard(
-            Integer userId, Integer productId
-    ){
+    exportDashboard(Integer productId){
 
         DashboardSummaryDto summary =
                 getSummary(
-                        userId, productId
+                        productId
                 );
 
         return new ExportDashboardDto(
@@ -582,10 +582,12 @@ public class DashBoardServiceImpl
     }
 
     @Override
-    public Object getTasks(
+    public Page<TaskListDto> getTasks(
             Integer page,
             Integer size
-    ){
+    ) {
+
+        Users user = getLoggedInUser();
 
         Pageable pageable =
                 PageRequest.of(
@@ -594,37 +596,55 @@ public class DashBoardServiceImpl
                 );
 
         return taskRepository
-                .findAll(
+                .findByUserid(
+                        user,
                         pageable
                 )
-                .map(
+                .map(task ->
 
-                        task ->
+                        TaskListDto.builder()
 
-                                new TaskListDto(
+                                .id(task.getId())
 
-                                        task.getId(),
+                                .title(task.getTitle())
 
-                                        task.getTitle(),
-
-                                        task.getTaskstatus() != null
-                                                ?
-                                                task.getTaskstatus().name()
-                                                :
-                                                "UNKNOWN"
-
+                                .storyName(
+                                        task.getStoryid().getTitle()
                                 )
+
+                                .sprintName(
+                                        task.getSprintid().getSprintName()
+                                )
+
+                                .status(
+                                        task.getTaskstatus().name()
+                                )
+
+                                .priority(
+                                        task.getPriority().name()
+                                )
+
+                                .originalEstimateHours(
+                                        task.getOriginalestimatehours()
+                                )
+
+                                .remainingEstimateHours(
+                                        task.getRemainingestimatehours()
+                                )
+
+                                .build()
 
                 );
 
     }
 
     @Override
-    public Page<StoryListDto>
-    getStories(
+    public Page<StoryListDto> getStories(
             Integer page,
             Integer size
     ){
+
+        Users user = getLoggedInUser();
 
         Pageable pageable =
                 PageRequest.of(
@@ -633,21 +653,95 @@ public class DashBoardServiceImpl
                 );
 
         return storyRepository
-                .findAll(
+                .findByUserid(
+                        user,
                         pageable
                 )
-                .map(
-                        story ->
-                                new StoryListDto(
-                                        story.getId(),
-                                        story.getTitle(),
-                                        story.getStorystatus()!=null
-                                                ?
-                                                story.getStorystatus().name()
-                                                :
-                                                "UNKNOWN"
-                                )
-                );
+                .map(story -> {
+
+                    Long totalTasks =
+                            taskRepository.countByStoryid(
+                                    story
+                            );
+
+                    Long completedTasks =
+                            taskRepository.countByStoryidAndTaskstatus(
+                                    story,
+                                    Status.DONE
+                            );
+
+                    Integer progress =
+                            totalTasks == 0
+                                    ? 0
+                                    : (int)((completedTasks * 100) / totalTasks);
+
+                    return StoryListDto.builder()
+
+                            .id(
+                                    story.getId()
+                            )
+
+                            .title(
+                                    story.getTitle()
+                            )
+
+                            .featureName(
+
+                                    story.getFeatureid() != null
+
+                                            ?
+
+                                            story.getFeatureid().getTitle()
+
+                                            :
+
+                                            "No Feature"
+
+                            )
+
+                            .sprintName(
+
+                                    story.getSprintid() != null
+
+                                            ?
+
+                                            story.getSprintid().getSprintName()
+
+                                            :
+
+                                            "No Sprint"
+
+                            )
+
+                            .status(
+
+                                    story.getStorystatus() != null
+
+                                            ?
+
+                                            story.getStorystatus().name()
+
+                                            :
+
+                                            "UNKNOWN"
+
+                            )
+
+                            .totalTasks(
+                                    totalTasks.intValue()
+                            )
+
+                            .completedTasks(
+                                    completedTasks.intValue()
+                            )
+
+                            .progress(
+                                    progress
+                            )
+
+                            .build();
+
+                });
 
     }
 
@@ -871,11 +965,9 @@ public class DashBoardServiceImpl
     }
 
     @Override
-    public List<ProductDropdownDto> getProducts(Integer userId) {
+    public List<ProductDropdownDto> getProducts() {
 
-        Users user = usersRepository.findById(userId)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
+        Users user = getLoggedInUser();
 
         List<UserProductMapping> mappings =
                 userProductMappingRepository.findByUserid(user);
@@ -887,6 +979,145 @@ public class DashBoardServiceImpl
                 ))
                 .sorted(Comparator.comparing(ProductDropdownDto::getProductName))
                 .toList();
+    }
+
+    @Override
+    public TaskListDto getFocusTask() {
+
+        Users user = getLoggedInUser();
+
+        List<Task> tasks =
+                taskRepository.findByUserid(user);
+
+        Task focusTask =
+                tasks.stream()
+
+                        .filter(task ->
+                                task.getTaskstatus() != Status.DONE
+                        )
+
+                        .sorted((t1, t2) -> {
+
+                            Integer p1 = switch (t1.getPriority()) {
+                                case CRITICAL -> 4;
+                                case HIGH -> 3;
+                                case MEDIUM -> 2;
+                                case LOW -> 1;
+                            };
+
+                            Integer p2 = switch (t2.getPriority()) {
+                                case CRITICAL -> 4;
+                                case HIGH -> 3;
+                                case MEDIUM -> 2;
+                                case LOW -> 1;
+                            };
+
+                            return p2.compareTo(p1);
+
+                        })
+
+                        .findFirst()
+
+                        .orElse(null);
+
+        if (focusTask == null) {
+
+            return null;
+
+        }
+
+        return TaskListDto.builder()
+
+                .id(
+                        focusTask.getId()
+                )
+
+                .title(
+                        focusTask.getTitle()
+                )
+
+                .storyName(
+                        focusTask.getStoryid().getTitle()
+                )
+
+                .sprintName(
+                        focusTask.getSprintid().getSprintName()
+                )
+
+                .status(
+                        focusTask.getTaskstatus().name()
+                )
+
+                .priority(
+                        focusTask.getPriority().name()
+                )
+
+                .originalEstimateHours(
+                        focusTask.getOriginalestimatehours()
+                )
+
+                .remainingEstimateHours(
+                        focusTask.getRemainingestimatehours()
+                )
+
+                .build();
+
+    }
+
+    @Override
+    public List<WorklogDto> getRecentWorklogs() {
+
+        Users user = getLoggedInUser();
+
+        List<Worklog> logs =
+                worklogRepository
+                        .findTop5ByUseridOrderByWorkdateDesc(user);
+
+        System.out.println("Recent Logs = " + logs.size());
+
+        return logs.stream()
+
+                .map(worklog ->
+
+                        WorklogDto.builder()
+
+                                .taskId(
+                                        worklog.getTaskid() != null
+                                                ? worklog.getTaskid().getId()
+                                                : null
+                                )
+
+                                .taskTitle(
+                                        worklog.getTaskid() != null
+                                                ? worklog.getTaskid().getTitle()
+                                                : "General Work"
+                                )
+
+                                .storyTitle(
+                                        worklog.getTaskid() != null &&
+                                                worklog.getTaskid().getStoryid() != null
+                                                ? worklog.getTaskid().getStoryid().getTitle()
+                                                : "-"
+                                )
+
+                                .hoursSpent(
+                                        worklog.getHoursspent()
+                                )
+
+                                .workDate(
+                                        worklog.getWorkdate()
+                                )
+
+                                .remarks(
+                                        worklog.getRemarks()
+                                )
+
+                                .build()
+
+                )
+
+                .toList();
+
     }
 
 }
