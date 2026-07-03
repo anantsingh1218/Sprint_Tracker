@@ -1,7 +1,10 @@
 package com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl;
 
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ISprintService;
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.dto.CreateSprintRequest;
+import com.sprint.SprintLite.dto.SprintResponseDto;
+import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
@@ -10,6 +13,7 @@ import com.sprint.SprintLite.repository.SprintRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,55 +25,127 @@ public class SprintServiceImpl implements ISprintService {
 
 
     @Override
-    public Sprint createSprint(CreateSprintRequest request) {
+    public SprintResponseDto createSprint(CreateSprintRequest request) {
         Product product = productRepository.findById(Math.toIntExact(request.getProductId()))
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
         Sprint sprint = new Sprint();
         sprint.setSprintName(request.getSprintName());
+        sprint.setStartDate(request.getStartDate());
+        sprint.setEndDate(request.getEndDate());
         sprint.setSprintDuration(Math.toIntExact(request.getSprintDuration()));
-//        sprint.setProduct(product);
-//        sprint.setCreatedAt(LocalDateTime.now());
+        sprint.setStatus(request.getStatus());
+        sprint.setProductid(product);
 
-        return sprintRepository.save(sprint);
+        Sprint savedSprint = sprintRepository.save(sprint);
+
+        SprintResponseDto response = new SprintResponseDto();
+        response.setId(savedSprint.getId());
+        response.setSprintName(savedSprint.getSprintName());
+        response.setStartDate(savedSprint.getStartDate());
+        response.setEndDate(savedSprint.getEndDate());
+        response.setSprintDuration(savedSprint.getSprintDuration());
+        response.setStatus(savedSprint.getStatus());
+        response.setId(savedSprint.getId());
+
+        return response;
     }
 
     @Override
-    public Sprint getSprintById(Long id) {
-        return sprintRepository.findById(Math.toIntExact(id)).orElseThrow(() -> new RuntimeException("Sprint not found"));
+    public SprintResponseDto getSprintById(Long id) {
+        Sprint sprint = sprintRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+
+        return mapToDto(sprint);
     }
 
     @Override
-    public List<Sprint> getAllSprints() {
-        return sprintRepository.findAll();
+    public List<SprintResponseDto> getAllSprints() {
+//        return sprintRepository.findAll()
+//                .stream()
+//                .map(this::mapToDto)
+//                .toList();
+        List<SprintResponseDto> sprintResponseDtoList = new ArrayList<>();
+        List<Sprint> sprintList = sprintRepository.findAll();
+        sprintList.forEach(sprint -> {
+            SprintResponseDto sprintResponseDto = mapToDto(sprint);
+            sprintResponseDtoList.add(sprintResponseDto);
+        });
+        return sprintResponseDtoList;
     }
-
 //    @Override
 //    public List<Sprint> getSprintsByProductId(Long productId) {
 //        return sprintRepository.findByProductId(productId);
 //    }
 
     @Override
-    public Sprint updateSprint(Long id,CreateSprintRequest request) {
-        Sprint sprint = getSprintById(id);
+    public Sprint updateSprint(Long id, CreateSprintRequest request) {
 
-        sprint.setSprintName(request.getSprintName());
-        sprint.setSprintDuration(Math.toIntExact(request.getSprintDuration()));
-//        sprint.setUpdatedAt(LocalDateTime.now());
+        Sprint sprint = sprintRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+
+        if (request.getSprintName() != null && !request.getSprintName().isEmpty()) {
+            sprint.setSprintName(request.getSprintName());
+        }
+
+
+        if (request.getStartDate() != null) {
+            sprint.setStartDate(request.getStartDate());
+        }
+
+        if (request.getEndDate() != null) {
+            sprint.setEndDate(request.getEndDate());
+        }
+
+        if (request.getSprintDuration() != null) {
+            sprint.setSprintDuration(Math.toIntExact(request.getSprintDuration()));
+        }
+
+        if (request.getStatus() != null) {
+            sprint.setStatus(request.getStatus());
+        }
+
+        if (request.getProductId() != null) {
+            Product product = productRepository.findById(request.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            sprint.setProductid(product);
+        }
+
         return sprintRepository.save(sprint);
     }
 
-    @Override
-    public Sprint updateSprintStatus(Long id, SprintStatus status) {
-        Sprint sprint = getSprintById(id);
-        sprint.setStatus(status);
-//        sprint.setUpdatedAt(LocalDateTime.now());
-        return sprintRepository.save(sprint);
+    public SprintResponseDto mapToDto(Sprint sprint) {
+        return new SprintResponseDto(
+                sprint.getId(),
+                sprint.getSprintName(),
+                sprint.getProductid() != null
+                        ? sprint.getProductid().getId()
+                        : null,
+                sprint.getStartDate(),
+                sprint.getEndDate(),
+                sprint.getSprintDuration(),
+                sprint.getStatus()
+        );
+    }
 
+    @Override
+    public SprintResponseDto updateSprintStatus(Long id, SprintStatus status) {
+        Sprint sprint = sprintRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+
+        sprint.setStatus(status);
+
+        Sprint updatedSprint = sprintRepository.save(sprint);
+
+        return mapToDto(updatedSprint);
     }
 
     @Override
     public void deleteSprint(Long id) {
-        Sprint sprint = getSprintById(id);
+        Sprint sprint = sprintRepository.findById(id.intValue())
+                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+
         sprintRepository.delete(sprint);
     }
 }

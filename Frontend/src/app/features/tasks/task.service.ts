@@ -1,11 +1,28 @@
-/*import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
 
-  private tasks: any[] = [];
+  private tasks: any[] = [
+  {
+    id: '1',
+    title: 'Gather Requirements',
+    description: 'Collect lead requirements',
+    status: 'Done',
+    priority: 'Medium',
+    sprintId: '1'
+  },
+  {
+    id: '2',
+    title: 'Design Lead Screen',
+    description: 'Create UI for lead form',
+    status: 'In Progress',
+    priority: 'High',
+    sprintId: '1'
+  }
+];
 
   getTasks() {
     return this.tasks;
@@ -44,4 +61,4 @@ export class TaskService {
       };
     }
   }
-} */
+}

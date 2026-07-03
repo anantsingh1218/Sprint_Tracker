@@ -24,4 +24,6 @@ public interface BugRepository extends JpaRepository<Bug, Integer> {
             Instant start,
             Instant end
     );
+
+    List<Bug> findByTitleContainingIgnoreCase(String keyword);
 }

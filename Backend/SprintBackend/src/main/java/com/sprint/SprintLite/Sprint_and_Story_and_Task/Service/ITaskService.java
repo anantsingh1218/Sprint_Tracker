@@ -1,20 +1,20 @@
 package com.sprint.SprintLite.Sprint_and_Story_and_Task.Service;
 
 import com.sprint.SprintLite.dto.CreateTaskRequest;
-import com.sprint.SprintLite.entity.Task;
+import com.sprint.SprintLite.dto.TaskResponseDto;
 
 import java.util.List;
 
 public interface ITaskService {
-    Task createTask(CreateTaskRequest request);
+    TaskResponseDto createTask(CreateTaskRequest request);
 
-    Task getTaskById(Long id);
+    TaskResponseDto getTaskById(Long id);
 
-    List<Task> getAllTasks();
+    List<TaskResponseDto> getAllTasks();
 
-    List<Task> getTasksBySprintId(Long sprintId);
+    List<TaskResponseDto> getTasksBySprintId(Long sprintId);
 
-    Task updateTask(Integer id, CreateTaskRequest request);
+    TaskResponseDto updateTask(Integer id, CreateTaskRequest request);
 
     void deleteTask(Long id);
 }

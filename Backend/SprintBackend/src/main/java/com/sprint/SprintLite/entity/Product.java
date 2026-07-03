@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,7 +35,9 @@ public class Product extends BaseEntity {
     @NonNull
     @OneToMany(mappedBy = "productid")
     private Set<UserProductMapping> userproductmappings = new LinkedHashSet<>();
+
     @NonNull
+    @JsonIgnore
     @OneToMany(mappedBy = "productid")
     private Set<Sprint> sprints = new LinkedHashSet<>();
 

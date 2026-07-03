@@ -2,6 +2,7 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl;
 
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.IStoryService;
 import com.sprint.SprintLite.dto.CreateStoryRequest;
+import com.sprint.SprintLite.dto.StoryResponseDto;
 import com.sprint.SprintLite.entity.*;
 import com.sprint.SprintLite.entity.enums.EntityType;
 import com.sprint.SprintLite.repository.*;
@@ -22,7 +23,7 @@ public class StoryServiceImpl implements IStoryService {
     private final CommentRepository commentRepository;
 
     @Override
-    public Story createStory(CreateStoryRequest request) {
+    public StoryResponseDto createStory(CreateStoryRequest request) {
 
         // Get logged-in user from JWT/Security Context
         String currentUsername = SecurityContextHolder.getContext()
@@ -56,13 +57,22 @@ public class StoryServiceImpl implements IStoryService {
         story.setStorypoints(request.getStoryPoints());
         story.setCreatedBy(currentUsername);
         story.setCreatedAt(Instant.now());
+        Story savedStory = storyRepository.save(story);
 
-
-        return storyRepository.save(story);
+        StoryResponseDto response = new StoryResponseDto();
+        response.setTitle(story.getTitle());
+        response.setBody(story.getBody());
+        response.setFeatureId(feature.getId());
+        response.setSprintId(sprint.getId());
+        response.setUserId(assignedUser.getId());
+        response.setStoryStatus(story.getStorystatus());
+        response.setPriority(story.getPriority());
+        response.setStoryPoints(story.getStorypoints());
+        return response;
     }
 
     @Override
-    public Story updateStory(Integer id, CreateStoryRequest story) {
+    public StoryResponseDto updateStory(Integer id, CreateStoryRequest story) {
 
         Story existingStory = storyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Story not found"));
@@ -107,6 +117,8 @@ public class StoryServiceImpl implements IStoryService {
 
         existingStory.setUpdatedBy(username);
 
+        Comment savedComment = null;
+
         if (story.getComments() != null && !story.getComments().isEmpty()) {
             Comment comment = new Comment();
             comment.setComment(story.getComments());
@@ -114,10 +126,25 @@ public class StoryServiceImpl implements IStoryService {
             comment.setEntitytype(EntityType.STORY);
             comment.setEntityid(id);
             comment.setCreatedAt(Instant.now());
-            commentRepository.save(comment);
+
+            savedComment = commentRepository.save(comment);
         }
 
-        return storyRepository.save(existingStory);
+        Story updatedStory = storyRepository.save(existingStory);
+
+        StoryResponseDto response = new StoryResponseDto();
+        response.setTitle(updatedStory.getTitle());
+        response.setBody(updatedStory.getBody());
+        response.setFeatureId(updatedStory.getFeatureid().getId());
+        response.setSprintId(updatedStory.getSprintid().getId());
+        response.setUserId(updatedStory.getUserid().getId());
+        response.setStoryStatus(updatedStory.getStorystatus());
+        response.setPriority(updatedStory.getPriority());
+        response.setStoryPoints(updatedStory.getStorypoints());
+        if (savedComment != null) {
+            response.setComments(savedComment.getComment());
+        }
+        return response;
 
     }
 }

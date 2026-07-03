@@ -30,6 +30,10 @@ createDSU(
   );
 }
 
+getDsuById(id: string) {
+  return this.http.get(`${this.baseUrl}/${id}`);
+}
+
 getReport(date: string): Observable<any> {
 
   const token = localStorage.getItem('jwtToken');

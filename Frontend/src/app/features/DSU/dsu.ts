@@ -1,4 +1,5 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DsuService } from './dsu.service';
@@ -14,6 +15,8 @@ export class DsuComponent {
 
   entityType: string = '';
   entityId: number = 0;
+
+  selectedDsu: any = null;
 
 autoStartDate: string = '';
 autoEndDate: string = '';
@@ -32,9 +35,10 @@ autoDsuData: any = null;
   successMessage: string = '';
 
   constructor(
-    private dsuService: DsuService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  private dsuService: DsuService,
+  private cdr: ChangeDetectorRef,
+  private route: ActivatedRoute
+) {}
 
   submitDSU() {
   this.dsuService.createDSU(
@@ -83,6 +87,23 @@ autoDsuData: any = null;
     }
   });
 }
+ngOnInit(): void {
+  const dsuId = this.route.snapshot.paramMap.get('id');
+
+  if (dsuId) {
+    this.dsuService.getDsuById(dsuId).subscribe({
+      next: (res: any) => {
+        this.selectedDsu = res;
+        console.log('Selected DSU:', res);
+      },
+      error: (err: any) => {
+        console.error('Error loading DSU:', err);
+      }
+    });
+  }
+}
+
+
 
   fetchReport() {
     this.dsuService.getReport(this.reportDate)

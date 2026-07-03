@@ -1,21 +1,23 @@
 package com.sprint.SprintLite.dto;
 
 import com.sprint.SprintLite.entity.enums.SprintStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
-public class CreateSprintRequest {
+@AllArgsConstructor
+@NoArgsConstructor
+public class SprintResponseDto {
+    private Integer id;
     private String sprintName;
-    private String description;
-
     private Integer productId;
-
     private LocalDate startDate;
     private LocalDate endDate;
-
-    private Long sprintDuration;
-
+    private Integer sprintDuration;
     private SprintStatus status;
+
+
 }

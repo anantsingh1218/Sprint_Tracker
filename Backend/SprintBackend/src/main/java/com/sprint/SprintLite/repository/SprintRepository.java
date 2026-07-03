@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SprintRepository extends JpaRepository<Sprint, Integer> {
 //    List<Sprint> findByProductId(Long productId);
+     List<Sprint> findBySprintNameContainingIgnoreCase(String sprintName);
 }

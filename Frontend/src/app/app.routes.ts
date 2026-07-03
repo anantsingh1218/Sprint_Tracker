@@ -36,6 +36,7 @@ export const routes: Routes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'sprints', component: Sprint },
       { path: 'tasks', component: Tasks },
+      { path: 'tasks/:id', component: Tasks },
       { path: 'backlog', component: Backlog },
       { path: 'board', component: Board },
       { path: 'story', component: StoryList },
@@ -43,6 +44,11 @@ export const routes: Routes = [
       { path: 'feature', component: FeatureList },
       { path: 'bugs', component: BugList },
       { path: 'profile', component: Profile },
+      { path: 'dsu/:id', component: DsuComponent },
+      {
+  path: 'sprints/:id',
+  component: Sprint
+}
     ],
   },
 

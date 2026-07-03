@@ -12,4 +12,6 @@ public interface StoryRepository extends JpaRepository<Story, Integer> {
             Instant start,
             Instant end
     );
+
+    List<Story> findByTitleContainingIgnoreCase(String keyword);
 }

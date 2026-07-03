@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
-import { SprintService } from '../../core/sprint/sprint';
-import { TaskService } from '../../core/task/task';
+import { SprintService } from './sprint.service';
+import { TaskService } from '../tasks/task.service';
 
 @Component({
   selector: 'app-sprint',
@@ -12,7 +13,61 @@ import { TaskService } from '../../core/task/task';
   templateUrl: './sprint.html',
   styleUrl: './sprint.css',
 })
-export class Sprint {
+export class Sprint implements OnInit {
+
+  sprints: any[] = [];
+  selectedSprint: any = null;
+  showSprintModal = false;
+
+  newSprint = {
+    sprintName: '',
+    description: '',
+    productId: null,
+    startDate: '',
+    endDate: '',
+    sprintDuration: 0,
+    status: 'Planned',
+  };
+
+  constructor(
+    private sprintService: SprintService,
+    private taskService: TaskService,
+    private route: ActivatedRoute
+  ) {}
+
+
+  ngOnInit(): void {
+  this.loadSprints();
+
+  this.route.paramMap.subscribe(params => {
+    const sprintId = params.get('id');
+
+    if (sprintId) {
+      this.sprintService.getSprintById(Number(sprintId)).subscribe({
+        next: (res: any) => {
+          this.selectedSprint = res;
+        },
+        error: (err: any) => {
+          console.error(err);
+        }
+      });
+    } else {
+      this.selectedSprint = null;
+    }
+  });
+}
+
+  loadSprints(): void {
+    this.sprintService.getSprints().subscribe({
+      next: (res: any[]) => {
+        this.sprints = res;
+      },
+      error: (err: any) => {
+        console.error('Error loading sprints:', err);
+      }
+    });
+  }
+
   getTasksForSprint(sprintId: string) {
     return this.taskService.getTasksBySprint(sprintId) || [];
   }
@@ -26,7 +81,7 @@ export class Sprint {
   }
 
   get completedSprints() {
-    return this.sprints.filter((s) => s.status === 'Completed').length;
+    return this.sprints.filter((s: any) => s.status === 'Completed').length;
   }
 
   getSprintProgress(sprintId: string) {
@@ -34,29 +89,9 @@ export class Sprint {
 
     if (!tasks || tasks.length === 0) return 0;
 
-    const done = tasks.filter((t) => t.status === 'Done').length;
+    const done = tasks.filter((t: any) => t.status === 'Done').length;
 
     return Math.round((done / tasks.length) * 100);
-  }
-
-  showSprintModal = false;
-
-  newSprint = {
-    name: '',
-    description: '',
-    startDate: '',
-    endDate: '',
-    duration: 0,
-    status: 'Planned',
-  };
-
-  constructor(
-    private sprintService: SprintService,
-    private taskService: TaskService,
-  ) {}
-
-  get sprints() {
-    return this.sprintService.getSprints();
   }
 
   openSprintForm() {
@@ -69,7 +104,8 @@ export class Sprint {
 
   calculateDuration(): void {
     if (!this.newSprint.startDate || !this.newSprint.endDate) {
-      this.newSprint.duration = 0;
+      this.newSprint.sprintDuration = 0;
+      return;
     }
 
     const start = new Date(this.newSprint.startDate);
@@ -78,33 +114,28 @@ export class Sprint {
     const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    this.newSprint.duration = diffDays;
+    this.newSprint.sprintDuration = diffDays;
   }
 
   onDateChange() {
-    if (!this.newSprint.startDate || !this.newSprint.endDate) {
-      return;
-    }
+    if (!this.newSprint.startDate || !this.newSprint.endDate) return;
 
-    // Only auto-calculate duration if user hasn't entered one
-    if (!this.newSprint.duration) {
+    if (!this.newSprint.sprintDuration) {
       const start = new Date(this.newSprint.startDate);
       const end = new Date(this.newSprint.endDate);
 
       const diffTime = end.getTime() - start.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      this.newSprint.duration = diffDays;
+      this.newSprint.sprintDuration = diffDays;
     }
   }
 
   onDurationChange() {
-    if (!this.newSprint.startDate || !this.newSprint.duration) {
-      return;
-    }
+    if (!this.newSprint.startDate || !this.newSprint.sprintDuration) return;
 
     const start = new Date(this.newSprint.startDate);
-    const duration = this.newSprint.duration;
+    const duration = this.newSprint.sprintDuration;
 
     const end = new Date(start);
     end.setDate(start.getDate() + duration);
@@ -113,19 +144,28 @@ export class Sprint {
   }
 
   createSprint() {
-    if (!this.newSprint.name) return;
+    if (!this.newSprint.sprintName) return;
+    console.log(this.newSprint);
+    this.sprintService.addSprint(this.newSprint).subscribe({
+      next: () => {
+        this.loadSprints();
 
-    this.sprintService.addSprint(this.newSprint);
+        this.newSprint = {
+          sprintName: '',
+          description: '',
+          productId:null,
+          startDate: '',
+          endDate: '',
+          sprintDuration: 0,
+          status: 'Planned',
+        };
 
-    this.newSprint = {
-      name: '',
-      description: '',
-      startDate: '',
-      endDate: '',
-      duration: 0,
-      status: 'Planned',
-    };
-
-    this.showSprintModal = false;
+        this.showSprintModal = false;
+      },
+      error: (err: any) => {
+        console.error('Error creating sprint:', err);
+      }
+    });
+    this.closeSprintForm()
   }
 }

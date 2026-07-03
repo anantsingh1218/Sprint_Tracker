@@ -13,4 +13,6 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
             Instant start,
             Instant end
     );
+
+    List<Task> findByTitleContainingIgnoreCase(String keyword);
 }
