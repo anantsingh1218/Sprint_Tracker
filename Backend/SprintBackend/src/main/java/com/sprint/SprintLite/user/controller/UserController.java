@@ -5,8 +5,8 @@ import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.entity.enums.Role;
 import com.sprint.SprintLite.repository.UsersRepository;
 import com.sprint.SprintLite.security.util.JwtUtil;
-import com.sprint.SprintLite.util.ApplicationUtility;
 import com.sprint.SprintLite.util.PasswordGenerator;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.password.CompromisedPasswordChecker;
-import org.springframework.security.authentication.password.CompromisedPasswordDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -154,6 +155,20 @@ public class UserController {
                 "initialized", userRepository.count() > 0
         );
     }
+
+//    @GetMapping("/user/getAllUsers")
+//    public ResponseEntity<List<GetAllResponseDto>> getAllUsers(){
+//        List<Users> usersList = userRepository.findAll();
+//        if (usersList.isEmpty()){
+//            throw new EntityNotFoundException("No Users registered");
+//        }
+//        List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
+//        usersList.forEach(users -> {
+//            GetAllResponseDto getAllResponseDto = new GetAllResponseDto(users.getId(), users.getUsername());
+//            getAllResponseDtoList.add(getAllResponseDto);
+//        });
+//        return ResponseEntity.ok(getAllResponseDtoList);
+//    }
 
     @GetMapping("/users/all")
     public ResponseEntity<List<UserDropdownDto>> getAllUsers() {

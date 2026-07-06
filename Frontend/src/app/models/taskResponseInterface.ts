@@ -1,4 +1,4 @@
-import { WorkStatus } from "./workItem";
+import { Priority, WorkStatus } from "./workItem";
 
 export interface ITasksResponse{
     id: number,
@@ -8,7 +8,7 @@ export interface ITasksResponse{
     storyId: number,
     assignedTo: string,
     taskStatus: WorkStatus,
-    taskPriority: string,
+    taskPriority: Priority,
     sprintName: string,
     estimatedHours: number,
     remainingHours: number

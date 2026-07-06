@@ -2,13 +2,18 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ISprintService;
 import com.sprint.SprintLite.dto.CreateSprintRequest;
+import com.sprint.SprintLite.dto.GetAllResponseDto;
+import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.dto.SprintResponseDto;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
+import com.sprint.SprintLite.repository.SprintRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -17,6 +22,7 @@ import java.util.List;
 public class SprintController {
 
     private final ISprintService sprintService;
+    private final SprintRepository sprintRepository;
 
     // CREATE
     @PostMapping("/add")
@@ -47,6 +53,21 @@ public class SprintController {
     }
 
     // UPDATE FULL
+    @GetMapping("/getAllSprints")
+    public ResponseEntity<List<GetAllResponseDto>> getAllProducts(){
+        List<Sprint> sprintList = sprintRepository.findAll();
+        if (sprintList.isEmpty()){
+            throw new EntityNotFoundException("No Sprints registered");
+        }
+        List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
+        sprintList.forEach(sprint -> {
+            GetAllResponseDto getAllResponseDto = new GetAllResponseDto(sprint.getId(), sprint.getSprintName());
+            getAllResponseDtoList.add(getAllResponseDto);
+        });
+        return ResponseEntity.ok(getAllResponseDtoList);
+    }
+
+    // Update Sprint
     @PutMapping("/{id}")
     public ResponseEntity<Sprint> updateSprint(
             @PathVariable Long id,
@@ -70,3 +91,4 @@ public class SprintController {
         return ResponseEntity.ok("Sprint deleted successfully");
     }
 }
+

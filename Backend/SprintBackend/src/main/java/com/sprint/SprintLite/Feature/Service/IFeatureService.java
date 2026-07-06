@@ -2,26 +2,27 @@ package com.sprint.SprintLite.Feature.Service;
 
 import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.entity.Feature;
-import com.sprint.SprintLite.entity.enums.Status;
+import com.sprint.SprintLite.entity.Product;
+import com.sprint.SprintLite.entity.Sprint;
 
 import java.util.List;
 
 public interface IFeatureService {
 
-    Feature createFeature(CreateFeatureRequest request);
+    RegisterResponseDto createFeature(CreateFeatureRequest request);
 
-    Feature getFeatureById(Long featureId);
-
-
-
-    List<Feature> getFeaturesByProduct(Long productId);
-
-    List<Feature> getFeaturesBySprint(Long sprintId);
-
-    Feature updateFeature(Long featureId, CreateFeatureRequest feature);
+    FeatureResponseDto getFeatureByFeatureCode(String featureCode);
 
     List<FeatureResponseDto> getAllFeatures();
 
-    void deleteFeature(Long featureId);
+    List<FeatureResponseDto> getFeaturesByProduct(Product product);
+
+    List<FeatureResponseDto> getFeaturesBySprint(Sprint sprint);
+
+    FeatureResponseDto updateFeature(String featureCode, CreateFeatureRequest request);
+
+    RegisterResponseDto deleteFeature(String featureCode);
+
 }

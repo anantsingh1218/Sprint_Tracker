@@ -2,6 +2,10 @@ import { SearchService } from './../search/search.service';
 import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+import { Story } from '../story/story';
+import { IStory } from '../../models/storyInterface';
+import { Priority, WorkStatus } from '../../models/workItem';
 import { HttpErrorResponse } from '@angular/common/http';
 import { StoryService } from './story.service';
 import { ApiService } from '../../core/apiService/api-service';

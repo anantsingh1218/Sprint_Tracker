@@ -3,7 +3,7 @@ package com.sprint.SprintLite.backlog.dto;
 import com.sprint.SprintLite.entity.enums.Status;
 
 public record FeatureResponseDto(
-        Integer id,
+        String featureCode,
         String title,
         String description,
         Status featureStatus

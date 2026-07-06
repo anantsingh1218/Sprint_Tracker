@@ -10,4 +10,14 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './layout.html',
   styleUrl: './layout.css',
 })
-export class Layout {}
+export class Layout {
+
+    collapsed = false;
+
+    toggleSidebar() {
+
+        this.collapsed = !this.collapsed;
+
+    }
+
+}

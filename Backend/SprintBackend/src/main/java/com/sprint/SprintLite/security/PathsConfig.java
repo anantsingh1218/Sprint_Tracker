@@ -19,7 +19,10 @@ public class PathsConfig {
                 "/actuator/**",
                 "/todos/**",
                 "/csrf-token",
+                "/register",
                 "/login",
+                "/attachment/**",
+                "/worklog/**",
                 "/attachment/**",
                 "/forgot-password",
                 "/system/status",
@@ -33,6 +36,9 @@ public class PathsConfig {
     @Bean(name = "securedPaths")
     public List<String> securedPaths() {
         return List.of(
+//                "/**"
+                "/dashboard/**",
+                "/user/**",
                 "/backlog/**",
                 "/feature/**",
                 "/product/**",

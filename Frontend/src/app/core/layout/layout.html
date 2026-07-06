@@ -1,11 +1,25 @@
-<div class="app-container">
-  <app-sidebar></app-sidebar>
+<div
 
-  <div class="main-area">
-    <app-navbar></app-navbar>
+class="app-container"
+
+[class.sidebar-collapsed]="collapsed">
+
+    <app-sidebar
+
+        [collapsed]="collapsed"
+
+        (toggle)="toggleSidebar()">
+
+    </app-sidebar>
+
+    <div class="main-area">
+      <app-navbar></app-navbar>
 
     <div class="page-content">
       <router-outlet></router-outlet>
     </div>
-  </div>
+
+    </div>
+
 </div>
+

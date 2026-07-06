@@ -1,4 +1,4 @@
-import { WorkStatus } from "./workItem";
+import { Priority, WorkStatus } from "./workItem";
 
 export interface IStoryResponse{
     id: number,
@@ -8,7 +8,7 @@ export interface IStoryResponse{
     featureName: string,
     featureId: number,
     storyStatus: WorkStatus,
-    priority: string,
+    storyPriority: Priority,
     sprintName: string,
     estimatedStoryPoints: number,
     remainingStoryPoints: number

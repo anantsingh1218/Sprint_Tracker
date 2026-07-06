@@ -1,0 +1,38 @@
+.analytics-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #DCDFE4);
+  border-radius: 10px;
+  padding: 16px 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text, #172B4D);
+}
+
+.badge {
+  background: var(--blue-tint, #E9F2FF);
+  color: var(--blue, #0C66E4);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.chart-container {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}

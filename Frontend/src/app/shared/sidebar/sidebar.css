@@ -83,3 +83,51 @@
   color: #94a3b8;
   font-size: 11px;
 }
+
+.sidebar{
+
+    transition:300ms ease;
+
+}
+
+.sidebar.collapsed{
+
+    width:80px;
+
+}
+
+.toggle{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    margin-bottom:16px;
+
+}
+
+.toggle button{
+
+    border:none;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+}
+
+.sidebar.collapsed a{
+
+    justify-content:center;
+
+}
+
+.sidebar.collapsed .logo{
+
+    justify-content:center;
+
+}

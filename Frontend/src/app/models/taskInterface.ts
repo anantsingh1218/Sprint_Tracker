@@ -1,20 +1,16 @@
 import { IComment } from "./storyInterface";
-import { WorkStatus } from "./workItem";
+import { Priority, WorkStatus } from "./workItem";
 
 export interface ITask {
   id: string;
   title: string;
   description: string;
-
   storyId: number | null;
-  sprintId: number | null;
-  userId: number | null;
-
+  sprintId: string | null;
+  userId: string | null;
   status: WorkStatus;
-  priority: 'Low' | 'Medium' | 'High';
-
+  priority: Priority;
   estimatedHours: number;
   remainingHours: number;
-
   comments: IComment[];
 }
