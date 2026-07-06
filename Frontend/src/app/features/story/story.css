@@ -1,4 +1,4 @@
-.overlay {
+/* .overlay {
   position: fixed;
   inset: 0;
   background: rgba(30, 30, 30, 0.35);
@@ -243,4 +243,4 @@ textarea {
   border: none;
   cursor: pointer;
   color: red;
-}
+} 

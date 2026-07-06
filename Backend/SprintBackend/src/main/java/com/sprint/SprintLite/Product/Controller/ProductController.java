@@ -6,6 +6,7 @@ import com.sprint.SprintLite.entity.Product;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,7 @@ public class ProductController {
 
     private final ProductService productService;
     @PostMapping("/add")
-//    @PreAuthorize("hasAuthority('PM')")
+    @PreAuthorize("hasAuthority('PM')")
     public ResponseEntity<?> addProduct(@RequestBody CreateProductRequest request) {
         Product savedProduct = productService.createProduct(request);
         return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);

@@ -25,8 +25,9 @@ public class PathsConfig {
                 "/system/status",
                 "/bootstrap-admin",
                 "/search/**",
-                "/DSU/**"
-                );
+                "/DSU/**",
+                "/users/**"
+        );
     }
 
     @Bean(name = "securedPaths")

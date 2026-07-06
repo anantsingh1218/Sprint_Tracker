@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.Feature.Service.impl;
 
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
 import com.sprint.SprintLite.entity.Comment;
 import com.sprint.SprintLite.entity.Feature;
@@ -49,10 +50,7 @@ public class FeatureServiceImpl implements IFeatureService {
                         new RuntimeException("Feature not found"));
     }
 
-    @Override
-    public List<Feature> getAllFeatures() {
-        return featureRepository.findAll();
-    }
+
 
     @Override
     public List<Feature> getFeaturesByProduct(Long productId) {
@@ -104,5 +102,18 @@ public class FeatureServiceImpl implements IFeatureService {
         Feature feature = getFeatureById(featureId);
 
         featureRepository.delete(feature);
+    }
+
+    public List<FeatureResponseDto> getAllFeatures() {
+        List<Feature> features = featureRepository.findAll();
+
+        return features.stream()
+                .map(feature -> new FeatureResponseDto(
+                        feature.getId(),
+                        feature.getTitle(),
+                        feature.getDescription(),
+                        feature.getFeatureStatus()
+                ))
+                .toList();
     }
 }

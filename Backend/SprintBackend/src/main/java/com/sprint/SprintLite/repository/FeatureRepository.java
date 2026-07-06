@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.repository;
 
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.Story;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +18,9 @@ public interface FeatureRepository extends JpaRepository<Feature, Integer> {
             Instant end
     );
 
+    //List<FeatureResponseDto> getAllFeaturesBySto(Story story);
+
     List<Feature> findByTitleContainingIgnoreCase(String keyword);
+
+
 }

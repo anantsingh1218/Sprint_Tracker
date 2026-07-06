@@ -13,22 +13,20 @@ export class SprintService {
 
   private getHeaders() {
     const token = localStorage.getItem('jwtToken');
-
     return {
       Authorization: `Bearer ${token}`
     };
   }
 
   // GET all sprints
- getSprints(): Observable<any[]> {
-  return this.http.get<any[]>(
-    `${this.baseUrl}/all`,
-    {
-      headers: this.getHeaders()
-    }
-  );
-}
-
+  getSprints(): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.baseUrl}/all`,
+      {
+        headers: this.getHeaders()
+      }
+    );
+  }
 
   // GET sprint by ID
   getSprintById(id: number): Observable<any> {

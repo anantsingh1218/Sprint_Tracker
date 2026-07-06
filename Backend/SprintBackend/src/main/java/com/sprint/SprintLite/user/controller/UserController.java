@@ -22,8 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping()
@@ -151,5 +153,15 @@ public class UserController {
         return Map.of(
                 "initialized", userRepository.count() > 0
         );
+    }
+
+    @GetMapping("/users/all")
+    public ResponseEntity<List<UserDropdownDto>> getAllUsers() {
+        List<UserDropdownDto> users = userRepository.findAll()
+                .stream()
+                .map(user -> new UserDropdownDto(user.getId(), user.getUsername()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(users);
     }
 }

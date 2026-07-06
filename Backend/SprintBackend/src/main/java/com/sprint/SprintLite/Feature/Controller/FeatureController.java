@@ -2,6 +2,7 @@ package com.sprint.SprintLite.Feature.Controller;
 
 import ch.qos.logback.core.status.Status;
 import com.sprint.SprintLite.Feature.Service.impl.FeatureServiceImpl;
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.dto.CreateFeatureRequest;
 import com.sprint.SprintLite.dto.CreateProductRequest;
 import com.sprint.SprintLite.entity.Feature;
@@ -30,11 +31,6 @@ public class FeatureController {
         return ResponseEntity.ok().body(feature);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Feature>> getAllFeatures() {
-        List<Feature> features = featureService.getAllFeatures();
-        return ResponseEntity.ok().body(features);
-    }
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<List<Feature>> getFeatureByProductId(@PathVariable Long productId) {
@@ -72,6 +68,11 @@ public class FeatureController {
         return ResponseEntity.ok("Feature deleted successfully");
     }
 
+
+    @GetMapping("/all")
+    public ResponseEntity<List<FeatureResponseDto>> getAllFeatures() {
+        return ResponseEntity.ok(featureService.getAllFeatures());
+    }
 
 
 }

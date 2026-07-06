@@ -8,11 +8,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/story")
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryServiceImpl storyService;
+
+    @GetMapping("/all")
+    public ResponseEntity<List<StoryResponseDto>> getAllStories() {
+        return ResponseEntity.ok(storyService.getAllStories());
+    }
 
     @PostMapping("/create")
     public ResponseEntity<StoryResponseDto> createStory(@RequestBody CreateStoryRequest story) {

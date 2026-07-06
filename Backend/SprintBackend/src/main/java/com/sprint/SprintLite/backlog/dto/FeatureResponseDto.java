@@ -6,12 +6,12 @@ public record FeatureResponseDto(
         Integer id,
         String title,
         String description,
-        Status featureStatus,
-        String priority,
-        String sprintName,
-        Integer remainingStoryPoints,
-        Integer estimatedStoryPoints,
-        String productName,
-        String assignedTo
+        Status featureStatus
+       // String priority,
+        //String sprintName,
+        //Integer remainingStoryPoints,
+        //Integer estimatedStoryPoints,
+        //String productName,
+        //String assignedTo
 ) {
 }

@@ -23,9 +23,8 @@ export class SearchService {
   return this.http.get<any[]>(
     `${this.baseUrl}/search?q=${keyword}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: this.getHeaders()
+
     }
   );
 }

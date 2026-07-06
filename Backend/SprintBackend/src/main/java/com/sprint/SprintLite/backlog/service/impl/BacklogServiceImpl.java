@@ -33,13 +33,7 @@ public class BacklogServiceImpl implements IBacklogService {
                     feature.getId(),
                     feature.getTitle(),
                     feature.getDescription(),
-                    feature.getFeatureStatus(),
-                    feature.getPriority().toString(),
-                    feature.getSprintId().getSprintName(),
-                    feature.getRemainingStoryPoints(),
-                    feature.getEstimatedStoryPoints(),
-                    feature.getProductId().getProductname(),
-                    feature.getUpdatedBy()
+                    feature.getFeatureStatus()
             );
             featureResponseDtosList.add(featureResponseDto);
         });

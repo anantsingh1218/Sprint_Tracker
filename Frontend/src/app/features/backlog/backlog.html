@@ -89,10 +89,7 @@
   </app-feature>
 }
 
-@if (overlayType === WorkItemType.Story && selectedStory) {
-  <app-story [story]="selectedStory" (save)="saveStory($event)" (close)="closeOverlay()">
-  </app-story>
-}
+
 
 @if ((overlayType === WorkItemType.Task) && selectedTask) {
   <app-tasks [task]="selectedTask" (save)="saveTask($event)" (close)="closeOverlay()"> </app-tasks>
