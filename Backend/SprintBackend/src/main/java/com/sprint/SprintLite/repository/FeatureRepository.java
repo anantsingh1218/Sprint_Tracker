@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.repository;
 
+import com.sprint.SprintLite.backlog.dto.FeatureResponseDto;
 import com.sprint.SprintLite.entity.Feature;
 import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.entity.Sprint;
@@ -12,6 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FeatureRepository extends JpaRepository<Feature, Integer> {
+    List<Feature> findBySprintId(Integer sprintId);
+
+    List<Feature> findByProductId(Integer projectId);
 
     List<Feature> findByUpdatedAtBetween(
             Instant start,
@@ -28,4 +32,10 @@ public interface FeatureRepository extends JpaRepository<Feature, Integer> {
     List<Feature> findByProductId(Product product);
 
     Long countByProductId(Product product);
+
+    //List<FeatureResponseDto> getAllFeaturesBySto(Story story);
+
+    List<Feature> findByTitleContainingIgnoreCase(String keyword);
+
+
 }

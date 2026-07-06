@@ -90,6 +90,7 @@ public class FeatureServiceImpl implements IFeatureService {
         if (request.description() != null) {
             existingFeature.setDescription(request.description());
         }
+
         existingFeature.setUpdatedBy(username);
         existingFeature.setUpdatedAt(Instant.now());
 

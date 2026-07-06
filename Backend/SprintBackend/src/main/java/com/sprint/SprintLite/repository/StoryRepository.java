@@ -46,4 +46,6 @@ public interface StoryRepository
     );
 
     List<Story> findByFeatureid(Feature feature);
+
+    List<Story> findByTitleContainingIgnoreCase(String keyword);
 }

@@ -54,6 +54,7 @@ public class FeatureController {
         return ResponseEntity.ok(featureResponseDtoList);
     }
 
+
     // Update Full Feature
     @PutMapping("/{featureCode}")
     public ResponseEntity<FeatureResponseDto> updateFeature(
@@ -64,6 +65,7 @@ public class FeatureController {
         return ResponseEntity.ok(updatedFeatureDto);
     }
 
+
     // Delete Feature
     @DeleteMapping("/{featureCode}")
     public ResponseEntity<RegisterResponseDto> deleteFeature(
@@ -71,6 +73,9 @@ public class FeatureController {
         RegisterResponseDto registerResponseDto = featureService.deleteFeature(featureCode);
         return ResponseEntity.ok(registerResponseDto);
     }
+
+
+
 }
 
 

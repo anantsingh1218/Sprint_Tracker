@@ -3,6 +3,7 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ITaskService;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl.TaskServiceImpl;
 import com.sprint.SprintLite.dto.CreateTaskRequest;
+import com.sprint.SprintLite.dto.TaskResponseDto;
 import com.sprint.SprintLite.dto.GetAllResponseDto;
 import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.entity.Task;
@@ -24,44 +25,44 @@ import java.util.List;
         private final TaskRepository taskRepository;
 
         @PostMapping("/add")
-        public ResponseEntity<Task> addTask(
+        public ResponseEntity<TaskResponseDto> addTask(
                 @RequestBody CreateTaskRequest request) {
 
-            Task task = taskService.createTask(request);
+            TaskResponseDto task = taskService.createTask(request);
             return ResponseEntity.ok(task);
         }
 
         @GetMapping("/{id}")
-        public ResponseEntity<Task> getTask(
+        public ResponseEntity<TaskResponseDto> getTask(
                 @PathVariable Long id) {
 
-            Task task = taskService.getTaskById(id);
+            TaskResponseDto task = taskService.getTaskById(id);
             return ResponseEntity.ok(task);
         }
 
         @GetMapping("/all")
-        public ResponseEntity<List<Task>> getAllTasks() {
+        public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
 
-            List<Task> tasks = taskService.getAllTasks();
+            List<TaskResponseDto> tasks = taskService.getAllTasks();
             return ResponseEntity.ok(tasks);
         }
 
         @GetMapping("/sprint/{sprintId}")
-        public ResponseEntity<List<Task>> getTasksBySprint(
+        public ResponseEntity<List<TaskResponseDto>> getTasksBySprint(
                 @PathVariable Long sprintId) {
 
-            List<Task> tasks =
+            List<TaskResponseDto> tasks =
                     taskService.getTasksBySprintId(sprintId);
 
             return ResponseEntity.ok(tasks);
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<Task> updateTask(
+        public ResponseEntity<TaskResponseDto> updateTask(
                 @PathVariable Integer id,
                 @RequestBody CreateTaskRequest request) {
 
-            Task updatedTask =
+            TaskResponseDto updatedTask =
                     taskService.updateTask(id, request);
 
             return ResponseEntity.ok(updatedTask);

@@ -4,12 +4,15 @@ import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl.StoryService
 import com.sprint.SprintLite.dto.CreateStoryRequest;
 import com.sprint.SprintLite.dto.GetAllResponseDto;
 import com.sprint.SprintLite.entity.Product;
+import com.sprint.SprintLite.dto.StoryResponseDto;
 import com.sprint.SprintLite.entity.Story;
 import com.sprint.SprintLite.repository.StoryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,15 +24,20 @@ public class StoryController {
     private final StoryServiceImpl storyService;
     private final StoryRepository storyRepository;
 
+    @GetMapping("/all")
+    public ResponseEntity<List<StoryResponseDto>> getAllStories() {
+        return ResponseEntity.ok(storyService.getAllStories());
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<Story> createStory(@RequestBody CreateStoryRequest story) {
-        Story st=storyService.createStory(story);
+    public ResponseEntity<StoryResponseDto> createStory(@RequestBody CreateStoryRequest story) {
+        StoryResponseDto st=storyService.createStory(story);
         return ResponseEntity.ok().body(st);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Story> updateStory(@PathVariable Integer id,@RequestBody CreateStoryRequest story) {
-        Story st=storyService.updateStory(id,story);
+    public ResponseEntity<StoryResponseDto> updateStory(@PathVariable Integer id,@RequestBody CreateStoryRequest story) {
+        StoryResponseDto st=storyService.updateStory(id,story);
         return ResponseEntity.ok().body(st);
     }
 

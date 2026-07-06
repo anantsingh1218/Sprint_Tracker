@@ -4,6 +4,7 @@ import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ISprintService;
 import com.sprint.SprintLite.dto.CreateSprintRequest;
 import com.sprint.SprintLite.dto.GetAllResponseDto;
 import com.sprint.SprintLite.entity.Product;
+import com.sprint.SprintLite.dto.SprintResponseDto;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
 import com.sprint.SprintLite.repository.SprintRepository;
@@ -19,26 +20,39 @@ import java.util.List;
 @RequestMapping("/sprint")
 @RequiredArgsConstructor
 public class SprintController {
+
     private final ISprintService sprintService;
     private final SprintRepository sprintRepository;
 
+    // CREATE
     @PostMapping("/add")
-    public ResponseEntity<Sprint> addSprint(@RequestBody CreateSprintRequest request) {
-        Sprint sprint=sprintService.createSprint(request);
+    public ResponseEntity<SprintResponseDto> addSprint(
+            @RequestBody CreateSprintRequest request) {
+
+        SprintResponseDto sprint = sprintService.createSprint(request);
+
         return ResponseEntity.ok(sprint);
     }
 
+    // GET SINGLE
     @GetMapping("/{id}")
-    public ResponseEntity<Sprint> getSprint(@PathVariable Long id) {
-        Sprint sprint= sprintService.getSprintById(id);
+    public ResponseEntity<SprintResponseDto> getSprint(
+            @PathVariable Long id) {
+
+        SprintResponseDto sprint = sprintService.getSprintById(id);
+
         return ResponseEntity.ok(sprint);
     }
+    // GET ALL
     @GetMapping("/all")
-    public ResponseEntity<List<Sprint>> getAllSprints() {
-        List<Sprint>sprint=sprintService.getAllSprints();
-        return ResponseEntity.ok(sprint);
+    public ResponseEntity<List<SprintResponseDto>> getAllSprints() {
+
+        List<SprintResponseDto> sprints = sprintService.getAllSprints();
+
+        return ResponseEntity.ok(sprints);
     }
 
+    // UPDATE FULL
     @GetMapping("/getAllSprints")
     public ResponseEntity<List<GetAllResponseDto>> getAllProducts(){
         List<Sprint> sprintList = sprintRepository.findAll();
@@ -64,18 +78,10 @@ public class SprintController {
 
         return ResponseEntity.ok(updatedSprint);
     }
-    // Update Sprint Status
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<Sprint> updateSprintStatus(
-            @PathVariable Long id,
-            @RequestParam SprintStatus status) {
 
-        Sprint updatedSprint =
-                sprintService.updateSprintStatus(id, status);
 
-        return ResponseEntity.ok(updatedSprint);
-    }
-    // Delete Sprint
+
+    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSprint(
             @PathVariable Long id) {

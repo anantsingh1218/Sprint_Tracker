@@ -101,4 +101,6 @@ WHERE t.sprintid=:sprint
     Optional<Task> findByTaskCode(String taskCode);
 
     List<Task> findBySprintidAndUserid(Sprint sprint, Users user);
+
+    List<Task> findByTitleContainingIgnoreCase(String keyword);
 }

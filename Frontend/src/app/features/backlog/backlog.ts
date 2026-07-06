@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
+import { StoryService } from '../story-list/story.service';
+import { WorkItem, WorkItemType } from '../../models/workItem';
 import { WorkItemService } from '../../services/workItemService';
 import { fadeSlide } from '../../animations/workItemAnimations';
 import { FeatureOverlay } from '../feature-overlay/feature-overlay';

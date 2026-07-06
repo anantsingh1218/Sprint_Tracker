@@ -47,7 +47,7 @@ public class DsuService {
         dsuNote1.setNotesdate(request.getNotesdate());
         dsuNote1.setEntityid(st2);
         dsuNote1.setEntitytype(st1);
-        dsuNote1.setStatus(request.getStatus());   // missing line fixed
+        dsuNote1.setStatus(request.getStatus());
         dsuNote1.setCompletedwork(request.getCompletedwork());
         dsuNote1.setBlockers(request.getBlockers());
         dsuNote1.setNextplan(request.getNextplan());

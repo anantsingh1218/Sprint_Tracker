@@ -26,8 +26,11 @@ public class PathsConfig {
                 "/attachment/**",
                 "/forgot-password",
                 "/system/status",
-                "/bootstrap-admin"
-                );
+                "/bootstrap-admin",
+                "/search/**",
+                "/DSU/**",
+                "/users/**"
+        );
     }
 
     @Bean(name = "securedPaths")
@@ -42,7 +45,6 @@ public class PathsConfig {
                 "/sprint/**",
                 "/story/**",
                 "/task/**",
-                "/DSU/**",
                 "/Bug/**",
                 "/profile/**"
         );

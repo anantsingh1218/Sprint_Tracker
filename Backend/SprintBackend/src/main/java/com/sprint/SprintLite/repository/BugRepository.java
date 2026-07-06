@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface BugRepository extends JpaRepository<Bug, Integer> {
 
-    
+
 
     List<Bug> findBySprintid(Integer sprintid);
 
@@ -29,4 +29,6 @@ public interface BugRepository extends JpaRepository<Bug, Integer> {
     );
 
     Long countByBugstatus(Status status);
+
+    List<Bug> findByTitleContainingIgnoreCase(String keyword);
 }

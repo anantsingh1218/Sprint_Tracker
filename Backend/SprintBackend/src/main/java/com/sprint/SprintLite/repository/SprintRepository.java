@@ -7,6 +7,7 @@ import com.sprint.SprintLite.entity.enums.SprintStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 public interface SprintRepository
         extends JpaRepository<Sprint,Integer> {
@@ -22,4 +23,6 @@ public interface SprintRepository
             Product product,
             SprintStatus status
     );
+
+    List<Sprint> findBySprintNameContainingIgnoreCase(String sprintName);
 }

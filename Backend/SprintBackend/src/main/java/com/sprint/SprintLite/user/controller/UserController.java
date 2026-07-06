@@ -23,8 +23,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping()
@@ -154,17 +156,27 @@ public class UserController {
         );
     }
 
-    @GetMapping("/user/getAllUsers")
-    public ResponseEntity<List<GetAllResponseDto>> getAllUsers(){
-        List<Users> usersList = userRepository.findAll();
-        if (usersList.isEmpty()){
-            throw new EntityNotFoundException("No Users registered");
-        }
-        List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
-        usersList.forEach(users -> {
-            GetAllResponseDto getAllResponseDto = new GetAllResponseDto(users.getId(), users.getUsername());
-            getAllResponseDtoList.add(getAllResponseDto);
-        });
-        return ResponseEntity.ok(getAllResponseDtoList);
+//    @GetMapping("/user/getAllUsers")
+//    public ResponseEntity<List<GetAllResponseDto>> getAllUsers(){
+//        List<Users> usersList = userRepository.findAll();
+//        if (usersList.isEmpty()){
+//            throw new EntityNotFoundException("No Users registered");
+//        }
+//        List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
+//        usersList.forEach(users -> {
+//            GetAllResponseDto getAllResponseDto = new GetAllResponseDto(users.getId(), users.getUsername());
+//            getAllResponseDtoList.add(getAllResponseDto);
+//        });
+//        return ResponseEntity.ok(getAllResponseDtoList);
+//    }
+
+    @GetMapping("/users/all")
+    public ResponseEntity<List<UserDropdownDto>> getAllUsers() {
+        List<UserDropdownDto> users = userRepository.findAll()
+                .stream()
+                .map(user -> new UserDropdownDto(user.getId(), user.getUsername()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(users);
     }
 }

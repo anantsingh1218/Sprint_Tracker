@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
+import { ActivatedRoute } from '@angular/router';
 import { SprintService } from '../../core/sprint/sprint';
-import { TaskService } from '../../core/task/task';
+import { TaskService } from './task.service';
 
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
@@ -18,7 +18,7 @@ import { ITask } from '../../models/taskInterface';
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
 })
-export class Tasks implements OnChanges {
+export class Tasks implements OnChanges,OnInit {
   @Input() task: ITask | null = null;
   @Output() save = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
@@ -27,6 +27,7 @@ export class Tasks implements OnChanges {
   showEditModal = false;
   selectedSprintId = '';
 
+  selectedTask: any = null;
   users = ['User 1', 'User 2', 'User 3', 'User 4', 'User 5'];
 
   newTask = {
@@ -45,6 +46,7 @@ export class Tasks implements OnChanges {
   constructor(
     private sprintService: SprintService,
     private taskService: TaskService,
+     private route: ActivatedRoute
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -64,7 +66,7 @@ export class Tasks implements OnChanges {
         this.showTaskModal = true;
       } else {
         // It's an existing task being opened for modification
-        this.editTask = { 
+        this.editTask = {
           ...this.task,
           originalEstimate: this.task.estimatedHours,
           remainingEstimate: this.task.remainingHours
@@ -73,6 +75,16 @@ export class Tasks implements OnChanges {
       }
     }
   }
+
+  ngOnInit(): void {
+  const taskId = this.route.snapshot.paramMap.get('id');
+
+  if (taskId) {
+    this.selectedTask = this.taskService.getTaskById(taskId);
+  }
+}
+
+
 
   get sprints() {
     return this.sprintService.getSprints();

@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -53,16 +54,25 @@ public class Sprint extends BaseEntity {
     @Column(name = "enddate")
     private Instant endDate;
     @NonNull
+    @JsonIgnore
     @OneToMany(mappedBy = "sprintid")
     private Set<Bug> bugs = new LinkedHashSet<>();
+
     @NonNull
+    @JsonIgnore
     @OneToMany(mappedBy = "sprintId")
     private Set<Feature> featuretables = new LinkedHashSet<>();
+
     @NonNull
+    @JsonIgnore
     @OneToMany(mappedBy = "sprintid")
     private Set<Story> storytables = new LinkedHashSet<>();
+
     @NonNull
+    @JsonIgnore
     @OneToMany(mappedBy = "sprintid")
     private Set<Task> tasktables = new LinkedHashSet<>();
+
+
 
 }

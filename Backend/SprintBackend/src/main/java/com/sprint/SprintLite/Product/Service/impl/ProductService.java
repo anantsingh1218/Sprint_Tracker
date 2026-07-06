@@ -29,24 +29,19 @@ public class ProductService implements IProductService {
     private final UserProductMappingRepository userProductMappingRepository;
 
     @Override
-    //  ProductRepository productRepository;
-    // 1. so this is used to retrieve name from context holder
+
     public Product createProduct(CreateProductRequest request) {
         String currentUsername = Objects.requireNonNull(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getPrincipal()).toString();
         System.out.println("Current User: " + currentUsername);
 
-        // Get logged-in username from JWT
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-
-        // 2. Fetch the complete User entity from DB to set the "owner" relationship
         Users currentuser = userRepository.findByUsername(currentUsername)
                 .orElseThrow((() -> new UsernameNotFoundException("Login user not found in database")));
 
         System.out.println("Fetched Username : " + currentUsername);
 
-        // 3.
-        // Dto -> Entity
         Product product = new Product();
         product.setProductname(request.getProductName());
         product.setDescription(request.getDescription());
@@ -57,12 +52,10 @@ public class ProductService implements IProductService {
         Product savedProduct = productRepository.save(product);
 
 
-        // Filling the user_Product_mapping table
         UserProductMapping mapping = new UserProductMapping();
         mapping.setUserid(currentuser);
         mapping.setProductid(savedProduct);
 
-        // save mapping
         userProductMappingRepository.save(mapping);
         return savedProduct;
 

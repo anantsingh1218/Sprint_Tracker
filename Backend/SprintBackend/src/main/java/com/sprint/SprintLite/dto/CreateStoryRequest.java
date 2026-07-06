@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateStoryRequest {
+
 private String title;
 private String Body;
 private Integer featureId;
