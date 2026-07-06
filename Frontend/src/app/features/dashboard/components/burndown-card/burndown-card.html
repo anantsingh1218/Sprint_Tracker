@@ -4,27 +4,12 @@
 >
 
     <div class="card-header">
-
-        <h3>
-
-            Burndown Chart
-
-        </h3>
-
-        <span>
-
-            {{burndown.sprintName}}
-
-        </span>
-
+        <h3>Burndown Chart</h3>
+        <span class="badge">{{ burndown.sprintName }}</span>
     </div>
 
     <div class="chart-container">
-
-        <canvas #chartCanvas>
-
-        </canvas>
-
+        <canvas #chartCanvas></canvas>
     </div>
 
 </div>

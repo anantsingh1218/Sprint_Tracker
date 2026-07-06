@@ -9,7 +9,7 @@ import lombok.*;
 
 public class FeatureProgressDto {
 
-    private Integer featureId;
+    private String featureCode;
 
     private String featureName;
 

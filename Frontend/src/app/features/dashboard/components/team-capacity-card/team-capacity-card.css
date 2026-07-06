@@ -1,81 +1,79 @@
-.analytics-card{
-
-    background:#fff;
-
-    border-radius:18px;
-
-    padding:24px;
-
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
-
-    height:100%;
-
+.analytics-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #DCDFE4);
+  border-radius: 10px;
+  padding: 16px 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.card-header{
-
-    margin-bottom:20px;
-
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
 }
 
-.member-count{
-
-    font-size:42px;
-
-    font-weight:700;
-
-    color:#2563eb;
-
-    margin-bottom:18px;
-
+.card-header h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text, #172B4D);
 }
 
-.progress-track{
-
-    height:10px;
-
-    background:#e5e7eb;
-
-    border-radius:999px;
-
-    overflow:hidden;
-
+.ratio {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #626F86);
 }
 
-.progress-fill{
-
-    height:100%;
-
-    background:#2563eb;
-
+.capacity-track {
+  display: flex;
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: #EEF1F5;
+  overflow: hidden;
 }
 
-.stats{
+.seg { height: 100%; }
+.seg-success { background: var(--success, #22A06B); }
+.seg-warning { background: var(--warning, #E56910); }
+.seg-danger  { background: var(--danger, #C9372C); }
 
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
-    margin-top:24px;
-
-    gap:15px;
-
+.stats {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-content: center;
+  margin-top: 18px;
+  gap: 8px;
 }
 
-.stats span{
-
-    color:#6b7280;
-
-    font-size:13px;
-
+.stats span {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary, #626F86);
+  font-size: 11px;
 }
 
-.stats strong{
-
-    display:block;
-
-    font-size:24px;
-
-    margin-top:6px;
-
+.stats strong {
+  display: block;
+  font-size: 18px;
+  margin-top: 6px;
+  color: var(--text, #172B4D);
 }
+
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex: 0 0 auto;
+}
+
+.dot-success { background: var(--success, #22A06B); }
+.dot-warning { background: var(--warning, #E56910); }
+.dot-danger  { background: var(--danger, #C9372C); }

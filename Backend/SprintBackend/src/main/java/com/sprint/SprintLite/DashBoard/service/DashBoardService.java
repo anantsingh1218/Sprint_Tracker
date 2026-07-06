@@ -47,9 +47,9 @@ public interface DashBoardService {
             Integer featureId
     );
 
-    List<StoryCardDto> getStoriesByFeature(
-            Integer featureId
-    );
+//    List<StoryCardDto> getStoriesByFeature(
+//            Integer featureId
+//    );
 
     StoryProgressDto getStoryProgress(
             Integer storyId
@@ -68,4 +68,8 @@ public interface DashBoardService {
     TaskListDto getFocusTask();
 
     List<WorklogDto> getRecentWorklogs();
+
+    List<SprintDropdownDto> getSprintDropdown();
+
+    SprintProgressDto getSprintProgress(Integer productId);
 }

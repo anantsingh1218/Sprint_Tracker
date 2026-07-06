@@ -11,8 +11,6 @@ public class DashboardResponseDto {
 
     private Object dashboard;
 
-    public DashboardResponseDto() {}
-
     public DashboardResponseDto(
             String role,
             Object dashboard

@@ -47,20 +47,12 @@ public class DashBoardServiceImpl
     private final WorklogRepository worklogRepository;
 
 
-    private Users getLoggedInUser() {
+    public Users getLoggedInUser() {
 
         Authentication authentication =
                 SecurityContextHolder
                         .getContext()
                         .getAuthentication();
-
-        System.out.println("Authentication = " + authentication);
-
-        System.out.println("Principal = " + authentication.getPrincipal());
-
-        System.out.println("Name = " + authentication.getName());
-
-        System.out.println("Authorities = " + authentication.getAuthorities());
 
         String username = authentication.getName();
 
@@ -168,7 +160,7 @@ public class DashBoardServiceImpl
 
             Long features =
                     (long) featureRepository
-                            .findBySprintId(sprint)
+                            .findFeaturesBySprintId(sprint)
                             .size();
 
             Long tasks =
@@ -200,7 +192,7 @@ public class DashBoardServiceImpl
 
                     new ProductSummaryDto(
 
-                            product.getId(),
+                            product.getProductCode(),
 
                             product.getProductname(),
 
@@ -604,7 +596,7 @@ public class DashBoardServiceImpl
 
                         TaskListDto.builder()
 
-                                .id(task.getId())
+                                .taskCode(task.getTaskCode())
 
                                 .title(task.getTitle())
 
@@ -677,8 +669,8 @@ public class DashBoardServiceImpl
 
                     return StoryListDto.builder()
 
-                            .id(
-                                    story.getId()
+                            .storyCode(
+                                    story.getStoryCode()
                             )
 
                             .title(
@@ -788,7 +780,7 @@ public class DashBoardServiceImpl
                         );
         return new FeatureProgressDto(
 
-                feature.getId(),
+                feature.getFeatureCode(),
 
                 feature.getTitle(),
 
@@ -801,64 +793,64 @@ public class DashBoardServiceImpl
         );
     }
 
-    @Override
-    public List<StoryCardDto>
-    getStoriesByFeature(
-            Integer featureId
-    ){
-
-        Feature feature =
-
-                featureRepository
-                        .findById(
-                                featureId
-                        )
-                        .orElseThrow(
-                                () ->
-                                        new RuntimeException(
-                                                "Feature not found"
-                                        )
-                        );
-
-        return storyRepository
-                .findAll()
-                .stream()
-
-                .filter(
-                        s ->
-                                s.getFeatureid()!=null
-                                        &&
-                                        s.getFeatureid()
-                                                .getId()
-                                                .equals(
-                                                        feature.getId()
-                                                )
-                )
-
-                .map(
-                        s ->
-                                new StoryCardDto(
-
-                                        s.getId(),
-
-                                        s.getTitle(),
-
-                                        s.getStorystatus()!=null
-                                                ?
-
-                                                s.getStorystatus()
-                                                .name()
-
-                                                :
-
-                                                "UNKNOWN"
-
-                                )
-                )
-
-                .toList();
-
-    }
+//    @Override
+//    public List<StoryCardDto>
+//    getStoriesByFeature(
+//            Integer featureId
+//    ){
+//
+//        Feature feature =
+//
+//                featureRepository
+//                        .findById(
+//                                featureId
+//                        )
+//                        .orElseThrow(
+//                                () ->
+//                                        new RuntimeException(
+//                                                "Feature not found"
+//                                        )
+//                        );
+//
+//        return storyRepository
+//                .findAll()
+//                .stream()
+//
+//                .filter(
+//                        s ->
+//                                s.getFeatureid()!=null
+//                                        &&
+//                                        s.getFeatureid()
+//                                                .getId()
+//                                                .equals(
+//                                                        feature.getId()
+//                                                )
+//                )
+//
+//                .map(
+//                        s ->
+//                                new StoryCardDto(
+//
+//                                        s.getId(),
+//
+//                                        s.getTitle(),
+//
+//                                        s.getStorystatus()!=null
+//                                                ?
+//
+//                                                s.getStorystatus()
+//                                                .name()
+//
+//                                                :
+//
+//                                                "UNKNOWN"
+//
+//                                )
+//                )
+//
+//                .toList();
+//
+//    }
 
     @Override
     public StoryProgressDto
@@ -919,6 +911,85 @@ public class DashBoardServiceImpl
     }
 
     @Override
+    public SprintProgressDto getSprintProgress(
+            Integer productId
+    ) {
+
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() ->
+                        new RuntimeException("Product not found"));
+
+        Long totalFeatures =
+                featureRepository.countByProductId(product);
+
+        List<Feature> features =
+                featureRepository.findByProductId(product);
+
+        Long totalStories = 0L;
+        Long totalTasks = 0L;
+        Long completedTasks = 0L;
+        Long blockedTasks = 0L;
+
+        for (Feature feature : features) {
+
+            totalStories +=
+                    storyRepository.countByFeatureid(feature);
+
+            List<Story> stories =
+                    storyRepository.findByFeatureid(feature);
+
+            for (Story story : stories) {
+
+                totalTasks +=
+                        taskRepository.countByStoryid(story);
+
+                completedTasks +=
+                        taskRepository.countByStoryidAndTaskstatus(
+                                story,
+                                Status.DONE
+                        );
+
+                blockedTasks +=
+                        taskRepository.countByStoryidAndTaskstatus(
+                                story,
+                                Status.BLOCKED
+                        );
+
+            }
+
+        }
+
+        Long pendingTasks =
+                totalTasks - completedTasks - blockedTasks;
+
+        Integer completion =
+                metricsService.calculateCompletionRate(
+                        completedTasks,
+                        totalTasks
+                );
+
+        return new SprintProgressDto(
+
+                totalFeatures.intValue(),
+
+                totalStories.intValue(),
+
+                totalTasks.intValue(),
+
+                completedTasks.intValue(),
+
+                pendingTasks.intValue(),
+
+                blockedTasks.intValue(),
+
+                completion
+
+        );
+
+    }
+
+    @Override
     public List<BoardColumnDto>
     getBoard(
             Integer sprintId
@@ -939,8 +1010,8 @@ public class DashBoardServiceImpl
         Task task =
 
                 taskRepository
-                        .findById(
-                                dto.getTaskId()
+                        .findByTaskCode(
+                                dto.getTaskCode()
                         )
                         .orElseThrow(
                                 ()->
@@ -1028,8 +1099,8 @@ public class DashBoardServiceImpl
 
         return TaskListDto.builder()
 
-                .id(
-                        focusTask.getId()
+                .taskCode(
+                        focusTask.getTaskCode()
                 )
 
                 .title(
@@ -1113,6 +1184,31 @@ public class DashBoardServiceImpl
                                 )
 
                                 .build()
+
+                )
+
+                .toList();
+
+    }
+
+    @Override
+    public List<SprintDropdownDto> getSprintDropdown() {
+
+        return sprintRepository.findAll()
+
+                .stream()
+
+                .map(sprint ->
+
+                        new SprintDropdownDto(
+
+                                sprint.getId(),
+
+                                sprint.getSprintCode(),
+
+                                sprint.getSprintName()
+
+                        )
 
                 )
 

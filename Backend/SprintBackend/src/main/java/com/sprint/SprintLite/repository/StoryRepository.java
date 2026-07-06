@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.Instant;
+import java.util.List;
+
 public interface StoryRepository
         extends JpaRepository<Story,Integer>{
 
@@ -36,4 +39,11 @@ public interface StoryRepository
             Users user,
             Pageable pageable
     );
+
+    List<Story> findByUpdatedAtBetween(
+            Instant start,
+            Instant end
+    );
+
+    List<Story> findByFeatureid(Feature feature);
 }

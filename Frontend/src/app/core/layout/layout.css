@@ -1,18 +1,22 @@
-.app-container {
-  display: flex;
-  height: 100vh;
-  width: 100%;
+.app-container{
+
+    display:flex;
+
 }
 
-/* LEFT SIDEBAR */
-app-sidebar {
-  width: 240px;
-  height: 100vh;
-  background: #111827;
-  color: white;
-  display: block;
+app-sidebar{
+
+    width:240px;
+
+    transition:.3s;
+
 }
 
+.app-container.sidebar-collapsed app-sidebar{
+
+    width:80px;
+
+}
 /* RIGHT SIDE */
 .main-area {
   flex: 1;

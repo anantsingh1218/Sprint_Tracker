@@ -1,73 +1,107 @@
-.analytics-card{
-
-    background:#fff;
-
-    border-radius:18px;
-
-    padding:24px;
-
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
-
-    height:100%;
-
+.analytics-card {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #DCDFE4);
+  border-radius: 10px;
+  padding: 16px 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.status{
-
-    margin:18px 0;
-
-    padding:12px;
-
-    border-radius:10px;
-
-    text-align:center;
-
-    font-weight:700;
-
-    font-size:20px;
-
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
-.ready{
-
-    background:#dcfce7;
-
-    color:#15803d;
-
+.card-header h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text, #172B4D);
 }
 
-.not-ready{
-
-    background:#fee2e2;
-
-    color:#dc2626;
-
+.status-badge {
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
 }
 
-.stats{
-
-    display:grid;
-
-    grid-template-columns:repeat(3,1fr);
-
-    gap:15px;
-
+.status-badge.ready {
+  background: var(--success-tint, #DCFFF1);
+  color: var(--success, #22A06B);
 }
 
-.stats span{
-
-    color:#6b7280;
-
-    font-size:13px;
-
+.status-badge.not-ready {
+  background: var(--danger-tint, #FFECEB);
+  color: var(--danger, #C9372C);
 }
 
-.stats strong{
+.release-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
 
-    display:block;
+.ring-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+}
 
-    margin-top:6px;
+.progress-ring {
+  width: 64px;
+  height: 64px;
+  transform: rotate(-90deg);
+}
 
-    font-size:24px;
+.ring-bg {
+  fill: none;
+  stroke: #EEF1F5;
+  stroke-width: 7;
+}
 
+.ring-fill {
+  fill: none;
+  stroke: var(--blue, #0C66E4);
+  stroke-width: 7;
+  stroke-linecap: round;
+  transition: stroke-dashoffset .4s ease;
+}
+
+.ring-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text, #172B4D);
+}
+
+.stats {
+  display: flex;
+  gap: 22px;
+}
+
+.stats span {
+  display: block;
+  color: var(--text-secondary, #626F86);
+  font-size: 11px;
+  text-align: center;
+}
+
+.stats strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 17px;
+  text-align: center;
+  color: var(--text, #172B4D);
 }

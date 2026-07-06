@@ -9,11 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 public interface SprintRepository
-        extends JpaRepository<Sprint,Integer>{
+        extends JpaRepository<Sprint,Integer> {
 
-    Optional<Sprint>
-    findFirstByStatus(
-            SprintStatus status
+    Sprint findSprintBySprintCode(String sprintCode);
+
+    Optional<Sprint> findSprintBySprintName(
+            String sprintName
     );
 
     Optional<Sprint>
@@ -21,5 +22,4 @@ public interface SprintRepository
             Product product,
             SprintStatus status
     );
-
 }

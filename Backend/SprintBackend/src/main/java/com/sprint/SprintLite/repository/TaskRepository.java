@@ -14,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface TaskRepository
@@ -96,4 +97,8 @@ WHERE t.sprintid=:sprint
             Instant start,
             Instant end
     );
+
+    Optional<Task> findByTaskCode(String taskCode);
+
+    List<Task> findBySprintidAndUserid(Sprint sprint, Users user);
 }

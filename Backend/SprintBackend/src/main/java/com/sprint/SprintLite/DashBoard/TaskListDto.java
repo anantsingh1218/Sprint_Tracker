@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class TaskListDto {
 
-    private Integer id;
+    private String taskCode;
 
     private String title;
 

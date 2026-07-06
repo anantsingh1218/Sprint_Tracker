@@ -9,7 +9,7 @@ import lombok.*;
 
 public class MoveTaskDto {
 
-    private Integer taskId;
+    private String taskCode;
 
     private String status;
 

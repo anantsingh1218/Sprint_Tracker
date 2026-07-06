@@ -1,44 +1,36 @@
 <div class="analytics-card" *ngIf="releaseReadiness">
 
     <div class="card-header">
-
-        <h3>🚀 Release Readiness</h3>
-
+        <h3>Release Readiness</h3>
+        <span class="status-badge"
+              [class.ready]="releaseReadiness.releaseReady"
+              [class.not-ready]="!releaseReadiness.releaseReady">
+            {{ releaseReadiness.releaseReady ? 'Ready' : 'Not Ready' }}
+        </span>
     </div>
 
-    <div
-        class="status"
-        [class.ready]="releaseReadiness.releaseReady"
-        [class.not-ready]="!releaseReadiness.releaseReady">
+    <div class="release-body">
 
-        {{ releaseReadiness.releaseReady ? 'Ready' : 'Not Ready' }}
-
-    </div>
-
-    <div class="stats">
-
-        <div>
-
-            <span>Completion</span>
-
-            <strong>{{ releaseReadiness.completion }}%</strong>
-
+        <div class="ring-wrap">
+            <svg class="progress-ring" viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
+                <circle class="ring-fill" cx="40" cy="40" r="34"
+                        [attr.stroke-dasharray]="213.6"
+                        [attr.stroke-dashoffset]="213.6 - (213.6 * (releaseReadiness.completion || 0) / 100)">
+                </circle>
+            </svg>
+            <div class="ring-value">{{ releaseReadiness.completion }}%</div>
         </div>
 
-        <div>
-
-            <span>Open Bugs</span>
-
-            <strong>{{ releaseReadiness.openBugs }}</strong>
-
-        </div>
-
-        <div>
-
-            <span>Blocked Tasks</span>
-
-            <strong>{{ releaseReadiness.blockedTasks }}</strong>
-
+        <div class="stats">
+            <div>
+                <span>Open Bugs</span>
+                <strong>{{ releaseReadiness.openBugs }}</strong>
+            </div>
+            <div>
+                <span>Blocked Tasks</span>
+                <strong>{{ releaseReadiness.blockedTasks }}</strong>
+            </div>
         </div>
 
     </div>

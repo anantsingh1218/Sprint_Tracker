@@ -9,7 +9,7 @@ import lombok.*;
 @Builder
 public class StoryListDto {
 
-    private Integer id;
+    private String storyCode;
 
     private String title;
 

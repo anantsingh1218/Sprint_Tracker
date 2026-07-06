@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductSummaryDto {
 
-    private Integer productId;
+    private String productCode;
 
     private String productName;
 

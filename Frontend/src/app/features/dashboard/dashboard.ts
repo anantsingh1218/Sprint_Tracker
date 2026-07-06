@@ -10,6 +10,8 @@ import { ReleaseReadiness } from './models/dashboard.model';
 import { TeamCapacity } from './models/dashboard.model';
 import { VelocityCard } from './components/velocity-card/velocity-card';
 import { AnalyticsSection } from './components/analytics-section/analytics-section';
+import { ExportDashboard } from './models/export-dashboard.model';
+import { SprintProgress } from './models/dashboard.model';
 import { Router } from '@angular/router';
 
 @Component({
@@ -28,6 +30,12 @@ export class Dashboard implements OnInit {
     products: ProductDropdown[] = [];
 
     selectedProductId!: number;
+
+    summary: any;
+
+    sprintProgress?: SprintProgress;
+
+    exportReport?: ExportDashboard;
 
     selectedProduct: any;
 
@@ -114,6 +122,62 @@ export class Dashboard implements OnInit {
 
     }
 
+    fetchSummary(): void {
+
+    if (!this.selectedProductId) {
+        return;
+    }
+
+    this.dashboardService
+        .getSummary(this.selectedProductId)
+        .subscribe({
+
+            next: (res: any) => {
+
+                console.log("Summary:", res);
+
+                this.summary = res;
+
+            },
+
+            error: err => {
+
+                console.error(err);
+
+            }
+
+        });
+
+}
+
+fetchExport(): void {
+
+    if (!this.selectedProductId) {
+        return;
+    }
+
+    this.dashboardService
+        .exportDashboard(this.selectedProductId)
+        .subscribe({
+
+            next: (res: ExportDashboard) => {
+
+                console.log("Export Report:", res);
+
+                this.exportReport = res;
+
+            },
+
+            error: err => {
+
+                console.error(err);
+
+            }
+
+        });
+
+}
+
     fetchProducts(): void {
 
         this.dashboardService
@@ -152,6 +216,12 @@ export class Dashboard implements OnInit {
         this.updateSelectedProduct();
 
         console.log("Fetching Analytics...");
+
+        this.fetchSummary();
+
+        this.fetchSprintProgress();
+        
+        this.fetchExport();
 
         this.fetchVelocity();
 
@@ -281,4 +351,32 @@ export class Dashboard implements OnInit {
             });
         this.cdr.detectChanges();
     }
+
+    fetchSprintProgress(): void {
+
+    if (!this.selectedProductId) {
+        return;
+    }
+
+    this.dashboardService
+        .getSprintProgress(this.selectedProductId)
+        .subscribe({
+
+            next: (res) => {
+
+                console.log("Sprint Progress =", res);
+
+                this.sprintProgress = res;
+
+            },
+
+            error: (err) => {
+
+                console.error(err);
+
+            }
+
+        });
+
+}
 }

@@ -68,6 +68,16 @@ public class DashboardController {
 
     }
 
+    @GetMapping("/sprint-progress")
+    public SprintProgressDto getSprintProgress(
+            @RequestParam Integer productId
+    ) {
+
+        return dashboardService.getSprintProgress(productId);
+
+    }
+
+
     @GetMapping("/export")
     public ExportDashboardDto export(
             @RequestParam(required = false) Integer productId
@@ -116,14 +126,14 @@ public class DashboardController {
 
     }
 
-    @GetMapping("/feature-stories/{featureId}")
-    public List<StoryCardDto> featureStories(
-            @PathVariable Integer featureId
-    ) {
-
-        return dashboardService.getStoriesByFeature(featureId);
-
-    }
+//    @GetMapping("/feature-stories/{featureId}")
+//    public List<StoryCardDto> featureStories(
+//            @PathVariable Integer featureId
+//    ) {
+//
+//        return dashboardService.getStoriesByFeature(featureId);
+//
+//    }
 
     @GetMapping("/story-progress/{storyId}")
     public StoryProgressDto storyProgress(
@@ -143,13 +153,10 @@ public class DashboardController {
 
     }
 
-    @PutMapping("/move-task")
-    public void move(
-            @RequestBody MoveTaskDto dto
-    ) {
+    @PatchMapping("/task/move")
+    public void moveTask(@RequestBody MoveTaskDto dto) {
 
         dashboardService.moveTask(dto);
-
     }
 
     @GetMapping("/products")
@@ -172,6 +179,13 @@ public class DashboardController {
         return ResponseEntity.ok(
                 dashboardService.getRecentWorklogs()
         );
+
+    }
+
+    @GetMapping("/sprints")
+    public List<SprintDropdownDto> getSprints() {
+
+        return dashboardService.getSprintDropdown();
 
     }
 

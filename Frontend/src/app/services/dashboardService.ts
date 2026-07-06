@@ -5,6 +5,11 @@ import { ApiService } from '../core/apiService/api-service';
 import { Task } from '../features/dashboard/models/task.model';
 import { Story } from '../features/dashboard/models/story.model';
 import { Worklog } from '../features/dashboard/models/worklog.model';
+import { BoardColumn } from '../features/board/models/board.model';
+import { MoveTask } from '../features/board/models/move-task.model';
+import { SprintDropdown } from '../features/board/models/sprint-dropdown.model';
+import { ExportDashboard } from '../features/dashboard/models/export-dashboard.model';
+import { SprintProgress } from '../features/dashboard/models/dashboard.model';
 import {
   DashboardResponse,
   ProductDropdown,
@@ -42,6 +47,18 @@ export class DashboardService {
     );
 
   }
+
+  getSprintProgress(productId:number){
+
+    return this.api.getRequest<SprintProgress>(
+
+        '/dashboard/sprint-progress',
+
+        { productId }
+
+    );
+
+}
 
   getVelocity(productId: number): Observable<Velocity> {
 
@@ -100,14 +117,14 @@ export class DashboardService {
 
   exportDashboard(productId: number) {
 
-    return this.api.getRequest(
-      '/dashboard/export',
-      {
-        productId
-      }
+    return this.api.getRequest<ExportDashboard>(
+        '/dashboard/export',
+        {
+            productId
+        }
     );
 
-  }
+}
 
   getMyTasks() {
 
@@ -137,6 +154,38 @@ getRecentWorklogs() {
 
     return this.api.getRequest<Worklog[]>(
         '/dashboard/recent-worklogs'
+    );
+
+}
+
+getBoard(sprintId: number) {
+
+  return this.api.getRequest<BoardColumn[]>(
+
+    `/dashboard/board/${sprintId}`
+
+  );
+
+}
+
+moveTask(data: MoveTask) {
+
+    return this.api.patchRequest(
+
+        '/dashboard/task/move',
+
+        data
+
+    );
+
+}
+
+getSprints() {
+
+    return this.api.getRequest<SprintDropdown[]>(
+
+        '/dashboard/sprints'
+
     );
 
 }

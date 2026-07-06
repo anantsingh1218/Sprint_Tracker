@@ -25,6 +25,24 @@ export interface ProductSummary {
 
 }
 
+export interface SprintProgress {
+
+    totalFeatures:number;
+
+    totalStories:number;
+
+    totalTasks:number;
+
+    completedTasks:number;
+
+    pendingTasks:number;
+
+    blockedTasks:number;
+
+    completion:number;
+
+}
+
 export interface PMDashboard {
 
   totalProducts: number;

@@ -4,9 +4,12 @@ import com.sprint.SprintLite.DashBoard.BoardColumnDto;
 import com.sprint.SprintLite.DashBoard.TaskCardDto;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.Task;
+import com.sprint.SprintLite.entity.Users;
 import com.sprint.SprintLite.repository.SprintRepository;
 import com.sprint.SprintLite.repository.TaskRepository;
 
+import com.sprint.SprintLite.repository.UsersRepository;
+import com.sprint.SprintLite.util.ApplicationUtility;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -22,112 +25,68 @@ public class BoardServiceImpl
         implements BoardService {
 
     private final
-    SprintRepository
-            sprintRepository;
+    SprintRepository sprintRepository;
+    private final UsersRepository usersRepository;
 
-    private final
-    TaskRepository
-            taskRepository;
-
+    private final TaskRepository taskRepository;
 
     @Override
-    public List<BoardColumnDto>
-    getBoard(
-            Integer sprintId
-    ){
+    public List<BoardColumnDto> getBoard(Integer sprintId){
 
-        Sprint sprint =
-
-                sprintRepository
-                        .findById(
-                                sprintId
-                        )
-                        .orElseThrow();
-
+        Sprint sprint = sprintRepository.findById(sprintId).orElseThrow();
+        String userName= ApplicationUtility.getLoggedInUser();
+        Users user = usersRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException(("User not found")));
         List<Task> tasks =
-
-                taskRepository
-                        .findBySprintid(
-                                sprint
-                        );
+                taskRepository.findBySprintidAndUserid(
+                        sprint,
+                        user
+                );
 
         return List.of(
 
-                buildColumn(
-                        "TODO",
-                        tasks
-                ),
+                buildColumn("OPEN", tasks),
 
-                buildColumn(
-                        "IN_PROGRESS",
-                        tasks
-                ),
+                buildColumn("TODO", tasks),
 
-                buildColumn(
-                        "DONE",
-                        tasks
-                )
+                buildColumn("IN_PROGRESS", tasks),
+
+                buildColumn("DONE", tasks),
+
+                buildColumn("BLOCKED", tasks)
 
         );
 
     }
 
-
     private BoardColumnDto
-    buildColumn(
+    buildColumn(String status, List<Task> tasks){
 
-            String status,
+        return new BoardColumnDto(status, tasks.stream().filter(
+                t -> t.getTaskstatus()!=null && t.getTaskstatus().name().equals(status))
 
-            List<Task> tasks
+                        .map(t -> new TaskCardDto(
 
-    ){
+                                        t.getId(),
 
-        return new BoardColumnDto(
+                                        t.getTaskCode(),
 
-                status,
+                                        t.getTitle(),
 
-                tasks
+                                        t.getPriority() != null
+                                                ? t.getPriority().name()
+                                                : "UNKNOWN",
 
-                        .stream()
+                                        t.getStoryid() != null
+                                                ? t.getStoryid().getTitle()
+                                                : "-",
 
-                        .filter(
+                                        t.getRemainingestimatehours(),
 
-                                t ->
+                                        t.getUserid() != null
+                                                ? t.getUserid().getUsername()
+                                                : "-"
 
-                                        t.getTaskstatus()!=null
-
-                                                &&
-
-                                                t.getTaskstatus()
-                                                        .name()
-                                                        .equals(
-                                                                status
-                                                        )
-
-                        )
-
-                        .map(
-
-                                t ->
-
-                                        new TaskCardDto(
-
-                                                t.getId(),
-
-                                                t.getTitle(),
-
-                                                t.getPriority()!=null
-
-                                                        ?
-
-                                                        t.getPriority()
-                                                        .name()
-
-                                                        :
-
-                                                        "UNKNOWN"
-
-                                        )
+                                )
 
                         )
 
