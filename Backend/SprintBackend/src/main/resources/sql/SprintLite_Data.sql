@@ -1,5 +1,4 @@
 -- Defer constraint checking for INSERT
-ROLLBACK;
 BEGIN;
 SET CONSTRAINTS ALL DEFERRED;
 

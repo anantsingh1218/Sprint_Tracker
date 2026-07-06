@@ -1,0 +1,312 @@
+<div class="team-dashboard">
+
+    <div class="dashboard-header">
+
+        <div>
+
+            <h1>
+                My Dashboard
+            </h1>
+
+            <p>
+                Welcome back
+                Here's your current sprint overview.
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- Summary Cards -->
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+
+            <span class="label">
+                Assigned Tasks
+            </span>
+
+            <span class="value">
+
+                {{ assignedTasks }}
+
+            </span>
+
+        </div>
+
+        <div class="summary-card">
+
+            <span class="label">
+                Pending
+            </span>
+
+            <span class="value">
+
+                {{ pendingTasks }}
+
+            </span>
+
+        </div>
+
+        <div class="summary-card">
+
+            <span class="label">
+                Completed
+            </span>
+
+            <span class="value">
+
+                {{ completedTasks }}
+
+            </span>
+
+        </div>
+
+        <div class="summary-card">
+
+            <span class="label">
+                Active Sprint
+            </span>
+
+            <span class="value">
+                Sprint 1
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="dashboard-grid">
+
+        <!-- LEFT -->
+
+        <div class="left-column">
+
+            <div class="card">
+
+                <div class="section-header">
+
+                    <h3>
+                        My Stories
+                    </h3>
+
+                    <span>
+
+                        {{stories.length}} Stories
+
+                    </span>
+
+                </div>
+
+                <div *ngFor="let story of stories" class="story-card">
+
+                    <div class="story-header">
+
+                        <h4>
+
+                            {{story.title}}
+
+                        </h4>
+
+                        <span class="story-status">
+
+                            {{story.status}}
+
+                        </span>
+
+                    </div>
+
+                    <div class="story-feature">
+
+                        {{story.featureName}}
+
+                    </div>
+
+                    <div class="progress-bar">
+
+                        <div class="progress-fill" [style.width.%]="story.progress">
+                        </div>
+
+                    </div>
+
+                    <div class="story-footer">
+
+                        <span>
+
+                            {{story.completedTasks}}
+                            /
+                            {{story.totalTasks}}
+                            Tasks
+
+                        </span>
+
+                        <span>
+
+                            {{story.progress}}%
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="section-header">
+
+                    <h3>My Tasks</h3>
+
+                    <span>{{tasks.length}} Tasks</span>
+
+                </div>
+
+                <div class="task-item" *ngFor="let task of tasks">
+
+                    <div class="task-top">
+
+                        <h4>{{task.title}}</h4>
+
+                        <span class="priority" [ngClass]="task.priority.toLowerCase()">
+
+                            {{task.priority}}
+
+                        </span>
+
+                    </div>
+
+                    <div class="task-middle">
+
+                        <span>{{task.sprintName}}</span>
+
+                        <span>
+
+                            Story :
+                            {{task.storyName}}
+
+                        </span>
+
+                    </div>
+
+                    <div class="task-bottom">
+
+                        <span class="status" [ngClass]="task.status.toLowerCase()">
+
+                            {{task.status}}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+
+        <div class="right-column">
+
+            <div class="card">
+
+                <div class="section-header">
+
+                    <h3>📝 Recent Work</h3>
+
+                </div>
+
+                <div *ngFor="let work of recentWorklogs" class="worklog-item">
+
+                    <div class="worklog-top">
+
+                        <div>
+
+                            <strong>
+
+                                {{ work.taskTitle }}
+
+                            </strong>
+
+                            <div class="story-name">
+
+                                {{ work.storyTitle }}
+
+                            </div>
+
+                        </div>
+
+                        <span class="hours">
+
+                            {{ work.hoursSpent }} h
+
+                        </span>
+
+                    </div>
+
+                    <div class="worklog-bottom">
+
+                        <span>
+
+                            {{ work.workDate }}
+
+                        </span>
+
+                        <span>
+
+                            {{ work.remarks }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <h3> Today's Focus</h3>
+
+                <div *ngIf="focusTask">
+
+                    <h4>{{focusTask.title}}</h4>
+
+                    <p>
+                        {{focusTask.storyName}}
+                    </p>
+
+                    <span class="priority {{focusTask.priority.toLowerCase()}}">
+                        {{focusTask.priority}}
+                    </span>
+
+                    <span class="status {{focusTask.status.toLowerCase()}}">
+                        {{focusTask.status}}
+                    </span>
+
+                    <p>
+
+                        Remaining :
+
+                        {{focusTask.remainingEstimateHours}}
+
+                        hrs
+
+                    </p>
+
+                </div>
+
+                <div *ngIf="!focusTask">
+
+                    No active task
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>

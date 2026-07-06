@@ -15,6 +15,9 @@ import org.jspecify.annotations.NonNull;
 import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
 @Setter
@@ -57,6 +60,7 @@ public class Task extends BaseEntity {
     @JoinColumn(name = "storyid", nullable = false)
     private Story storyid;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sprintid", nullable = false)

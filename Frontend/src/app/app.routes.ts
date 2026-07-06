@@ -12,6 +12,8 @@ import { pmGuard } from './core/guards/pm-guard';
 import { DsuComponent } from './features/DSU/dsu';
 import { ForgotPassword } from './features/forgot-password/forgot-password';
 import { FeatureList } from './features/feature-list/feature-list';
+import { TeamDashboard } from './features/dashboard/TeamDashboard/teamDashboard';
+
 import { BugList } from './features/bug-list/bug-list';
 import { Profile } from './features/profile/profile';
 
@@ -34,6 +36,7 @@ export const routes: Routes = [
     component: Layout,
     children: [
       { path: 'dashboard', component: Dashboard },
+      { path: 'teamDashboard', component: TeamDashboard},
       { path: 'sprints', component: Sprint },
       { path: 'tasks', component: Tasks },
       { path: 'backlog', component: Backlog },

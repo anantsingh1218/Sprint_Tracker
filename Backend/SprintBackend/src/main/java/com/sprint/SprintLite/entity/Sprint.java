@@ -65,6 +65,4 @@ public class Sprint extends BaseEntity {
     @OneToMany(mappedBy = "sprintid")
     private Set<Task> tasktables = new LinkedHashSet<>();
 
-
-
 }

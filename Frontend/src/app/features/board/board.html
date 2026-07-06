@@ -1,63 +1,103 @@
+<div class="toolbar">
+
+    <label>Sprint</label>
+
+    <select
+        [(ngModel)]="selectedSprintId"
+        (change)="loadBoard()">
+
+        <option
+            *ngFor="let sprint of sprints"
+            [value]="sprint.id">
+
+            {{ sprint.sprintCode }} - {{ sprint.sprintName }}
+
+        </option>
+
+    </select>
+
+</div>
+
 <div class="board">
 
-  <!-- TODO -->
-  <div class="column"
-       cdkDropList
-       [cdkDropListData]="todo"
-       (cdkDropListDropped)="drop($event, 'todo')">
+  <div
+    class="column"
 
-    <h3>To Do</h3>
+    *ngFor="let column of columns$ | async"
 
-    <div *ngFor="let item of todo"
-         cdkDrag
-         @fadeSlide>
+    cdkDropList
 
-      <mat-card class="card">
-        <b>{{ item.type | uppercase }}</b><br />
-        {{ item.title }}
-      </mat-card>
+    [cdkDropListData]="column.tasks"
 
-    </div>
-  </div>
+    [cdkDropListConnectedTo]="dropLists"
 
-  <!-- IN PROGRESS -->
-  <div class="column"
-       cdkDropList
-       [cdkDropListData]="inProgress"
-       (cdkDropListDropped)="drop($event, 'in-progress')">
+    [id]="column.status"
 
-    <h3>In Progress</h3>
+    (cdkDropListDropped)="drop($event, column)">
 
-    <div *ngFor="let item of inProgress"
-         cdkDrag
-         @fadeSlide>
+    <div class="column-header">
 
-      <mat-card class="card">
-        <b>{{ item.type | uppercase }}</b><br />
-        {{ item.title }}
-      </mat-card>
+      <h3>{{ column.status }}</h3>
+
+      <span class="count">
+        {{ column.tasks.length }}
+      </span>
 
     </div>
-  </div>
 
-  <!-- DONE -->
-  <div class="column"
-       cdkDropList
-       [cdkDropListData]="done"
-       (cdkDropListDropped)="drop($event, 'done')">
+    <div
+      class="empty"
+      *ngIf="column.tasks.length === 0">
 
-    <h3>Done</h3>
-
-    <div *ngFor="let item of done"
-         cdkDrag
-         @fadeSlide>
-
-      <mat-card class="card">
-        <b>{{ item.type | uppercase }}</b><br />
-        {{ item.title }}
-      </mat-card>
+      No Tasks
 
     </div>
+
+    <div
+    class="card"
+
+    *ngFor="let task of column.tasks"
+
+    cdkDrag>
+
+      <div class="card-title">
+
+        {{ task.title }}
+
+      </div>
+
+      <div class="story">
+
+        {{ task.story }}
+
+      </div>
+
+      <div class="card-footer">
+
+        <span
+          class="priority"
+          [ngClass]="task.priority.toLowerCase()">
+
+          {{ task.priority }}
+
+        </span>
+
+      </div>
+
+      <div class="meta">
+
+        👤 {{ task.assignee }}
+
+      </div>
+
+      <div class="meta">
+
+        ⏱ {{ task.remainingHours }} hrs remaining
+
+      </div>
+
+    </div>
+
   </div>
 
 </div>
