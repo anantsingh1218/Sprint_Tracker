@@ -14,7 +14,7 @@ import { DsuService } from './dsu.service';
 export class DsuComponent {
 
   entityType: string = '';
-  entityId: number = 0;
+  entityCode: string = '';
 
   selectedDsu: any = null;
 
@@ -43,7 +43,7 @@ autoDsuData: any = null;
   submitDSU() {
   this.dsuService.createDSU(
     this.entityType,
-    this.entityId,
+    this.entityCode,
     this.dsuData
   ).subscribe({
     next: (res: any) => {
@@ -51,7 +51,7 @@ autoDsuData: any = null;
 
       // Clear form first
       this.entityType = '';
-      this.entityId = 0;
+      this.entityCode = '';
       this.dsuData = {
         notesdate: '',
         status: '',

@@ -9,6 +9,7 @@ import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -32,21 +33,13 @@ public class StoryServiceImpl implements IStoryService {
                 .getAuthentication()
                 .getName();
 
+        Feature feature = featureRepository.findFeatureByFeatureCode(request.getFeatureCode())
+                .orElseThrow(() -> new RuntimeException("Feature not found"));
 
-        Feature feature = featureRepository.findById(request.getFeatureId())
-                .orElseThrow(() ->
-                        new RuntimeException("Feature not found"));
+        Users assignedUser = usersRepository.findByUsername(request.getUserCode())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-
-        Users assignedUser = usersRepository.findById(request.getUserId())
-                .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
-
-
-        Sprint sprint = sprintRepository.findById(request.getSprintId())
-                .orElseThrow(() ->
-                        new RuntimeException("Sprint not found"));
+        Sprint sprint = sprintRepository.findSprintBySprintCode(request.getSprintCode());
 
         // Create Story object
         Story story = new Story();
@@ -65,9 +58,9 @@ public class StoryServiceImpl implements IStoryService {
         StoryResponseDto response = new StoryResponseDto();
         response.setTitle(story.getTitle());
         response.setBody(story.getBody());
-        response.setFeatureId(feature.getId());
-        response.setSprintId(sprint.getId());
-        response.setUserId(assignedUser.getId());
+        response.setFeatureCode(CodeUtils.encode("F", feature.getId()));
+        response.setSprintCode(CodeUtils.encode("SP", sprint.getId()));
+        response.setUserCode(CodeUtils.encode("U", assignedUser.getId()));
         response.setStoryStatus(story.getStorystatus());
         response.setPriority(story.getPriority());
         response.setStoryPoints(story.getStorypoints());
@@ -107,20 +100,18 @@ public class StoryServiceImpl implements IStoryService {
         }
 
         // 3. Map relations carefully
-        if (story.getUserId() != null) {
-            Users user = usersRepository.findById(story.getUserId())
+        if (story.getUserCode() != null) {
+            Users user = usersRepository.findByUsername(story.getUserCode())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
             existingStory.setUserid(user);
         }
 
-        if (story.getSprintId() != null) {
-            Sprint sprint = sprintRepository.findById(story.getSprintId())
-                    .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
-            existingStory.setSprintid(sprint);
+        if (story.getSprintCode() != null) {
+            Sprint sprint = sprintRepository.findSprintBySprintCode(story.getSprintCode());
         }
 
-        if (story.getFeatureId() != null) {
-            Feature feature = featureRepository.findById(story.getFeatureId())
+        if (story.getFeatureCode() != null) {
+            Feature feature = featureRepository.findFeatureByFeatureCode(story.getFeatureCode())
                     .orElseThrow(() -> new IllegalArgumentException("Feature not found"));
             existingStory.setFeatureid(feature);
         }
@@ -151,13 +142,13 @@ public class StoryServiceImpl implements IStoryService {
         response.setStoryPoints(updatedStory.getStorypoints());
 
         if (updatedStory.getFeatureid() != null) {
-            response.setFeatureId(updatedStory.getFeatureid().getId());
+            response.setFeatureCode(CodeUtils.encode("F", updatedStory.getFeatureid().getId()));
         }
         if (updatedStory.getSprintid() != null) {
-            response.setSprintId(updatedStory.getSprintid().getId());
+            response.setSprintCode(CodeUtils.encode("SP", updatedStory.getSprintid().getId()));
         }
         if (updatedStory.getUserid() != null) {
-            response.setUserId(updatedStory.getUserid().getId());
+            response.setUserCode(CodeUtils.encode("U", updatedStory.getUserid().getId()));
         }
 
         if (savedComment != null) {
@@ -189,12 +180,11 @@ public class StoryServiceImpl implements IStoryService {
             dto.setStoryPoints(story.getStorypoints());
 
             // Handle potential null checks safely for relational mappings
-            if (story.getFeatureid() != null) dto.setFeatureId(story.getFeatureid().getId());
-            if (story.getSprintid() != null) dto.setSprintId(story.getSprintid().getId());
-            if (story.getUserid() != null) dto.setUserId(story.getUserid().getId());
+            if (story.getFeatureid() != null) dto.setFeatureCode(CodeUtils.encode("F", story.getFeatureid().getId()));
+            if (story.getSprintid() != null) dto.setSprintCode(CodeUtils.encode("SP", story.getSprintid().getId()));
+            if (story.getUserid() != null) dto.setUserCode(CodeUtils.encode("U", story.getUserid().getId()));
 
             return dto;
         }).collect(Collectors.toList());
     }
 }
-

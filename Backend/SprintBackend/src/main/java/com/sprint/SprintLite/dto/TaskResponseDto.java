@@ -11,15 +11,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskResponseDto {
+
+    private Integer taskCode;
+
+
     private String title;
 
     private String body;
 
-    private Integer userId;
+    private String userCode;
 
-    private Integer sprintid;
+    private String sprintCode;
 
-    private Integer storyid;
+    private String storyCode;
 
     private Status taskstatus;
 

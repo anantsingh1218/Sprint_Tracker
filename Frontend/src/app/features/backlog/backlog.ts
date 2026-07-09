@@ -6,11 +6,9 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
 import { StoryService } from '../story-list/story.service';
-import { WorkItem, WorkItemType } from '../../models/workItem';
 import { WorkItemService } from '../../services/workItemService';
 import { fadeSlide } from '../../animations/workItemAnimations';
 import { FeatureOverlay } from '../feature-overlay/feature-overlay';
-import { Story } from '../story/story';
 import { IFeature } from '../../models/featureInterface';
 import { IStory } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
@@ -38,7 +36,6 @@ interface TreeNode extends WorkItem {
     MatButtonModule,
     MatMenuModule,
     FeatureOverlay,
-    Story,
     Tasks,
     Bug,
   ],
@@ -210,9 +207,9 @@ export class Backlog {
       priority: item.priority,
       estimatedStoryPoints: item.estimatedPoints,
       remainingStoryPoint: item.remainingPoints,
-      productId: item.productCategory,
-      sprintId: item.sprintName,
-      userId: item.assignedTo,
+      productCode: item.productCategory,
+      sprintCode: item.sprintName,
+      userCode: item.assignedTo,
       comments: item.comments,
     };
   }
@@ -226,9 +223,9 @@ export class Backlog {
       priority: item.priority,
       estimatedStoryPoints: item.estimatedPoints,
       remainingStoryPoint: item.remainingPoints,
-      featureId: item.parentId ? this.extractNumericId(item.parentId) : null,
-      sprintId: item.sprintName,
-      userId: item.assignedTo,
+      featureCode: item.parentId ? item.parentId : null,
+      sprintCode: item.sprintName,
+      userCode: item.assignedTo,
       comments: item.comments,
     };
   }
@@ -242,9 +239,9 @@ export class Backlog {
       priority: item.priority,
       estimatedHours: item.estimatedPoints,
       remainingHours: item.remainingPoints,
-      storyId: item.parentId ? this.extractNumericId(item.parentId) : null,
-      sprintId: item.sprintName,
-      userId: item.assignedTo,
+      storyCode: item.parentId ? item.parentId : null,
+      sprintCode: item.sprintName,
+      userCode: item.assignedTo,
       comments: item.comments,
     };
   }
@@ -259,8 +256,8 @@ export class Backlog {
       estimatedHours: 0,
       remainingHours: 0,
       reopenCount: 0,
-      storyId: item.parentId ? this.extractNumericId(item.parentId) : null,
-      sprintId: null,
+      storyCode: item.parentId ? item.parentId : null,
+      sprintCode: null,
       assignedTo: null,
       comments: [],
     };
@@ -274,10 +271,10 @@ export class Backlog {
       parentId: null,
       status: f.status,
       description: f.description,
-      sprintName: f.sprintId,
+      sprintName: f.sprintCode,
       priority: f.priority,
-      assignedTo: f.userId,
-      productCategory: f.productId,
+      assignedTo: f.userCode,
+      productCategory: f.productCode,
       reopenCount: 0,
       estimatedPoints: f.estimatedStoryPoints,
       remainingPoints: f.remainingStoryPoint,
@@ -290,12 +287,12 @@ export class Backlog {
       id: s.id,
       title: s.title,
       type: WorkItemType.Story,
-      parentId: s.featureId ? `F${s.featureId}` : null,
+      parentId: s.featureCode ? `F${s.featureCode}` : null,
       status: s.status,
       description: s.body,
-      sprintName: s.sprintId,
+      sprintName: s.sprintCode,
       priority: s.priority,
-      assignedTo: s.userId,
+      assignedTo: s.userCode,
       productCategory: null,
       reopenCount: 0,
       estimatedPoints: s.estimatedStoryPoints,
@@ -309,12 +306,12 @@ export class Backlog {
       id: t.id,
       title: t.title,
       type: WorkItemType.Task,
-      parentId: t.storyId ? `S${t.storyId}` : null,
+      parentId: t.storyCode ? `S${t.storyCode}` : null,
       status: t.status,
       description: t.description,
-      sprintName: t.sprintId,
+      sprintName: t.sprintCode,
       priority: t.priority,
-      assignedTo: t.userId,
+      assignedTo: t.userCode,
       productCategory: null,
       reopenCount: 0,
       estimatedPoints: t.estimatedHours,
@@ -328,10 +325,10 @@ export class Backlog {
       id: b.id,
       title: b.title,
       type: WorkItemType.Bug,
-      parentId: b.storyId ? `S${b.storyId}` : null,
+      parentId: b.storyCode ? `S${b.storyCode}` : null,
       status: b.status,
       description: b.description,
-      sprintName: b.sprintId,
+      sprintName: b.sprintCode,
       priority: b.priority,
       assignedTo: b.assignedTo,
       productCategory: null,
@@ -377,7 +374,7 @@ export class Backlog {
       id: `S${story.id}`,
       title: story.title,
       type: WorkItemType.Story,
-      parentId: `F${story.featureId}`,
+      parentId: `F${story.featureCode}`,
       status: story.storyStatus,
       description: story.description,
       sprintName: story.sprintName,
@@ -396,7 +393,7 @@ export class Backlog {
       id: `T${task.id}`,
       title: task.title,
       type: WorkItemType.Task,
-      parentId: `S${task.storyId}`,
+      parentId: `S${task.storyCode}`,
       status: task.taskStatus,
       description: task.description,
       sprintName: task.sprintName,
@@ -415,7 +412,7 @@ export class Backlog {
       id: `B${bug.id}`,
       title: bug.title,
       type: WorkItemType.Bug,
-      parentId: `S${bug.storyId}`,
+      parentId: `S${bug.storyCode}`,
       status: bug.bugStatus,
       description: bug.description,
       sprintName: bug.sprintName,

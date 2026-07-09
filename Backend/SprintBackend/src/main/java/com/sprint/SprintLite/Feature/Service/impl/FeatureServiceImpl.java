@@ -150,7 +150,7 @@ public class FeatureServiceImpl implements IFeatureService {
                 feature.getSprintId().getSprintName(),
                 feature.getRemainingStoryPoints(),
                 feature.getEstimatedStoryPoints(),
-                feature.getProductId().getProductname(),
+                feature.getProductId() != null ? feature.getProductId().getProductname() : null,
                 feature.getUserid().getUsername()
         );
     }

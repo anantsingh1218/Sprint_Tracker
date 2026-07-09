@@ -12,6 +12,7 @@ import com.sprint.SprintLite.repository.ProductRepository;
 import com.sprint.SprintLite.repository.SprintRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class SprintServiceImpl implements ISprintService {
 
     @Override
     public SprintResponseDto createSprint(CreateSprintRequest request) {
-        Product product = productRepository.findById(Math.toIntExact(request.getProductId()))
+        Product product = productRepository.findById(CodeUtils.decodeToInteger("P", request.getProductCode()))
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         Sprint sprint = new Sprint();
@@ -105,8 +106,8 @@ public class SprintServiceImpl implements ISprintService {
             sprint.setStatus(request.getStatus());
         }
 
-        if (request.getProductId() != null) {
-            Product product = productRepository.findById(request.getProductId())
+        if (request.getProductCode() != null) {
+            Product product = productRepository.findById(CodeUtils.decodeToInteger("P", request.getProductCode()))
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
             sprint.setProductid(product);
@@ -119,9 +120,7 @@ public class SprintServiceImpl implements ISprintService {
         return new SprintResponseDto(
                 sprint.getId(),
                 sprint.getSprintName(),
-                sprint.getProductid() != null
-                        ? sprint.getProductid().getId()
-                        : null,
+                CodeUtils.encode("P", sprint.getProductid() != null ? sprint.getProductid().getId() : null),
                 sprint.getStartDate(),
                 sprint.getEndDate(),
                 sprint.getSprintDuration(),

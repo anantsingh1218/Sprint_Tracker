@@ -1,66 +1,48 @@
 import { Injectable } from '@angular/core';
+import { ApiService } from '../../core/apiService/api-service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
 
-  private tasks: any[] = [
-  {
-    id: '1',
-    title: 'Gather Requirements',
-    description: 'Collect lead requirements',
-    status: 'Done',
-    priority: 'Medium',
-    sprintId: '1'
-  },
-  {
-    id: '2',
-    title: 'Design Lead Screen',
-    description: 'Create UI for lead form',
-    status: 'In Progress',
-    priority: 'High',
-    sprintId: '1'
-  }
-];
+  constructor(private apiService: ApiService) {}
 
-  getTasks() {
-    return this.tasks;
+  getTasks(): Observable<any[]> {
+    return this.apiService.getRequest<any[]>('/task/all');
   }
 
-  addTask(task: any) {
-    this.tasks.push({
-      ...task,
-      id: crypto.randomUUID() // IMPORTANT for edit feature
-    });
+  addTask(task: any): Observable<any> {
+    return this.apiService.postRequest<any>('/task/add', task);
   }
 
-  getTaskById(id: string) {
-  return this.tasks.find((t: any) => t.id === id);
-}
-
-
-
-  getTasksBySprint(sprintId: string) {
-    return this.tasks.filter(t => t.sprintId === sprintId);
+  getTaskById(taskCode: string): Observable<any> {
+    return this.apiService.getRequest<any>(`/task/${taskCode}`);
   }
 
-  updateTaskStatus(task: any, status: string) {
-    const found = this.tasks.find(t => t.id === task.id);
-    if (found) {
-      found.status = status;
-    }
+  getTasksBySprint(sprintCode: string): Observable<any[]> {
+    return this.apiService.getRequest<any[]>(`/task/sprint/${sprintCode}`);
   }
 
-  // ✅ NEW: required for Edit Task feature
-  updateTask(updatedTask: any) {
-    const index = this.tasks.findIndex(t => t.id === updatedTask.id);
+  updateTaskStatus(task: any, status: string): Observable<any> {
+    const updatedTask = { ...task, status: status };
+    return this.apiService.putRequest<any>(`/task/${task.taskCode}`, updatedTask);
+  }
 
-    if (index !== -1) {
-      this.tasks[index] = {
-        ...this.tasks[index],
-        ...updatedTask
-      };
-    }
+  updateTask(updatedTask: any): Observable<any> {
+    return this.apiService.putRequest<any>(`/task/${updatedTask.taskCode}`, updatedTask);
+  }
+
+  getUsersDropdown(): Observable<any[]> {
+    return this.apiService.getRequest<any[]>('/users/all');
+  }
+
+  getSprintsDropdown(): Observable<any[]> {
+    return this.apiService.getRequest<any[]>('/sprint/all');
+  }
+
+  getStoriesDropdown(): Observable<any[]> {
+    return this.apiService.getRequest<any[]>('/story/all');
   }
 }

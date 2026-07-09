@@ -39,8 +39,8 @@ export class BugList {
     estimatedHours: 0,
     remainingHours: 0,
 
-    storyId: null,
-    sprintId: null,
+    storyCode: null,
+    sprintCode: null,
     assignedTo: null,
     reopenCount: 0,
 

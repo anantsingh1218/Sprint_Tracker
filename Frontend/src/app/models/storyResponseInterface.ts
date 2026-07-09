@@ -6,7 +6,7 @@ export interface IStoryResponse{
     description: string,
     assignedTo: string,
     featureName: string,
-    featureId: number,
+    featureCode: string,
     storyStatus: WorkStatus,
     storyPriority: Priority,
     sprintName: string,

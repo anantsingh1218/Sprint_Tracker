@@ -15,11 +15,11 @@ public class StoryResponseDto {
     private Integer id;
     private String title;
     private String body;
-    private Integer featureId;
-    private Integer userId;
+    private String featureCode;
+    private String userCode;
     private Status storyStatus;
     private Priority priority;
-    private Integer sprintId;
+    private String sprintCode;
     private Integer storyPoints;
     private String comments;
 }

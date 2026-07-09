@@ -5,8 +5,8 @@ export interface IBug {
   id: string;
   title: string;
   description: string;
-  storyId: number | null;
-  sprintId: string | null;
+  storyCode: string | null;
+  sprintCode: string | null;
   assignedTo: string | null;
   status: WorkStatus;
   priority: Priority;

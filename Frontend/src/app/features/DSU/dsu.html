@@ -11,10 +11,18 @@
   <div class="dsu-card">
     <h2>Create DSU</h2>
 
-    <!-- Entity Type + Entity ID -->
+    <!-- Entity Type + Entity Code -->
     <div class="form-row">
-      <input [(ngModel)]="entityType" placeholder="Entity Type">
-      <input [(ngModel)]="entityId" type="number" placeholder="Entity ID">
+      <select [(ngModel)]="entityType">
+        <option value="">Select Entity Type</option>
+        <option value="PRODUCT">PRODUCT</option>
+        <option value="FEATURE">FEATURE</option>
+        <option value="STORY">STORY</option>
+        <option value="TASK">TASK</option>
+        <option value="BUG">BUG</option>
+        <option value="SPRINT">SPRINT</option>
+      </select>
+      <input [(ngModel)]="entityCode" type="text" placeholder="Entity Code (e.g. T1, SP1)">
     </div>
 
     <!-- Date -->

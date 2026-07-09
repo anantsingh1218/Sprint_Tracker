@@ -2,8 +2,8 @@
   <div class="workitem">
     <div class="header">
       <div class="title-block">
-        <div class="story-id">Feature #{{ feature.id }}</div>
-        <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
+        <div class="story-id">Task #{{ task.taskCode || 'New' }}</div>
+        <input class="title" [(ngModel)]="task.title" placeholder="Enter title..." />
       </div>
 
       <div class="header-center">
@@ -24,13 +24,13 @@
       <div class="left">
         @if (!isAttachmentView) {
           <label>Description</label>
-          <textarea [(ngModel)]="feature.description"></textarea>
+          <textarea [(ngModel)]="task.body"></textarea>
 
           <div class="comments">
             <h4>Discussion</h4>
 
-            <div class="comment" *ngFor="let c of feature.comments">
-              <b>{{ getUserName(c.userCode) }}</b>
+            <div class="comment" *ngFor="let c of task.commentsList">
+              <b>{{ c.userCode || 'System' }}</b>
               <p>{{ c.text }}</p>
               <small>{{ c.createdAt | date: 'short' }}</small>
             </div>
@@ -49,7 +49,6 @@
 
           <div class="selected-files" *ngIf="selectedFiles().length">
             <h5>Selected Files</h5>
-
             <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
           </div>
 
@@ -68,49 +67,49 @@
       </div>
 
       <div class="right">
-        <label>Product</label>
-        <select [(ngModel)]="feature.productCode">
-          <option value="">Select Products</option>
-          <option *ngFor="let f of products" [value]="f.name">{{ f.name }}</option>
+        <label>Story Code</label>
+        <select [(ngModel)]="task.storyCode">
+          <option [ngValue]="null">Select Story</option>
+          <option *ngFor="let st of stories" [ngValue]="'S' + st.id">{{ st.title }}</option>
         </select>
 
-        <label>Sprint</label>
-        <select [(ngModel)]="feature.sprintCode">
-          <option value="">Select Sprint</option>
-          <option *ngFor="let s of sprints" [value]="s.name">{{ s.name }}</option>
+        <label>Sprint Code</label>
+        <select [(ngModel)]="task.sprintCode">
+          <option [ngValue]="null">Select Sprint</option>
+          <option *ngFor="let sp of sprints" [ngValue]="'SP' + sp.id">{{ sp.sprintName }}</option>
         </select>
 
-        <label>Assigned To</label>
-        <select [(ngModel)]="feature.userCode">
-          <option value="">Unassigned</option>
-          <option value="SYSTEM">SYSTEM</option>
-          <option *ngFor="let u of users" [value]="u.name">{{ u.name }}</option>
+        <label>Assigned To (User Code)</label>
+        <select [(ngModel)]="task.userCode">
+          <option [ngValue]="null">Unassigned</option>
+          <option *ngFor="let u of users" [ngValue]="'U' + u.id">{{ u.username }}</option>
         </select>
 
         <label>Status</label>
-        <select [(ngModel)]="feature.status">
+        <select [(ngModel)]="task.taskstatus">
           <option value="OPEN">Open</option>
           <option value="IN_PROGRESS">In Progress</option>
           <option value="DONE">Done</option>
+          <option value="CLOSED">Closed</option>
         </select>
 
         <label>Priority</label>
-        <select [(ngModel)]="feature.priority">
+        <select [(ngModel)]="task.priority">
           <option value="LOW">Low</option>
           <option value="MEDIUM">Medium</option>
           <option value="HIGH">High</option>
           <option value="CRITICAL">Critical</option>
         </select>
 
-        <label>Story Points (Estimated)</label>
-        <input type="number" [(ngModel)]="feature.estimatedStoryPoints" />
+        <label>Original Estimate (Hours)</label>
+        <input type="number" [(ngModel)]="task.originalestimatehours" />
 
-        <label>Remaining Estimate</label>
-        <input type="number" [(ngModel)]="feature.remainingStoryPoint" />
+        <label>Remaining Estimate (Hours)</label>
+        <input type="number" [(ngModel)]="task.remainingestimatehours" />
       </div>
     </div>
     <div class="footer">
-      <button class="btn-save" (click)="saveFeature()">Save</button>
+      <button class="btn-save" (click)="saveTask()">Save</button>
       <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
     </div>
   </div>

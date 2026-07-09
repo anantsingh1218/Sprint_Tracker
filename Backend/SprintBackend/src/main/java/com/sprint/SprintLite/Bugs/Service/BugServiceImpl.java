@@ -7,6 +7,7 @@ import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,10 +32,10 @@ public class BugServiceImpl implements IBugService {
         Users assignedUser = usersRepository.findById(request.getAssignedto())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Story story = storyRepository.findById(request.getStoryid())
+        Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
                 .orElseThrow(() -> new RuntimeException("Story not found"));
 
-        Sprint sprint = sprintRepository.findById(request.getSprintid())
+        Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
                 .orElseThrow(() -> new RuntimeException("Sprint not found"));
 
         Bug bug = new Bug();
@@ -126,14 +127,14 @@ public class BugServiceImpl implements IBugService {
             existingBug.setAssignedto(assignedUser);
         }
 
-        if (request.getStoryid() != null) {
-            Story story = storyRepository.findById(request.getStoryid())
+        if (request.getStoryCode() != null) {
+            Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
                     .orElseThrow(() -> new RuntimeException("Story not found"));
             existingBug.setStoryid(story);
         }
 
-        if (request.getSprintid() != null) {
-            Sprint sprint = sprintRepository.findById(request.getSprintid())
+        if (request.getSprintCode() != null) {
+            Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
                     .orElseThrow(() -> new RuntimeException("Sprint not found"));
             existingBug.setSprintid(sprint);
         }

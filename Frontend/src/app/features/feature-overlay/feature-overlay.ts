@@ -74,7 +74,7 @@ export class FeatureOverlay implements OnInit, OnChanges {
     if (!this.newComment.trim()) return;
 
     const comment: IComment = {
-      userId: 1,
+      userCode: 'U1',
       text: this.newComment,
       createdAt: new Date().toISOString(),
     };
@@ -83,8 +83,8 @@ export class FeatureOverlay implements OnInit, OnChanges {
     this.newComment = '';
   }
 
-  getUserName(userId: any): string {
-    return this.users.find((u) => u.id === userId || u.name === userId)?.name || 'Unassigned';
+  getUserName(userCode: any): string {
+    return this.users.find((u) => u.id === userCode || u.name === userCode)?.name || 'Unassigned';
   }
 
   toggleAttachmentsView() {

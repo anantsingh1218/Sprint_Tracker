@@ -5,9 +5,9 @@ export interface IFeature {
   id: string;
   title: string;
   description: string;
-  productId: string | null;
-  sprintId: string | null;
-  userId: string | null;
+  productCode: string | null;
+  sprintCode: string | null;
+  userCode: string | null;
   status: WorkStatus;
   priority: Priority;
   estimatedStoryPoints: number;

@@ -13,14 +13,14 @@ export class DsuService {
 
 createDSU(
   entityType: string,
-  entityId: number,
+  entityCode: string,
   payload: any
 ): Observable<any> {
 
   const token = localStorage.getItem('jwtToken');
 
   return this.http.post(
-    `${this.baseUrl}/${entityType}/${entityId}`,
+    `${this.baseUrl}/${entityType}/${entityCode}`,
     payload,
     {
       headers: {

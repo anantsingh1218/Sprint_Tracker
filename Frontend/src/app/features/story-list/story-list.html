@@ -73,7 +73,7 @@
                 <div class="comments-timeline-stream">
                   @for (cmt of selectedStory.comments; track cmt.createdAt) {
                     <div class="individual-comment-bubble">
-                      <span class="comment-author">{{ getUserName(cmt.userId) }}:</span>
+                      <span class="comment-author">{{ getUserName(cmt.userCode) }}:</span>
                       <p class="comment-text-content">{{ cmt.text }}</p>
                     </div>
                   }
@@ -126,30 +126,30 @@
           <div class="layout-metadata-sidebar">
             <div class="meta-field-select-row">
               <label>Feature</label>
-              <select [(ngModel)]="selectedStory.featureId" class="select-dropdown-meta">
+              <select [(ngModel)]="selectedStory.featureCode" class="select-dropdown-meta">
                 <option [ngValue]="null">Select Feature</option>
-                @for (f of features(); track f.id) {
-                  <option [ngValue]="f.id">{{ f.title }}</option>
+                @for (f of features(); track f.featureCode) {
+                  <option [ngValue]="f.featureCode">{{ f.title }}</option>
                 }
               </select>
             </div>
 
             <div class="meta-field-select-row">
               <label>Sprint</label>
-              <select [(ngModel)]="selectedStory.sprintId" class="select-dropdown-meta">
+              <select [(ngModel)]="selectedStory.sprintCode" class="select-dropdown-meta">
                 <option [ngValue]="null">Select Sprint</option>
                 @for (s of sprints(); track s.id) {
-                  <option [ngValue]="s.id">{{ s.sprintName }}</option>
+                  <option [ngValue]="'SP' + s.id">{{ s.sprintName }}</option>
                 }
               </select>
             </div>
 
             <div class="meta-field-select-row">
               <label>Assigned To</label>
-              <select [(ngModel)]="selectedStory.userId" class="select-dropdown-meta">
+              <select [(ngModel)]="selectedStory.userCode" class="select-dropdown-meta">
                 <option [ngValue]="null">Unassigned</option>
-                @for (u of users(); track u.id) {
-                  <option [ngValue]="u.id">{{ u.username }}</option>
+                @for (u of users(); track u.username) {
+                  <option [ngValue]="u.username">{{ u.username }}</option>
                 }
               </select>
             </div>

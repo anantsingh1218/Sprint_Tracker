@@ -7,10 +7,11 @@ import java.time.LocalDate;
 
 @Data
 public class CreateSprintRequest {
+
     private String sprintName;
     private String description;
 
-    private Integer productId;
+    private String productCode;
 
     private LocalDate startDate;
     private LocalDate endDate;

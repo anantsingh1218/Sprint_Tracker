@@ -33,13 +33,12 @@
   <!-- SELECTED SPRINT CARD -->
   <div *ngIf="selectedSprint" class="selected-sprint-card">
     <h2>{{ selectedSprint.sprintName }}</h2>
-    <div><strong>Product ID:</strong> {{ selectedSprint.productId }}</div>
+    <div><strong>Product ID:</strong> {{ selectedSprint.productCode }}</div>
     <div><strong>Duration:</strong> {{ selectedSprint.sprintDuration }} Days</div>
     <div><strong>Status:</strong> {{ selectedSprint.status }}</div>
     <div><strong>Start:</strong> {{ selectedSprint.startDate }}</div>
     <div><strong>End:</strong> {{ selectedSprint.endDate }}</div>
-    <!-- Also added a Delete option inside the specific selection card if it's open -->
-    <button class="delete-btn-text" (click)="deleteSprint(selectedSprint.id)" style="margin-top: 12px; color: #ff4d4d; border: 1px solid #ff4d4d; background: transparent; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+    <button class="delete-btn" (click)="deleteSprint(selectedSprint.id)">
       Delete This Sprint
     </button>
   </div>
@@ -55,14 +54,11 @@
           <p class="description">{{ sprint.description }}</p>
         </div>
 
-        <span
-          class="badge"
-          [ngClass]="{
+        <span class="badge" [ngClass]="{
             planned: sprint.status === 'Planned' || sprint.status === 'PLANNED',
             active: sprint.status === 'Active' || sprint.status === 'ACTIVE',
             completed: sprint.status === 'Completed' || sprint.status === 'COMPLETED'
-          }"
-        >
+          }">
           {{ sprint.status }}
         </span>
       </div>
@@ -71,7 +67,7 @@
       <div class="info-section">
         <div class="info-item">
           <span class="label">Product ID</span>
-          <span class="value">{{ sprint.productId }}</span>
+          <span class="value">{{ sprint.productCode }}</span>
         </div>
       </div>
 
@@ -109,9 +105,7 @@
         </div>
 
         <div class="progress-bar">
-          <div
-            class="progress-fill"
-            [style.width.%]="getSprintProgress(sprint.id)">
+          <div class="progress-fill" [style.width.%]="getSprintProgress(sprint.id)">
           </div>
         </div>
       </div>
@@ -129,12 +123,9 @@
         </p>
       </div>
 
-      <!-- ACTION BUTTONS (DELETE ADDED HERE) -->
-      <div class="card-actions" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: flex-end;">
-        <button
-          class="delete-btn"
-          (click)="deleteSprint(sprint.id)"
-          style="background-color: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+      <!-- ACTION BUTTONS -->
+      <div class="card-actions">
+        <button class="delete-btn" (click)="deleteSprint(sprint.id)">
           Delete
         </button>
       </div>
@@ -152,31 +143,19 @@
     <input placeholder="Sprint Name" [(ngModel)]="newSprint.sprintName" />
 
     <!-- Product ID -->
-    <input type="number" placeholder="Product ID" [(ngModel)]="newSprint.productId" />
+    <input type="number" placeholder="Product ID" [(ngModel)]="newSprint.productCode" />
 
     <!-- Start Date -->
     <label>Start Date</label>
-    <input
-      type="date"
-      [(ngModel)]="newSprint.startDate"
-      (ngModelChange)="onDateChange(); onDurationChange()"
-    />
+    <input type="date" [(ngModel)]="newSprint.startDate" (ngModelChange)="onDateChange(); onDurationChange()" />
 
     <!-- Duration -->
     <label>Duration (Days)</label>
-    <input
-      type="number"
-      [(ngModel)]="newSprint.sprintDuration"
-      (ngModelChange)="onDurationChange()"
-    />
+    <input type="number" [(ngModel)]="newSprint.sprintDuration" (ngModelChange)="onDurationChange()" />
 
     <!-- End Date -->
     <label>End Date</label>
-    <input
-      type="date"
-      [(ngModel)]="newSprint.endDate"
-      (ngModelChange)="onDateChange()"
-    />
+    <input type="date" [(ngModel)]="newSprint.endDate" (ngModelChange)="onDateChange()" />
 
     <!-- Status -->
     <select [(ngModel)]="newSprint.status">

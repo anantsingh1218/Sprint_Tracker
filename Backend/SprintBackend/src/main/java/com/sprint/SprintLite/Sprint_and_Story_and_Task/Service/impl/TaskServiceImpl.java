@@ -9,6 +9,7 @@ import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 
 import java.util.List;
 
@@ -29,14 +30,14 @@ public class TaskServiceImpl implements ITaskService {
                 .getAuthentication()
                 .getName();
 
-        Users userid = usersRepository.findById(request.getUserId())
+        Users userid = usersRepository.findById(CodeUtils.decodeToInteger("U", request.getUserCode()))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
 
-        Sprint sprint = sprintRepository.findById(request.getSprintid())
+        Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
                 .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
 
-        Story story = storyRepository.findById(request.getStoryid())
+        Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
                 .orElseThrow(() -> new IllegalArgumentException("Story not found"));
 
         Task task = new Task();
@@ -57,18 +58,18 @@ public class TaskServiceImpl implements ITaskService {
 
         Task t1=taskRepository.save(task);
 
-       TaskResponseDto response = new TaskResponseDto();
-       response.setTitle(t1.getTitle());
-       response.setBody(t1.getBody());
-       response.setUserId(t1.getId());
-       response.setSprintid(sprint.getId());
-       response.setStoryid(story.getId());
-       response.setTaskstatus(t1.getTaskstatus());
-       response.setOriginalestimatehours(t1.getOriginalestimatehours());
-       response.setRemainingestimatehours(t1.getRemainingestimatehours());
-       response.setTaskstatus(t1.getTaskstatus());
-       response.setPriority(t1.getPriority());
-       return response;
+        TaskResponseDto response = new TaskResponseDto();
+        response.setTitle(t1.getTitle());
+        response.setBody(t1.getBody());
+        response.setUserCode(CodeUtils.encode("U", t1.getId()));
+        response.setSprintCode(CodeUtils.encode("SP", sprint.getId()));
+        response.setStoryCode(CodeUtils.encode("S", story.getId()));
+        response.setTaskstatus(t1.getTaskstatus());
+        response.setOriginalestimatehours(t1.getOriginalestimatehours());
+        response.setRemainingestimatehours(t1.getRemainingestimatehours());
+        response.setTaskstatus(t1.getTaskstatus());
+        response.setPriority(t1.getPriority());
+        return response;
     }
     @Override
     public TaskResponseDto getTaskById(Long id) {
@@ -78,12 +79,12 @@ public class TaskServiceImpl implements ITaskService {
 
         TaskResponseDto response = new TaskResponseDto();
 
-        response.setUserId(task.getId());
+        response.setUserCode(CodeUtils.encode("U", task.getId()));
         response.setTitle(task.getTitle());
         response.setBody(task.getBody());
-        response.setUserId(task.getUserid().getId());
-        response.setSprintid(task.getSprintid().getId());
-        response.setStoryid(task.getStoryid().getId());
+        response.setUserCode(CodeUtils.encode("U", task.getUserid().getId()));
+        response.setSprintCode(CodeUtils.encode("SP", task.getSprintid().getId()));
+        response.setStoryCode(CodeUtils.encode("S", task.getStoryid().getId()));
         response.setTaskstatus(task.getTaskstatus());
         response.setPriority(task.getPriority());
         response.setOriginalestimatehours(task.getOriginalestimatehours());
@@ -99,12 +100,12 @@ public class TaskServiceImpl implements ITaskService {
                 .map(task -> {
                     TaskResponseDto response = new TaskResponseDto();
 
-                    response.setUserId(task.getId());
+                    response.setUserCode(CodeUtils.encode("U", task.getId()));
                     response.setTitle(task.getTitle());
                     response.setBody(task.getBody());
-                    response.setUserId(task.getUserid().getId());
-                    response.setSprintid(task.getSprintid().getId());
-                    response.setStoryid(task.getStoryid().getId());
+                    response.setUserCode(CodeUtils.encode("U", task.getUserid().getId()));
+                    response.setSprintCode(CodeUtils.encode("SP", task.getSprintid().getId()));
+                    response.setStoryCode(CodeUtils.encode("S", task.getStoryid().getId()));
                     response.setTaskstatus(task.getTaskstatus());
                     response.setPriority(task.getPriority());
                     response.setOriginalestimatehours(task.getOriginalestimatehours());
@@ -121,12 +122,12 @@ public class TaskServiceImpl implements ITaskService {
                 .map(task -> {
                     TaskResponseDto response = new TaskResponseDto();
 
-                    response.setUserId(task.getId());
+                    response.setUserCode(CodeUtils.encode("U", task.getId()));
                     response.setTitle(task.getTitle());
                     response.setBody(task.getBody());
-                    response.setUserId(task.getUserid().getId());
-                    response.setSprintid(task.getSprintid().getId());
-                    response.setUserId(task.getStoryid().getId());
+                    response.setUserCode(CodeUtils.encode("U", task.getUserid().getId()));
+                    response.setSprintCode(CodeUtils.encode("SP", task.getSprintid().getId()));
+                    response.setStoryCode(CodeUtils.encode("S", task.getStoryid().getId()));
                     response.setTaskstatus(task.getTaskstatus());
                     response.setPriority(task.getPriority());
                     response.setOriginalestimatehours(task.getOriginalestimatehours());
@@ -156,22 +157,22 @@ public class TaskServiceImpl implements ITaskService {
             existingTask.setBody(request.getBody());
         }
 
-        if (request.getUserId() != null) {
-            Users assignedUser = usersRepository.findById(request.getUserId())
+        if (request.getUserCode() != null) {
+            Users assignedUser = usersRepository.findById(CodeUtils.decodeToInteger("U", request.getUserCode()))
                     .orElseThrow(() -> new IllegalArgumentException("Assigned user not found"));
 
             existingTask.setUserid(assignedUser);
         }
 
-        if (request.getSprintid() != null) {
-            Sprint sprint = sprintRepository.findById(request.getSprintid())
+        if (request.getSprintCode() != null) {
+            Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
                     .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
 
             existingTask.setSprintid(sprint);
         }
 
-        if (request.getStoryid() != null) {
-            Story story = storyRepository.findById(request.getStoryid())
+        if (request.getStoryCode() != null) {
+            Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
                     .orElseThrow(() -> new IllegalArgumentException("Story not found"));
 
             existingTask.setStoryid(story);
@@ -210,26 +211,20 @@ public class TaskServiceImpl implements ITaskService {
 
         TaskResponseDto response = new TaskResponseDto();
 
-        response.setUserId(updatedTask.getId());
+        response.setUserCode(CodeUtils.encode("U", updatedTask.getId()));
         response.setTitle(updatedTask.getTitle());
         response.setBody(updatedTask.getBody());
 
-        response.setUserId(
-                updatedTask.getUserid() != null
-                        ? updatedTask.getUserid().getId()
-                        : null
+        response.setUserCode(
+                CodeUtils.encode("U", updatedTask.getUserid() != null ? updatedTask.getUserid().getId() : null)
         );
 
-        response.setSprintid(
-                updatedTask.getSprintid() != null
-                        ? updatedTask.getSprintid().getId()
-                        : null
+        response.setSprintCode(
+                CodeUtils.encode("SP", updatedTask.getSprintid() != null ? updatedTask.getSprintid().getId() : null)
         );
 
-        response.setStoryid(
-                updatedTask.getStoryid() != null
-                        ? updatedTask.getStoryid().getId()
-                        : null
+        response.setStoryCode(
+                CodeUtils.encode("S", updatedTask.getStoryid() != null ? updatedTask.getStoryid().getId() : null)
         );
 
         response.setTaskstatus(updatedTask.getTaskstatus());

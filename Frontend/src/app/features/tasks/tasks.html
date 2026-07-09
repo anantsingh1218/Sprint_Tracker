@@ -18,8 +18,8 @@
       All Sprints
     </option>
 
-    <option *ngFor="let s of sprints" [value]="s.id">
-      {{ s.name }}
+    <option *ngFor="let s of sprints()" [value]="'SP' + s.id">
+      {{ s.sprintName }}
     </option>
 
   </select>
@@ -51,11 +51,11 @@
           <span class="priority">{{ t.priority }}</span>
         </div>
 
-        <p>{{ t.description }}</p>
+        <p>{{ t.body }}</p>
 
         <div class="task-meta">
-          <span>👤 {{ t.assignedTo || 'Unassigned' }}</span>
-          <span>⏱ {{ t.remainingEstimate || 0 }}h</span>
+          <span>👤 {{ t.userCode || 'Unassigned' }}</span>
+          <span>⏱ {{ t.remainingestimatehours || 0 }}h</span>
         </div>
 
       </div>
@@ -85,11 +85,11 @@
           <span class="priority">{{ t.priority }}</span>
         </div>
 
-        <p>{{ t.description }}</p>
+        <p>{{ t.body }}</p>
 
         <div class="task-meta">
-          <span> {{ t.assignedTo || 'Unassigned' }}</span>
-          <span> {{ t.remainingEstimate || 0 }}h</span>
+          <span> {{ t.userCode || 'Unassigned' }}</span>
+          <span> {{ t.remainingestimatehours || 0 }}h</span>
         </div>
 
       </div>
@@ -119,11 +119,11 @@
           <span class="priority">{{ t.priority }}</span>
         </div>
 
-        <p>{{ t.description }}</p>
+        <p>{{ t.body }}</p>
 
         <div class="task-meta">
-          <span> {{ t.assignedTo || 'Unassigned' }}</span>
-          <span> {{ t.remainingEstimate || 0 }}h</span>
+          <span> {{ t.userCode || 'Unassigned' }}</span>
+          <span> {{ t.remainingestimatehours || 0 }}h</span>
         </div>
 
       </div>
@@ -133,156 +133,14 @@
 
 </div>
 
-<!-- ================= CREATE TASK MODAL ================= -->
-<div
-  class="modal-overlay"
-  *ngIf="showTaskModal"
-  (click)="closeTaskForm()">
 
-  <div class="modal-content" (click)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h3>Create Task</h3>
-      <button class="close-btn" (click)="closeTaskForm()">✕</button>
-    </div>
-
-    <label>Task Title</label>
-    <input [(ngModel)]="newTask.title" />
-
-    <label>Description</label>
-    <textarea rows="3" [(ngModel)]="newTask.description"></textarea>
-
-    <label>Priority</label>
-    <select [(ngModel)]="newTask.priority">
-      <option>Low</option>
-      <option>Medium</option>
-      <option>High</option>
-    </select>
-
-    <label>Status</label>
-    <select [(ngModel)]="newTask.status">
-      <option>Open</option>
-      <option>In Progress</option>
-      <option>Blocked</option>
-      <option>Done</option>
-      <option>Closed</option>
-    </select>
-
-    <label>Assigned To</label>
-    <input [(ngModel)]="newTask.assignedTo" [matAutocomplete]="auto" />
-
-    <mat-autocomplete #auto="matAutocomplete">
-      <mat-option *ngFor="let u of filteredUsers" [value]="u">
-        {{ u }}
-      </mat-option>
-    </mat-autocomplete>
-
-    <div class="estimate-row">
-
-      <div>
-        <label>Original Estimate</label>
-        <input type="number" min="0"
-               [(ngModel)]="newTask.originalEstimate" />
-      </div>
-
-      <div>
-        <label>Remaining Estimate</label>
-        <input type="number" min="0"
-               [max]="newTask.originalEstimate"
-               [(ngModel)]="newTask.remainingEstimate" />
-      </div>
-
-    </div>
-
-    <div class="modal-actions">
-
-      <button class="cancel-btn" (click)="closeTaskForm()">
-        Cancel
-      </button>
-
-      <button class="create-btn" (click)="createTask()">
-        Create Task
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
-<!-- ================= EDIT TASK MODAL ================= -->
-<div
-  class="modal-overlay"
-  *ngIf="showEditModal"
-  (click)="closeEditTask()">
-
-  <div class="modal-content" (click)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h3>Edit Task</h3>
-      <button class="close-btn" (click)="closeEditTask()">✕</button>
-    </div>
-
-    <label>Task Title</label>
-    <input type="text" placeholder="Title" [(ngModel)]="editTask.title" />
-
-    <label>Description</label>
-    <textarea rows="3" [(ngModel)]="editTask.description"></textarea>
-
-    <label>Priority</label>
-    <select  [(ngModel)]="editTask.priority">
-      <option>Low</option>
-      <option>Medium</option>
-      <option>High</option>
-    </select>
-
-    <label>Status</label>
-    <select [(ngModel)]="editTask.status">
-      <option>Open</option>
-      <option>In Progress</option>
-      <option>Blocked</option>
-      <option>Done</option>
-      <option>Closed</option>
-    </select>
-
-    <label>Assigned To</label>
-    <input [(ngModel)]="editTask.assignedTo" [matAutocomplete]="autoEdit" />
-
-    <mat-autocomplete #autoEdit="matAutocomplete">
-      <mat-option *ngFor="let u of filteredUsers" [value]="u">
-        {{ u }}
-      </mat-option>
-    </mat-autocomplete>
-
-    <div class="estimate-row">
-
-      <div>
-        <label>Original Estimate</label>
-        <input type="number" min="0"
-               [(ngModel)]="editTask.originalEstimate" />
-      </div>
-
-      <div>
-        <label>Remaining Estimate</label>
-        <input type="number" min="0"
-               [max]="editTask.originalEstimate"
-               [(ngModel)]="editTask.remainingEstimate" />
-      </div>
-
-    </div>
-
-    <div class="modal-actions">
-
-      <button class="cancel-btn" (click)="closeEditTask()">
-        Cancel
-      </button>
-
-      <button class="create-btn" (click)="saveTaskChanges()">
-        Save Changes
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
+<!-- ================= TASK OVERLAY ================= -->
+<app-task-overlay
+  *ngIf="showTaskModal || showEditModal"
+  [task]="selectedTaskForOverlay"
+  [sprints]="sprints()"
+  [users]="users()"
+  [stories]="stories()"
+  (save)="onTaskSaved($event)"
+  (close)="closeTaskOverlay()">
+</app-task-overlay>

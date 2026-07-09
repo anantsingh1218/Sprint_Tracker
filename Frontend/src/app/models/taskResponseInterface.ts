@@ -5,7 +5,7 @@ export interface ITasksResponse{
     title: string,
     description: string,
     storyName: string,
-    storyId: number,
+    storyCode: string,
     assignedTo: string,
     taskStatus: WorkStatus,
     taskPriority: Priority,

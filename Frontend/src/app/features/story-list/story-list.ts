@@ -3,7 +3,6 @@ import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { Story } from '../story/story';
 import { IStory } from '../../models/storyInterface';
 import { Priority, WorkStatus } from '../../models/workItem';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -99,9 +98,9 @@ openCreateStory() {
       storyStatus: 'TODO',
       priority: 'Medium',
       storyPoints: 0,
-      featureId: null,
-      sprintId: null,
-      userId: null,
+      featureCode: null,
+      sprintCode: null,
+      userCode: null,
       comments: []
     };
     this.attachments.set([]);
@@ -118,9 +117,9 @@ openCreateStory() {
     const payload = {
       title: this.selectedStory.title,
       body: this.selectedStory.body,
-      featureId: this.selectedStory.featureId,
-      sprintId: this.selectedStory.sprintId,
-      userId: this.selectedStory.userId,
+      featureCode: this.selectedStory.featureCode,
+      sprintCode: this.selectedStory.sprintCode,
+      userCode: this.selectedStory.userCode,
       status: this.selectedStory.storyStatus || 'TODO',
       priority: this.selectedStory.priority || 'Medium',
       storyPoints: this.selectedStory.storyPoints || 0,
@@ -167,9 +166,9 @@ openCreateStory() {
   }
 
   // Add this method inside the StoryList class in story-list.ts
-getUserName(userId: number | null): string {
+getUserName(userCode: string | null): string {
   // Finds the user in the dynamic signal array matching the id
-  return this.users().find((u) => u.id === userId)?.name || 'Unassigned';
+  return this.users().find((u) => u.id === userCode)?.name || 'Unassigned';
 }
 
   loadAttachments() {

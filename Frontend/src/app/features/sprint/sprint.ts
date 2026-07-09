@@ -7,10 +7,10 @@ import { SprintService } from './sprint.service';
 import { TaskService } from '../tasks/task.service';
 
 interface SprintData {
-  id?: number;
+  id?: string;
   sprintName: string;
   description: string;
-  productId: number | null;
+  productCode: string | null;
   startDate: string;
   endDate: string;
   sprintDuration: number;
@@ -28,11 +28,12 @@ export class Sprint implements OnInit {
   sprints: SprintData[] = [];
   selectedSprint: SprintData | null = null;
   showSprintModal = false;
+  allTasks: any[] = [];
 
   newSprint: SprintData = {
     sprintName: '',
     description: '',
-    productId: null,
+    productCode: null,
     startDate: '',
     endDate: '',
     sprintDuration: 0,
@@ -47,15 +48,16 @@ export class Sprint implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 1. Initial load of all sprints
+    // 1. Initial load of all sprints and tasks
     this.loadSprints();
+    this.loadTasks();
 
     // 2. Watch URL route parameters for changes cleanly
     this.route.paramMap.subscribe((params) => {
-      const sprintId = params.get('id');
+      const sprintCode = params.get('id');
 
-      if (sprintId) {
-        this.sprintService.getSprintById(Number(sprintId)).subscribe({
+      if (sprintCode) {
+        this.sprintService.getSprintById(sprintCode).subscribe({
           next: (res: SprintData) => {
             this.selectedSprint = res;
             this.cdr.detectChanges(); // Wake up change detection
@@ -83,29 +85,40 @@ export class Sprint implements OnInit {
     });
   }
 
-  getTasksForSprint(sprintId: number | undefined) {
-    return this.taskService.getTasksBySprint(String(sprintId)) || [];
+  loadTasks(): void {
+    this.taskService.getTasks().subscribe({
+      next: (res: any[]) => {
+        this.allTasks = res;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error loading tasks:', err);
+      },
+    });
   }
 
-  getTaskCount(sprintId: number | undefined) {
-    const tasks = this.taskService.getTasksBySprint(String(sprintId));
-    return tasks ? tasks.length : 0;
+  getTasksForSprint(sprintId: string | undefined) {
+    if (!sprintId) return [];
+    return this.allTasks.filter((t: any) => t.sprintCode === 'SP' + sprintId);
+  }
+
+  getTaskCount(sprintId: string | undefined) {
+    return this.getTasksForSprint(sprintId).length;
   }
 
   get totalTasks() {
-    const tasks = this.taskService.getTasks();
-    return tasks ? tasks.length : 0;
+    return this.allTasks.length;
   }
 
   get completedSprints() {
     return this.sprints.filter((s: SprintData) => s.status === 'Completed').length;
   }
 
-  getSprintProgress(sprintId: number | undefined) {
-    const tasks = this.taskService.getTasksBySprint(String(sprintId));
+  getSprintProgress(sprintId: string | undefined) {
+    const tasks = this.getTasksForSprint(sprintId);
     if (!tasks || tasks.length === 0) return 0;
 
-    const done = tasks.filter((t: any) => t.status === 'Done').length;
+    const done = tasks.filter((t: any) => t.taskstatus === 'DONE' || t.taskstatus === 'CLOSED').length;
     return Math.round((done / tasks.length) * 100);
   }
 
@@ -163,7 +176,7 @@ export class Sprint implements OnInit {
         this.newSprint = {
           sprintName: '',
           description: '',
-          productId: null,
+          productCode: null,
           startDate: '',
           endDate: '',
           sprintDuration: 0,
@@ -177,7 +190,7 @@ export class Sprint implements OnInit {
       },
     });
   }
-  deleteSprint(id: number | undefined): void {
+  deleteSprint(id: string | undefined): void {
   if (!id) {
     console.error('Cannot delete sprint: Missing ID');
     return;
