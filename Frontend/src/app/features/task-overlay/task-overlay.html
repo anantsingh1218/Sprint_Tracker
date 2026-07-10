@@ -26,18 +26,16 @@
           <label>Description</label>
           <textarea [(ngModel)]="task.body"></textarea>
 
-          <div class="comments">
-            <h4>Discussion</h4>
-
-            <div class="comment" *ngFor="let c of task.commentsList">
-              <b>{{ c.userCode || 'System' }}</b>
-              <p>{{ c.text }}</p>
-              <small>{{ c.createdAt | date: 'short' }}</small>
+          <!-- Comments (Only when updating) -->
+          <div *ngIf="task.taskCode" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+            <h4 style="margin-bottom: 10px;">Comments</h4>
+            <div *ngFor="let c of task.commentsList" style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #eaeaea;">
+              <b style="color: #333;">{{ c.userCode || 'System' }}</b>
+              <p style="margin: 4px 0; color: #555; font-size: 14px;">{{ c.text }}</p>
+              <small style="color: #888; font-size: 11px;">{{ c.createdAt | date: 'short' }}</small>
             </div>
-
-            <div class="add-comment">
-              <input [(ngModel)]="newComment" placeholder="Add comment..." />
-              <button (click)="addComment()">Add</button>
+            <div style="margin-top: 10px;">
+              <textarea [(ngModel)]="newComment" placeholder="Type a new comment here. It will be added when you click Update Task..." style="width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 60px;"></textarea>
             </div>
           </div>
         }
@@ -109,8 +107,8 @@
       </div>
     </div>
     <div class="footer">
-      <button class="btn-save" (click)="saveTask()">Save</button>
       <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
+      <button class="btn-save" (click)="saveTask()">{{ task.taskCode ? 'Update Task' : 'Create Task' }}</button>
     </div>
   </div>
 </div>

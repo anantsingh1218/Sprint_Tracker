@@ -1,6 +1,7 @@
 package com.sprint.SprintLite.Bugs.Service;
 
 import com.sprint.SprintLite.dto.BugDto;
+import com.sprint.SprintLite.dto.BugResponseDto;
 import com.sprint.SprintLite.entity.*;
 import com.sprint.SprintLite.entity.enums.EntityType;
 import com.sprint.SprintLite.repository.*;
@@ -23,20 +24,29 @@ public class BugServiceImpl implements IBugService {
     private final CommentRepository commentRepository;
 
     @Override
-    public Bug createBug(BugDto request) {
+    public BugResponseDto createBug(BugDto request) {
 
         String username = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        Users assignedUser = usersRepository.findById(request.getAssignedto())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        Users assignedUser = null;
+        if (request.getAssignedUserCode() != null) {
+            assignedUser = usersRepository.findById(CodeUtils.decodeToInteger("U", request.getAssignedUserCode()))
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
 
-        Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
-                .orElseThrow(() -> new RuntimeException("Story not found"));
+        Story story = null;
+        if (request.getStoryCode() != null) {
+            story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
+                    .orElseThrow(() -> new RuntimeException("Story not found"));
+        }
 
-        Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
-                .orElseThrow(() -> new RuntimeException("Sprint not found"));
+        Sprint sprint = null;
+        if (request.getSprintCode() != null) {
+            sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
+                    .orElseThrow(() -> new RuntimeException("Sprint not found"));
+        }
 
         Bug bug = new Bug();
         bug.setDescription(request.getDescription());
@@ -54,56 +64,43 @@ public class BugServiceImpl implements IBugService {
 
         Bug savedBug = bugRepository.save(bug);
 
-        // Save comment during create
-        if (request.getComments() != null &&
-                !request.getComments().isBlank()) {
-
-            Comment comment = new Comment();
-            comment.setComment(request.getComments());
-            comment.setEntitytype(EntityType.BUG);
-            comment.setEntityid(savedBug.getId());
-            comment.setCreatedBy(username);
-            comment.setCreatedAt(Instant.now());
-
-            commentRepository.save(comment);
-        }
-
-        return savedBug;
+        return mapToDto(savedBug);
     }
 
     @Override
-    public Bug getBugByiD(Integer id) {
-        return bugRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bug not found"));
+    public BugResponseDto getBugByiD(Integer id) {
+        return mapToDto(bugRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bug not found")));
     }
 
     @Override
-    public List<Bug> getAllBugs() {
-        return bugRepository.findAll();
+    public List<BugResponseDto> getAllBugs() {
+        return bugRepository.findAll().stream().map(this::mapToDto).toList();
     }
 
     @Override
-    public List<Bug> getBugsBySprintid(Integer sprintId) {
-        return bugRepository.findBySprintid(sprintId);
+    public List<BugResponseDto> getBugsBySprintid(Integer sprintId) {
+        return bugRepository.findBySprintid(sprintId).stream().map(this::mapToDto).toList();
     }
 
     @Override
-    public List<Bug> getBugsByStoryid(Integer storyId) {
-        return bugRepository.findByStoryid(storyId);
+    public List<BugResponseDto> getBugsByStoryid(Integer storyId) {
+        return bugRepository.findByStoryid(storyId).stream().map(this::mapToDto).toList();
     }
 
     @Override
-    public Bug getBugsBySprintIdAndStoryId(Integer sprintId, Integer storyId) {
-        return bugRepository.findBySprintidAndStoryid(
+    public BugResponseDto getBugsBySprintIdAndStoryId(Integer sprintId, Integer storyId) {
+        return mapToDto(bugRepository.findBySprintidAndStoryid(
                 sprintId,
                 storyId
-        );
+        ));
     }
 
     @Override
-    public Bug updateBug(Integer id, BugDto request) {
+    public BugResponseDto updateBug(Integer id, BugDto request) {
 
-        Bug existingBug = getBugByiD(id);
+        Bug existingBug = bugRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bug not found"));
 
         String username = SecurityContextHolder.getContext()
                 .getAuthentication()
@@ -121,8 +118,8 @@ public class BugServiceImpl implements IBugService {
             existingBug.setPriority(request.getPriority());
         }
 
-        if (request.getAssignedto() != null) {
-            Users assignedUser = usersRepository.findById(request.getAssignedto())
+        if (request.getAssignedUserCode() != null) {
+            Users assignedUser = usersRepository.findById(CodeUtils.decodeToInteger("U", request.getAssignedUserCode()))
                     .orElseThrow(() -> new RuntimeException("User not found"));
             existingBug.setAssignedto(assignedUser);
         }
@@ -166,12 +163,43 @@ public class BugServiceImpl implements IBugService {
             commentRepository.save(comment);
         }
 
-        return savedBug;
+        return mapToDto(savedBug);
     }
 
     @Override
     public void deleteBugByiD(Integer id) {
-        Bug bug = getBugByiD(id);
+        Bug bug = bugRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Bug not found"));
         bugRepository.delete(bug);
+    }
+
+    private BugResponseDto mapToDto(Bug bug) {
+        BugResponseDto dto = new BugResponseDto();
+        dto.setId(bug.getId());
+        dto.setBugCode(bug.getBugCode());
+        dto.setTitle(bug.getTitle());
+        dto.setDescription(bug.getDescription());
+        dto.setSprintCode(bug.getSprintid() != null ? CodeUtils.encode("SP", bug.getSprintid().getId()) : null);
+        dto.setStoryCode(bug.getStoryid() != null ? CodeUtils.encode("S", bug.getStoryid().getId()) : null);
+        dto.setAssignedUserCode(bug.getAssignedto() != null ? CodeUtils.encode("U", bug.getAssignedto().getId()) : null);
+        dto.setBugstatus(bug.getBugstatus());
+        dto.setPriority(bug.getPriority());
+        dto.setOriginalestimatehours(bug.getOriginalestimatehours());
+        dto.setRemainingestimatehours(bug.getRemainingestimatehours());
+        dto.setReopencount(bug.getReopencount());
+
+        java.util.List<com.sprint.SprintLite.dto.CommentDto> commentDtos = commentRepository
+                .findByEntitytypeAndEntityid(com.sprint.SprintLite.entity.enums.EntityType.BUG, bug.getId())
+                .stream()
+                .map(c -> {
+                    com.sprint.SprintLite.dto.CommentDto cDto = new com.sprint.SprintLite.dto.CommentDto();
+                    cDto.setUserCode(c.getCreatedBy());
+                    cDto.setText(c.getComment());
+                    cDto.setCreatedAt(c.getCreatedAt());
+                    return cDto;
+                }).toList();
+        dto.setComments(commentDtos);
+
+        return dto;
     }
 }

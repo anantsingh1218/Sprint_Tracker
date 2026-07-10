@@ -106,25 +106,24 @@ export class TaskOverlay implements OnInit {
       });
   }
 
-  addComment() {
-    if (!this.newComment.trim()) return;
 
-    this.task.commentsList.push({
-      userCode: '',
-      text: this.newComment,
-      createdAt: new Date().toISOString()
-    });
-    this.newComment = '';
-  }
 
   saveTask() {
+    const taskToSave = { ...this.task };
+    if (this.newComment.trim()) {
+      taskToSave.comments = this.newComment.trim();
+    } else {
+      taskToSave.comments = null;
+    }
+
+    console.log("SENDING TASK TO BACKEND:", JSON.stringify(taskToSave));
     if (this.task.taskCode) {
-      this.taskService.updateTask(this.task).subscribe({
+      this.taskService.updateTask(taskToSave).subscribe({
         next: (res) => this.save.emit(res),
         error: (err) => console.error('Failed to update task', err)
       });
     } else {
-      this.taskService.addTask(this.task).subscribe({
+      this.taskService.addTask(taskToSave).subscribe({
         next: (res) => this.save.emit(res),
         error: (err) => console.error('Failed to create task', err)
       });

@@ -1,40 +1,24 @@
 package com.sprint.SprintLite.dto;
 
-
 import com.sprint.SprintLite.entity.enums.Priority;
 import com.sprint.SprintLite.entity.enums.Status;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class TaskResponseDto {
-
-    private String taskCode;
-
-
+public class BugResponseDto {
+    private Integer id;
+    private String bugCode;
     private String title;
-
-    private String body;
-
-    private String userCode;
-
+    private String description;
     private String sprintCode;
-
     private String storyCode;
-
-    private Status taskstatus;
-
+    private String assignedUserCode;
+    private Status bugstatus;
     private Priority priority;
-
     private Integer originalestimatehours;
-
     private Integer remainingestimatehours;
-
-    private List<CommentDto> commentsList;
-
+    private Integer reopencount;
+    private List<CommentDto> comments;
 }

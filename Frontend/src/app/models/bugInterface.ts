@@ -2,17 +2,18 @@ import { IComment } from './storyInterface';
 import { Priority, WorkStatus } from './workItem';
 
 export interface IBug {
-  id: string;
+  id: number;
+  bugCode: string;
   title: string;
   description: string;
   storyCode: string | null;
   sprintCode: string | null;
-  assignedTo: string | null;
-  status: WorkStatus;
+  assignedUserCode: string | null;
+  bugstatus: WorkStatus;
   priority: Priority;
-  estimatedHours: number;
-  remainingHours: number;
-  reopenCount: number;
+  originalestimatehours: number;
+  remainingestimatehours: number;
+  reopencount: number;
 
-  comments: IComment[];
+  comments?: IComment[];
 }

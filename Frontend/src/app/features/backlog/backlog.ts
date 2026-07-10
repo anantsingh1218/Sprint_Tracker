@@ -248,17 +248,18 @@ export class Backlog {
 
   toBug(item: WorkItem): IBug {
     return {
-      id: item.id,
+      id: this.extractNumericId(item.id) ?? 0,
+      bugCode: item.id,
       title: item.title,
       description: '',
-      status: item.status,
+      bugstatus: item.status,
       priority: item.priority,
-      estimatedHours: 0,
-      remainingHours: 0,
-      reopenCount: 0,
+      originalestimatehours: 0,
+      remainingestimatehours: 0,
+      reopencount: 0,
       storyCode: item.parentId ? item.parentId : null,
       sprintCode: null,
-      assignedTo: null,
+      assignedUserCode: null,
       comments: [],
     };
   }
@@ -322,20 +323,20 @@ export class Backlog {
 
   fromBug(b: IBug): WorkItem {
     return {
-      id: b.id,
+      id: b.bugCode || `B${b.id}`,
       title: b.title,
       type: WorkItemType.Bug,
-      parentId: b.storyCode ? `S${b.storyCode}` : null,
-      status: b.status,
+      parentId: b.storyCode ? (b.storyCode.startsWith('S') ? b.storyCode : `S${b.storyCode}`) : null,
+      status: b.bugstatus,
       description: b.description,
       sprintName: b.sprintCode,
       priority: b.priority,
-      assignedTo: b.assignedTo,
+      assignedTo: b.assignedUserCode,
       productCategory: null,
-      reopenCount: b.reopenCount,
-      estimatedPoints: b.estimatedHours,
-      remainingPoints: b.remainingHours,
-      comments: b.comments,
+      reopenCount: b.reopencount,
+      estimatedPoints: b.originalestimatehours,
+      remainingPoints: b.remainingestimatehours,
+      comments: b.comments || [],
     };
   }
 

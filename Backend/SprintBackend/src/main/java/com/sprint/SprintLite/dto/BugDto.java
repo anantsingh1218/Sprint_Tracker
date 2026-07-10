@@ -11,7 +11,7 @@ public class BugDto {
     private Status bugstatus;
     private Priority priority;
 
-    private Integer assignedto;
+    private String assignedUserCode;
     private String sprintCode;
     private String storyCode;
 
