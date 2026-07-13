@@ -5,6 +5,8 @@ import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
 import { WorkItemType } from '../../models/workItem';
 import { HttpErrorResponse } from '@angular/common/http';
+import { IBug } from '../../models/bugInterface';
+import { IComment } from '../../models/storyInterface';
 
 @Component({
   selector: 'app-bug',
@@ -15,7 +17,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class Bug implements OnInit {
 
-  @Input() bug: any;
+  @Input() bug: IBug | null = null;
   @Input() sprints: any[] = [];
   @Input() stories: any[] = [];
   @Input() users: any[] = [];
@@ -42,11 +44,12 @@ export class Bug implements OnInit {
   }
 
   loadAttachments() {
-    if (!this.bug.bugCode) return;
+    if (!this.bug?.bugCode) return;
     try {
       this.apiService.getAttachments(WorkItemType.Bug, this.apiService.toApiWorkItemId(this.bug.bugCode)).subscribe({
         next: (data) => {
-          this.attachments.set(data.fileToBeFetched);
+          if(data?.fileToBeFetched)
+            this.attachments.set(data.fileToBeFetched);
         },
         error: (err: HttpErrorResponse) => {
           this.attachments.set([]);
@@ -67,7 +70,7 @@ export class Bug implements OnInit {
   }
 
   uploadFiles() {
-    if (!this.selectedFiles().length || !this.bug.bugCode) return;
+    if (!this.selectedFiles().length || !this.bug?.bugCode) return;
 
     try {
       this.apiService.uploadAttachments(WorkItemType.Bug, this.apiService.toApiWorkItemId(this.bug.bugCode), this.selectedFiles()).subscribe({
@@ -96,9 +99,14 @@ export class Bug implements OnInit {
     // The backend BugDto expects a single String for the new comment being added.
     // If the user typed a new comment, we send it here so the backend saves it.
     if (this.newComment.trim()) {
-      bugToSave.comments = this.newComment.trim();
+      const newComment : IComment = {
+        userCode: bugToSave.assignedUserCode ? bugToSave.assignedUserCode : '',
+        text: this.newComment.trim(),
+        createdAt: Date.now().toString()
+      };
+      bugToSave.comments?.push(newComment);
     } else {
-      bugToSave.comments = null;
+      bugToSave.comments = bugToSave.comments;
     }
 
     this.save.emit(bugToSave);

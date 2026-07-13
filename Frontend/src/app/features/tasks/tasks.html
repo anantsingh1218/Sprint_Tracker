@@ -137,7 +137,7 @@
 <!-- ================= TASK OVERLAY ================= -->
 <app-task-overlay
   *ngIf="showTaskModal || showEditModal"
-  [task]="selectedTaskForOverlay"
+  [task]="mapResponseToInterface(selectedTaskForOverlay)"
   [sprints]="sprints()"
   [users]="users()"
   [stories]="stories()"
