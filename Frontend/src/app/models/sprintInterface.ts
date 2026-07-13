@@ -1,21 +1,11 @@
-import { Priority, WorkStatus } from './workItem';
+export type SprintStatus = 'Planned' | 'Active' | 'Completed';
 
-export interface IStory {
+export interface Sprint {
   id: string;
-  title: string;
-  body: string;
-  featureCode: string | null;
-  sprintCode: string | null;
-  userCode: string | null;
-  status: WorkStatus;
-  priority: Priority;
-  estimatedStoryPoints: number;
-  remainingStoryPoint: number;
-  comments: IComment[];
-}
-
-export interface IComment {
-  userCode: string;
-  text: string;
-  createdAt: string;
+  name: string;
+  description?: string;
+  startDate: string;
+  endDate: string;
+  duration: number;
+  status: SprintStatus;
 }
