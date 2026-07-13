@@ -8,6 +8,7 @@ import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
 import { WorkItemService } from '../../services/workItemService';
 import { fadeSlide } from '../../animations/workItemAnimations';
 import { FeatureOverlay } from '../feature-overlay/feature-overlay';
+import { Story } from '../story/story';
 import { IFeature } from '../../models/featureInterface';
 import { IStory } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
@@ -19,7 +20,6 @@ import { ITask } from '../../models/taskInterface';
 import { IBug } from '../../models/bugInterface';
 import { IBugResponse } from '../../models/bugResponseInterface';
 import { Bug } from '../bug/bug';
-import { Story } from '../story/story';
 import { TaskOverlay } from '../task-overlay/task-overlay';
 
 interface TreeNode extends WorkItem {
@@ -28,7 +28,7 @@ interface TreeNode extends WorkItem {
 }
 
 @Component({
-  selector: 'app-backlog',
+  selector: 'app-integrated-view',
   standalone: true,
   imports: [
     CommonModule,
@@ -40,11 +40,11 @@ interface TreeNode extends WorkItem {
     TaskOverlay,
     Bug,
   ],
-  templateUrl: './backlog.html',
-  styleUrls: ['./backlog.css'],
+  templateUrl: './integrated-view.html',
+  styleUrls: ['./integrated-view.css'],
   animations: [fadeSlide],
 })
-export class Backlog {
+export class IntegrateView {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
@@ -56,7 +56,6 @@ export class Backlog {
   parentItem: WorkItem | null = null;
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
-  // Add these with your other property declarations near the top of the class
   usersList = signal<any[]>([]);
   featuresList = signal<any[]>([]);
   storyList = signal<any[]>([]);
@@ -102,7 +101,6 @@ export class Backlog {
     this.tree = [...this.tree];
   }
 
-  // ---------- CREATE ----------
   openCreate(type: WorkItemType, parent: WorkItem | null = null) {
     this.overlayType = type;
     this.parentItem = parent;
@@ -127,7 +125,6 @@ export class Backlog {
     this.isOverlayOpen = true;
   }
 
-  // ---------- EDIT ----------
   openEdit(item: WorkItem) {
     this.overlayType = item.type;
     this.parentItem = this.service.items.find((i) => i.id === item.parentId) ?? null;
@@ -155,13 +152,11 @@ export class Backlog {
     this.resetOverlayState();
   }
 
-  // ---------- SAVE FEATURE ----------
   saveFeature(updated: IFeature) {
     const workItem: WorkItem = this.fromFeature(updated);
     this.save(workItem);
   }
 
-  // ---------- SAVE STORY ----------
   saveStory(updated: IStory) {
     const workItem: WorkItem = this.fromStory(updated);
     this.save(workItem);
@@ -181,21 +176,105 @@ export class Backlog {
   private save(item: WorkItem) {
     if (!item.title?.trim()) return;
 
-    const items = [...this.service.items];
+    const isNewItem: boolean = !item.id || item.id.trim() === '';
 
-    const finalItem: WorkItem = {
-      ...item,
-      parentId: this.parentItem?.id ?? item.parentId ?? null,
-    };
+    if (isNewItem) {
+      let endpoint: string = '';
+      let payload: any;
 
-    const index = items.findIndex((i) => i.id === finalItem.id);
+      switch (item.type) {
+        case WorkItemType.Feature:
+          endpoint = '/feature/add';
+          payload = this.toFeature(item);
+          break;
+        case WorkItemType.Story:
+          endpoint = '/story/add';
+          payload = this.toStory(item);
+          break;
+        case WorkItemType.Task:
+          endpoint = '/task/add';
+          payload = this.toTask(item);
+          break;
+        case WorkItemType.Bug:
+          endpoint = '/bug/add';
+          payload = this.toBug(item);
+          break;
+      }
 
-    if (index >= 0) items[index] = finalItem;
-    else items.push(finalItem);
+      this.apiService.postRequest<any>(endpoint, payload).subscribe({
+        next: (response) => {
+          let savedWorkItem: WorkItem;
+          switch (item.type) {
+            case WorkItemType.Feature:
+              savedWorkItem = this.mapFeature(response);
+              break;
+            case WorkItemType.Story:
+              savedWorkItem = this.mapStory(response);
+              break;
+            case WorkItemType.Task:
+              savedWorkItem = this.mapTask(response);
+              break;
+            case WorkItemType.Bug:
+              savedWorkItem = this.mapBug(response);
+              break;
+          }
 
-    this.service.update(items);
+          const currentItems = [...this.service.items, savedWorkItem];
+          this.service.update(currentItems);
 
-    this.closeOverlay();
+          this.refreshTree();
+          this.closeOverlay();
+        },
+        error: (err) => console.error('Failed to create work item on backend', err),
+      });
+    } else {
+      let endpoint = '';
+      let payload: any;
+
+      switch (item.type) {
+        case WorkItemType.Feature:
+          endpoint = `/feature/${item.id}`;
+          payload = this.toFeature(item);
+          break;
+        case WorkItemType.Story:
+          endpoint = `/story/${item.id}`;
+          payload = this.toStory(item);
+          break;
+        case WorkItemType.Task:
+          endpoint = `/task/${item.id}`;
+          payload = this.toTask(item);
+          break;
+        case WorkItemType.Bug:
+          endpoint = `/bug/${item.id}`;
+          payload = this.toBug(item);
+          break;
+      }
+
+      this.apiService.putRequest<any>(endpoint, payload).subscribe({
+        next: () => {
+          const items = [...this.service.items];
+          const index = items.findIndex((i) => i.id === item.id);
+          if (index >= 0) {
+            items[index] = item;
+            this.service.update(items);
+            this.refreshTree();
+          }
+          this.closeOverlay();
+        },
+        error: (err) => console.error('Failed to update work item', err),
+      });
+    }
+  }
+
+  private refreshTree() {
+    const items = this.service.items;
+    const featureNodes = items.filter((i) => i.type === WorkItemType.Feature);
+    const storyNodes = items.filter((i) => i.type === WorkItemType.Story);
+    const taskNodes = items.filter((i) => i.type === WorkItemType.Task);
+    const bugNodes = items.filter((i) => i.type === WorkItemType.Bug);
+
+    this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];
+    this.cdr.detectChanges();
   }
 
   // ---------- MAPPERS ----------
@@ -437,10 +516,10 @@ export class Backlog {
   ): TreeNode[] {
     // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
-    
+
     // 2. Add Features to the map
     features.forEach((f) => {
-      map.set(f.id, {
+      map.set(this.normalizeId(f.id), {
         ...f,
         children: [],
         expanded: true,
@@ -449,7 +528,6 @@ export class Backlog {
 
     // 3. Add Stories to the map AND push them to their Feature parents
     stories.forEach((s) => {
-
       const normalizedStoryId = this.normalizeId(s.id);
       const parentId = this.normalizeId(s.parentId);
 
@@ -466,10 +544,9 @@ export class Backlog {
       if (parentFeature) {
         parentFeature.children.push(storyNode);
       }
-
     });
 
-    // 4. Push Tasks to their Story parents (which now confidently exist in the map!)
+    // 4. Push Tasks to their Story parents
     tasks.forEach((t) => {
       const parentId = this.normalizeId(t.parentId);
       const parentStory = map.get(parentId);
@@ -487,7 +564,7 @@ export class Backlog {
       }
     });
 
-    // 5. Push Bugs to their Story parents (which now confidently exist in the map!)
+    // 5. Push Bugs to their Story parents
     bugs.forEach((b) => {
       const parentId = this.normalizeId(b.parentId);
       const parentStory = map.get(parentId);

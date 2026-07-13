@@ -114,7 +114,7 @@ export class FeatureOverlay implements OnInit, OnChanges {
 
     this.feature.comments ??= [];
     this.loadDropdownData();
-    if (this.feature.id) {
+    if (this.feature.id || this.feature.id != '') {
       this.loadAttachments();
     }
   }

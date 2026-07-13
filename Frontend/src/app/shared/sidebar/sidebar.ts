@@ -93,6 +93,12 @@ export class Sidebar {
     },
 
     {
+      label: 'Integrated View',
+      route: '/integrated-view',
+      roles: ['ROLE_PM','ROLE_Scrum_Master', 'ROLE_Developer', 'ROLE_QA', 'ROLE_BA']
+    },
+
+    {
       label: 'DSU',
       route: '/dsu',
       roles: ['ROLE_PM', 'ROLE_Scrum_Master']

@@ -38,7 +38,7 @@
         <!-- Modal Top Bar Header -->
         <div class="modal-header-bar">
           <span class="story-id-indicator">
-            {{ selectedStory.id ? 'Story #' + selectedStory.id : 'New Story' }}
+            {{ selectedStory.id ? 'Story #S' + selectedStory.id : 'New Story' }}
           </span>
           <button class="btn-close-x" (click)="closeStory()">✕</button>
         </div>
@@ -148,8 +148,8 @@
               <label>Assigned To</label>
               <select [(ngModel)]="selectedStory.userCode" class="select-dropdown-meta">
                 <option [ngValue]="null">Unassigned</option>
-                @for (u of users(); track u.username) {
-                  <option [ngValue]="u.username">{{ u.username }}</option>
+                @for (u of users(); track u) {
+                  <option [ngValue]="'U' + u.id">{{ u.username }}</option>
                 }
               </select>
             </div>
@@ -157,11 +157,11 @@
             <div class="meta-field-select-row">
               <label>Status</label>
               <select [(ngModel)]="selectedStory.storyStatus" class="select-dropdown-meta">
-                <option value="OPEN">open</option>
+                <option value="OPEN">Open</option>
                 <option value="IN_PROGRESS">IN_PROGRESS</option>
-                <option value=" BLOCKED"> BLOCKED</option>
-                <option value=" DONE"> DONE</option>
-                <option value=" CLOSED"> CLOSED</option>
+                <option value="BLOCKED"> BLOCKED</option>
+                <option value="DONE"> DONE</option>
+                <option value="CLOSED"> CLOSED</option>
               </select>
             </div>
 
