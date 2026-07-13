@@ -1,9 +1,9 @@
 <div class="backlog">
   <div class="toolbar">
     <h2>Backlog</h2>
-    <button mat-raised-button color="primary" (click)="openCreate(WorkItemType.Feature)">
+    <!-- <button mat-raised-button color="primary" (click)="openCreate(WorkItemType.Feature)">
       + New Feature
-    </button>
+    </button> -->
   </div>
   @for (feature of tree; track feature.id) {
     <mat-card class="feature">
@@ -18,11 +18,11 @@
           {{ feature.title }}
         </strong>
 
-        <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
+        <!-- <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
 
         <mat-menu #featureMenu="matMenu">
           <button mat-menu-item (click)="openCreate(WorkItemType.Story, feature)">Add Story</button>
-        </mat-menu>
+        </mat-menu> -->
       </div>
 
       @if (feature.expanded) {
@@ -40,7 +40,7 @@
                   {{ story.title }}
                 </span>
 
-                <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
+                <!-- <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
 
                 <mat-menu #storyMenu="matMenu">
                   <button mat-menu-item (click)="openCreate(WorkItemType.Task, story)">
@@ -49,7 +49,7 @@
                   <button mat-menu-item (click)="openCreate(WorkItemType.Bug, story)">
                     Add Bug
                   </button>
-                </mat-menu>
+                </mat-menu> -->
               </div>
 
               @if (story.expanded) {
@@ -89,12 +89,15 @@
   </app-feature>
 }
 
-
+@if (overlayType === WorkItemType.Story && selectedStory) {
+  <app-story [isOpen]="true" [selectedStory]="selectedStory" [usersList]="usersList()" [featuresList]="featuresList()" [sprintsList]="sprintsList()" (saved)="closeOverlay()" (close)="closeOverlay()">
+  </app-story>
+}
 
 @if ((overlayType === WorkItemType.Task) && selectedTask) {
-  <app-tasks [task]="selectedTask" (save)="saveTask($event)" (close)="closeOverlay()"> </app-tasks>
+  <app-task-overlay [task]="selectedTask" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveTask($event)" (close)="closeOverlay()"> </app-task-overlay>
 }
 
 @if ((overlayType === WorkItemType.Bug) && selectedBug) {
-  <app-bug [bug]="selectedBug" (save)="saveBug($event)" (close)="closeOverlay()"> </app-bug>
+  <app-bug [bug]="selectedBug" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveBug($event)" (close)="closeOverlay()"> </app-bug>
 }

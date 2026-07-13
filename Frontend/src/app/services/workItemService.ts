@@ -39,7 +39,7 @@ export class WorkItemService {
 
   update(items: WorkItem[]) {
     this.itemsSubject.next(items);
-    this.syncCountersFromItems(items);
+    // this.syncCountersFromItems(items);
   }
 
   updateStatus(id: string, status: any) {

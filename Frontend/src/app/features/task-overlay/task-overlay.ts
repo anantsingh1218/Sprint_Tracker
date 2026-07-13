@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
-import { WorkItemType } from '../../models/workItem';
+import { Priority, WorkItemType, WorkStatus } from '../../models/workItem';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TaskService } from '../tasks/task.service';
+import { ITask } from '../../models/taskInterface';
+import { IComment } from '../../models/storyInterface';
+import { FetchAttachmentsResponse } from '../../models/fetchAttachmnetResponseInterface';
 
 @Component({
   selector: 'app-task-overlay',
@@ -15,7 +18,7 @@ import { TaskService } from '../tasks/task.service';
   styleUrl: './task-overlay.css'
 })
 export class TaskOverlay implements OnInit {
-  @Input() task: any = null;
+  @Input() task: ITask | null = null;
   @Input() sprints: any[] = [];
   @Input() users: any[] = [];
   @Input() stories: any[] = [];
@@ -34,20 +37,21 @@ export class TaskOverlay implements OnInit {
   ngOnInit() {
     if (!this.task) {
       this.task = {
+        id: null as unknown as string,
         title: '',
-        body: '',
-        taskstatus: 'OPEN',
-        priority: 'MEDIUM',
-        originalestimatehours: 0,
-        remainingestimatehours: 0,
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
         storyCode: '',
         sprintCode: '',
         userCode: '',
-        commentsList: []
+        comments: [],
       };
     } else {
-      if (!this.task.commentsList) this.task.commentsList = [];
-      if (this.task.taskCode) {
+      if (!this.task.comments) this.task.comments = [];
+      if (this.task.id) {
         this.loadAttachments();
       }
     }
@@ -58,11 +62,13 @@ export class TaskOverlay implements OnInit {
   }
 
   loadAttachments() {
-    if (!this.task.taskCode) return;
+    if (!this.task?.id) return;
     try {
-      this.apiService.getAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task.taskCode)).subscribe({
-        next: (data) => {
-          this.attachments.set(data.fileToBeFetched);
+      this.apiService.getAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task.id)).subscribe({
+        next: (data : FetchAttachmentsResponse) => {
+          if(data?.fileToBeFetched){
+            this.attachments.set(data.fileToBeFetched);
+          }
         },
         error: (err: HttpErrorResponse) => {
           this.attachments.set([]);
@@ -83,10 +89,10 @@ export class TaskOverlay implements OnInit {
   }
 
   uploadFiles() {
-    if (!this.selectedFiles().length || !this.task.taskCode) return;
+    if (!this.selectedFiles().length || !this.task?.id) return;
 
     try {
-      this.apiService.uploadAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task.taskCode), this.selectedFiles()).subscribe({
+      this.apiService.uploadAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task?.id), this.selectedFiles()).subscribe({
         next: (res: Attachment[]) => {
           this.selectedFiles.set([]);
           this.attachmentUploadStatus.set('Files uploaded Successfully');
@@ -111,13 +117,18 @@ export class TaskOverlay implements OnInit {
   saveTask() {
     const taskToSave = { ...this.task };
     if (this.newComment.trim()) {
-      taskToSave.comments = this.newComment.trim();
+      const newComment : IComment = {
+        userCode: taskToSave.userCode ? taskToSave.userCode : '',
+        text: this.newComment.trim(),
+        createdAt: Date.now().toString()
+      }
+      taskToSave.comments?.push(newComment);
     } else {
-      taskToSave.comments = null;
+      taskToSave.comments = taskToSave.comments;
     }
 
     console.log("SENDING TASK TO BACKEND:", JSON.stringify(taskToSave));
-    if (this.task.taskCode) {
+    if (this.task?.id) {
       this.taskService.updateTask(taskToSave).subscribe({
         next: (res) => this.save.emit(res),
         error: (err) => console.error('Failed to update task', err)

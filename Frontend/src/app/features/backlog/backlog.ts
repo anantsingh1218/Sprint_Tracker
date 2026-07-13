@@ -1,11 +1,10 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
-import { StoryService } from '../story-list/story.service';
 import { WorkItemService } from '../../services/workItemService';
 import { fadeSlide } from '../../animations/workItemAnimations';
 import { FeatureOverlay } from '../feature-overlay/feature-overlay';
@@ -17,10 +16,11 @@ import { IStoryResponse } from '../../models/storyResponseInterface';
 import { forkJoin } from 'rxjs';
 import { ITasksResponse } from '../../models/taskResponseInterface';
 import { ITask } from '../../models/taskInterface';
-import { Tasks } from '../tasks/tasks';
 import { IBug } from '../../models/bugInterface';
 import { IBugResponse } from '../../models/bugResponseInterface';
 import { Bug } from '../bug/bug';
+import { Story } from '../story/story';
+import { TaskOverlay } from '../task-overlay/task-overlay';
 
 interface TreeNode extends WorkItem {
   children: TreeNode[];
@@ -36,7 +36,8 @@ interface TreeNode extends WorkItem {
     MatButtonModule,
     MatMenuModule,
     FeatureOverlay,
-    Tasks,
+    Story,
+    TaskOverlay,
     Bug,
   ],
   templateUrl: './backlog.html',
@@ -55,6 +56,11 @@ export class Backlog {
   parentItem: WorkItem | null = null;
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
+  // Add these with your other property declarations near the top of the class
+  usersList = signal<any[]>([]);
+  featuresList = signal<any[]>([]);
+  storyList = signal<any[]>([]);
+  sprintsList = signal<any[]>([]);
   features: IFeatureResponse[] = [];
   stories: IStoryResponse[] = [];
   tasks: ITasksResponse[] = [];
@@ -192,11 +198,6 @@ export class Backlog {
     this.closeOverlay();
   }
 
-  private extractNumericId(id: string | null): number | null {
-    if (!id) return null;
-    return Number(id.replace(/^[A-Za-z]+/, ''));
-  }
-
   // ---------- MAPPERS ----------
   toFeature(item: WorkItem): IFeature {
     return {
@@ -223,7 +224,7 @@ export class Backlog {
       priority: item.priority,
       estimatedStoryPoints: item.estimatedPoints,
       remainingStoryPoint: item.remainingPoints,
-      featureCode: item.parentId ? item.parentId : null,
+      featureCode: item.parentId ?? null,
       sprintCode: item.sprintName,
       userCode: item.assignedTo,
       comments: item.comments,
@@ -234,12 +235,12 @@ export class Backlog {
     return {
       id: item.id,
       title: item.title,
-      description: '',
+      description: item.description,
       status: item.status,
       priority: item.priority,
       estimatedHours: item.estimatedPoints,
       remainingHours: item.remainingPoints,
-      storyCode: item.parentId ? item.parentId : null,
+      storyCode: item.parentId ?? null,
       sprintCode: item.sprintName,
       userCode: item.assignedTo,
       comments: item.comments,
@@ -247,20 +248,21 @@ export class Backlog {
   }
 
   toBug(item: WorkItem): IBug {
+    console.log(item);
     return {
-      id: this.extractNumericId(item.id) ?? 0,
+      id: Number(item.id.substring(1)),
       bugCode: item.id,
       title: item.title,
-      description: '',
+      description: item.description,
       bugstatus: item.status,
       priority: item.priority,
-      originalestimatehours: 0,
-      remainingestimatehours: 0,
-      reopencount: 0,
-      storyCode: item.parentId ? item.parentId : null,
-      sprintCode: null,
-      assignedUserCode: null,
-      comments: [],
+      originalestimatehours: item.estimatedPoints,
+      remainingestimatehours: item.remainingPoints,
+      reopencount: item.reopenCount,
+      storyCode: item.parentId ?? null,
+      sprintCode: item.sprintName,
+      assignedUserCode: item.assignedTo,
+      comments: item.comments,
     };
   }
 
@@ -269,7 +271,7 @@ export class Backlog {
       id: f.id,
       title: f.title,
       type: WorkItemType.Feature,
-      parentId: null,
+      parentId: f.productCode ?? null,
       status: f.status,
       description: f.description,
       sprintName: f.sprintCode,
@@ -288,7 +290,7 @@ export class Backlog {
       id: s.id,
       title: s.title,
       type: WorkItemType.Story,
-      parentId: s.featureCode ? `F${s.featureCode}` : null,
+      parentId: s.featureCode ?? null,
       status: s.status,
       description: s.body,
       sprintName: s.sprintCode,
@@ -307,7 +309,7 @@ export class Backlog {
       id: t.id,
       title: t.title,
       type: WorkItemType.Task,
-      parentId: t.storyCode ? `S${t.storyCode}` : null,
+      parentId: t.storyCode ?? null,
       status: t.status,
       description: t.description,
       sprintName: t.sprintCode,
@@ -323,10 +325,10 @@ export class Backlog {
 
   fromBug(b: IBug): WorkItem {
     return {
-      id: b.bugCode || `B${b.id}`,
+      id: b.bugCode,
       title: b.title,
       type: WorkItemType.Bug,
-      parentId: b.storyCode ? (b.storyCode.startsWith('S') ? b.storyCode : `S${b.storyCode}`) : null,
+      parentId: b.storyCode ?? null,
       status: b.bugstatus,
       description: b.description,
       sprintName: b.sprintCode,
@@ -336,7 +338,7 @@ export class Backlog {
       reopenCount: b.reopencount,
       estimatedPoints: b.originalestimatehours,
       remainingPoints: b.remainingestimatehours,
-      comments: b.comments || [],
+      comments: b.comments != undefined ? b.comments : [],
     };
   }
 
@@ -353,7 +355,7 @@ export class Backlog {
 
   private mapFeature(feature: IFeatureResponse): WorkItem {
     return {
-      id: `F${feature.id}`,
+      id: feature.featureCode,
       title: feature.title,
       type: WorkItemType.Feature,
       parentId: null,
@@ -372,58 +374,58 @@ export class Backlog {
 
   private mapStory(story: IStoryResponse): WorkItem {
     return {
-      id: `S${story.id}`,
+      id: 'S' + story.id,
       title: story.title,
       type: WorkItemType.Story,
-      parentId: `F${story.featureCode}`,
+      parentId: story.featureCode,
       status: story.storyStatus,
-      description: story.description,
-      sprintName: story.sprintName,
-      priority: story.storyPriority,
-      assignedTo: story.assignedTo,
+      description: story.body,
+      sprintName: story.sprintCode,
+      priority: story.priority,
+      assignedTo: story.userCode,
       productCategory: null,
       reopenCount: 0,
-      estimatedPoints: story.estimatedStoryPoints,
-      remainingPoints: story.remainingStoryPoints,
-      comments: [],
+      estimatedPoints: story.storyPoints,
+      remainingPoints: story.storyPoints,
+      comments: story.comments,
     };
   }
 
   private mapTask(task: ITasksResponse): WorkItem {
     return {
-      id: `T${task.id}`,
+      id: task.taskCode,
       title: task.title,
       type: WorkItemType.Task,
-      parentId: `S${task.storyCode}`,
-      status: task.taskStatus,
-      description: task.description,
-      sprintName: task.sprintName,
-      priority: task.taskPriority,
-      assignedTo: task.assignedTo,
+      parentId: task.storyCode,
+      status: task.taskstatus,
+      description: task.body,
+      sprintName: task.sprintCode,
+      priority: task.priority,
+      assignedTo: task.userCode,
       productCategory: null,
       reopenCount: 0,
-      estimatedPoints: task.estimatedHours,
-      remainingPoints: task.remainingHours,
-      comments: [],
+      estimatedPoints: task.originalestimatehours,
+      remainingPoints: task.remainingestimatehours,
+      comments: task.commentsList,
     };
   }
 
   private mapBug(bug: IBugResponse): WorkItem {
     return {
-      id: `B${bug.id}`,
+      id: bug.bugCode,
       title: bug.title,
       type: WorkItemType.Bug,
-      parentId: `S${bug.storyCode}`,
-      status: bug.bugStatus,
+      parentId: bug.storyCode,
+      status: bug.bugstatus,
       description: bug.description,
-      sprintName: bug.sprintName,
-      priority: bug.bugPriority,
-      assignedTo: bug.assignedTo,
+      sprintName: bug.sprintCode,
+      priority: bug.priority,
+      assignedTo: bug.assignedUserCode,
       productCategory: null,
-      reopenCount: bug.reopenCount,
-      estimatedPoints: bug.estimatedHours,
-      remainingPoints: bug.remainingHours,
-      comments: [],
+      reopenCount: bug.reopencount,
+      estimatedPoints: bug.originalestimatehours,
+      remainingPoints: bug.remainingestimatehours,
+      comments: bug.comments,
     };
   }
 
@@ -435,10 +437,10 @@ export class Backlog {
   ): TreeNode[] {
     // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
-
+    
     // 2. Add Features to the map
     features.forEach((f) => {
-      map.set(this.normalizeId(f.id), {
+      map.set(f.id, {
         ...f,
         children: [],
         expanded: true,
@@ -447,6 +449,7 @@ export class Backlog {
 
     // 3. Add Stories to the map AND push them to their Feature parents
     stories.forEach((s) => {
+
       const normalizedStoryId = this.normalizeId(s.id);
       const parentId = this.normalizeId(s.parentId);
 
@@ -463,6 +466,7 @@ export class Backlog {
       if (parentFeature) {
         parentFeature.children.push(storyNode);
       }
+
     });
 
     // 4. Push Tasks to their Story parents (which now confidently exist in the map!)
@@ -509,21 +513,26 @@ export class Backlog {
   private getBacklog() {
     forkJoin({
       features: this.apiService.getRequest<IFeatureResponse[]>('/backlog/getAllFeatures'),
-      stories: this.apiService.getRequest<IStoryResponse[]>('/backlog/getAllStories'),
-      tasks: this.apiService.getRequest<ITasksResponse[]>('/backlog/getAllTasks'),
-      bugs: this.apiService.getRequest<IBugResponse[]>('/backlog/getAllBugs'),
+      storyData: this.apiService.getRequest<any[]>('/story/all'),
+      tasks: this.apiService.getRequest<ITasksResponse[]>('/task/all'),
+      bugs: this.apiService.getRequest<IBugResponse[]>('/Bug'),
+      // Fetch dropdown reference entries simultaneously 
+      usersData: this.apiService.getRequest<any[]>('/users/all'), 
+      featuresData: this.apiService.getRequest<any[]>('/feature'),
+      sprintsData: this.apiService.getRequest<any[]>('/sprint/all')
 
     }).subscribe({
-      next: ({ features, stories, tasks, bugs }) => {
+      next: ({ features, tasks, bugs, usersData, featuresData, storyData, sprintsData }) => {
         const featureNodes = features.map((f) => this.mapFeature(f));
-        const storyNodes = stories.map((s) => this.mapStory(s));
+        const storyNodes = storyData.map((s) => this.mapStory(s));
         const taskNodes = tasks.map((t) => this.mapTask(t));
         const bugNodes = bugs.map((b) => this.mapBug(b));
-
+        this.usersList.set(usersData || []);
+        this.featuresList.set(featuresData || []);
+        this.sprintsList.set(sprintsData || []);
+        this.storyList.set(storyData || []);
         const allItems: WorkItem[] = [...featureNodes, ...storyNodes, ...taskNodes, ...bugNodes]
-
         this.service.update(allItems)
-
         // Overwrite tree variable with a brand new array reference
         this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];
 

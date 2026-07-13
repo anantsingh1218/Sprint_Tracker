@@ -11,6 +11,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
 import { TaskOverlay } from '../task-overlay/task-overlay';
 import { ITask } from '../../models/taskInterface';
+import { ITasksResponse } from '../../models/taskResponseInterface';
 
 @Component({
   selector: 'app-tasks',
@@ -93,6 +94,22 @@ export class Tasks implements OnChanges,OnInit {
 
     this.loadTasks();
     this.loadDependencyData();
+  }
+
+  mapResponseToInterface(taskRes: ITasksResponse): ITask{
+    return {
+      id: taskRes.taskCode,
+      title: taskRes.title,
+      description: taskRes.body,
+      status: taskRes.taskstatus,
+      priority: taskRes.priority,
+      estimatedHours: taskRes.originalestimatehours,
+      remainingHours: taskRes.remainingestimatehours,
+      storyCode: taskRes.storyCode,
+      sprintCode: taskRes.sprintCode,
+      userCode: taskRes.userCode,
+      comments: taskRes.commentsList,
+    }
   }
 
   loadTasks() {

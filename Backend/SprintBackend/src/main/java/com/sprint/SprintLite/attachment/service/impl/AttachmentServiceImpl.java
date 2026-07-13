@@ -17,10 +17,12 @@ import com.sprint.SprintLite.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -124,7 +126,7 @@ public class AttachmentServiceImpl implements IAttachmentService {
                         entityId
                 );
         if(attachmentList.isEmpty()){
-            throw new EntityTypeNotFoundException(
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT,
                     "Entry with entityType = " + entityType.toString() + " and entityId = " + entityId + " was not found"
             );
         }
