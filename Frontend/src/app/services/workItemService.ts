@@ -85,8 +85,7 @@ export class WorkItemService {
 
   createEmptyItem(type: WorkItemType, parentId: string | null = null): WorkItem {
     return {
-      // id: '',
-      id: this.generateId(type),
+      id: '',
       title: 'New Work Item',
       type,
       parentId,
