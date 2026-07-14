@@ -181,6 +181,7 @@ public class TaskServiceImpl implements ITaskService {
         }
 
         existingTask.setUpdatedBy(username);
+        existingTask.setUpdatedAt(Instant.now());
 
         System.out.println("RECEIVED COMMENTS IN UPDATE TASK: " + request.getComments());
 

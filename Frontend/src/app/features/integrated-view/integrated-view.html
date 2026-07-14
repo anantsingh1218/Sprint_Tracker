@@ -170,7 +170,7 @@
 }
 
 @if (overlayType === WorkItemType.Story && selectedStory) {
-  <app-story [isOpen]="true" [selectedStory]="selectedStory" [usersList]="usersList()" [featuresList]="featuresList()" [sprintsList]="sprintsList()" (saved)="closeOverlay()" (close)="closeOverlay()">
+  <app-story [isOpen]="true" [selectedStory]="selectedStory" [usersList]="usersList()" [featuresList]="featuresList()" [sprintsList]="sprintsList()" (saved)="saveStory($event)" (close)="closeOverlay()">
   </app-story>
 }
 

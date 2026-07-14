@@ -70,26 +70,6 @@ export class IntegrateView {
   uniqueSprints: string[] = [];
   uniqueStatuses: string[] = [];
   uniqueUsers: string[] = [];
-  // uniqueProducts = computed(() => {
-  //   const products = this.service.items
-  //     .map(item => item.productCategory)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(products)).sort();
-  // });
-
-  // uniqueSprints = computed(() => {
-  //   const sprints = this.service.items
-  //     .map(item => item.sprintName)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(sprints)).sort();
-  // });
-
-  // uniqueStatuses = computed(() => {
-  //   const statuses = this.service.items
-  //     .map(item => item.status)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(statuses)).sort();
-  // });
 
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
@@ -306,7 +286,7 @@ applyFilters() {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = '/story/add';
+          endpoint = '/story/create';
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -357,7 +337,7 @@ applyFilters() {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = `/story/${item.id}`;
+          endpoint = `/story/${item.id.substring(1)}`;
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -386,6 +366,7 @@ applyFilters() {
         error: (err) => console.error('Failed to update work item', err),
       });
     }
+    this.closeOverlay();
   }
 
 private refreshTree() {

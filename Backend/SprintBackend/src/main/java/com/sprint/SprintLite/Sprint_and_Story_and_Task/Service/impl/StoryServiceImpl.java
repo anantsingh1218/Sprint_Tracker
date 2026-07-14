@@ -104,7 +104,8 @@ public class StoryServiceImpl implements IStoryService {
 
         // 3. Map relations carefully
         if (story.getUserCode() != null) {
-            Users user = usersRepository.findByUsername(story.getUserCode())
+            Integer userId = CodeUtils.decodeToInteger("U", story.getUserCode());
+            Users user = usersRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
             existingStory.setUserid(user);
         }
@@ -120,6 +121,7 @@ public class StoryServiceImpl implements IStoryService {
         }
 
         existingStory.setUpdatedBy(username);
+        existingStory.setUpdatedAt(Instant.now());
 
         // 4. Handle Comments
         Comment savedComment = null;
