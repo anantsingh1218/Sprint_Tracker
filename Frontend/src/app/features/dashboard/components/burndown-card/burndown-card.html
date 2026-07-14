@@ -1,15 +1,63 @@
-<div
-    class="analytics-card"
-    *ngIf="burndown"
->
+<div class="analytics-card" *ngIf="burndown">
 
     <div class="card-header">
-        <h3>Burndown Chart</h3>
-        <span class="badge">{{ burndown.sprintName }}</span>
+
+        <div>
+
+            <h3>Sprint Burndown</h3>
+
+            <p class="subtitle">
+
+                Remaining Tasks vs Ideal Progress
+
+            </p>
+
+        </div>
+
+        <span class="badge">
+
+            {{ burndown.sprintName }}
+
+        </span>
+
     </div>
 
-    <div class="chart-container">
-        <canvas #chartCanvas></canvas>
+    <div class="chart-wrapper">
+
+        <div class="chart-container">
+
+            <canvas #chartCanvas></canvas>
+
+        </div>
+
+    </div>
+
+    <div class="chart-footer">
+
+        <div class="footer-item">
+
+            <span class="footer-label">Current Remaining</span>
+
+            <strong>{{ burndown.actual[burndown.actual.length - 1] }}</strong>
+
+        </div>
+
+        <div class="footer-item">
+
+            <span class="footer-label">Ideal Remaining</span>
+
+            <strong>{{ burndown.ideal[burndown.ideal.length - 1] }}</strong>
+
+        </div>
+
+        <div class="footer-item">
+
+            <span class="footer-label">Sprint</span>
+
+            <strong>{{ burndown.sprintName }}</strong>
+
+        </div>
+
     </div>
 
 </div>

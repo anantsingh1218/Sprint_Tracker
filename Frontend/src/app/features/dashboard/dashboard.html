@@ -77,6 +77,27 @@
 
   </div>
 
+  <div class="product-filter">
+        <label class="filter-label" for="productSelect">Product</label>
+        <select
+            id="productSelect"
+            class="product-dropdown"
+            [(ngModel)]="selectedProductId"
+            (change)="onProductChange()">
+          <option *ngFor="let product of products" [value]="product.productId">
+            {{ product.productName }}
+          </option>
+        </select>
+    </div>
+
+  <!-- Analytics (this child component renders its own section header) -->
+  <app-analytics-section
+      [velocity]="velocity"
+      [burndown]="burndown"
+      [teamCapacity]="teamCapacity"
+      [releaseReadiness]="releaseReadiness">
+  </app-analytics-section>
+
   <!-- Overview row: task breakdown | product overview | portfolio health, all side by side -->
   <div class="overview-row">
 
@@ -116,19 +137,6 @@
 
     <!-- Product overview -->
     <div class="product-panel">
-
-      <div class="product-filter">
-        <label class="filter-label" for="productSelect">Product</label>
-        <select
-            id="productSelect"
-            class="product-dropdown"
-            [(ngModel)]="selectedProductId"
-            (change)="onProductChange()">
-          <option *ngFor="let product of products" [value]="product.productId">
-            {{ product.productName }}
-          </option>
-        </select>
-      </div>
 
       <div class="product-card">
 
@@ -236,11 +244,11 @@
   </div>
 
   <!-- Analytics (this child component renders its own section header) -->
-  <app-analytics-section
+  <!-- <app-analytics-section
       [velocity]="velocity"
       [burndown]="burndown"
       [teamCapacity]="teamCapacity"
       [releaseReadiness]="releaseReadiness">
-  </app-analytics-section>
+  </app-analytics-section> -->
 
 </div>

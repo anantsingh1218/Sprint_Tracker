@@ -122,12 +122,18 @@ CREATE TABLE TASKTABLE (
                            PRIORITY PRIORITY,
                            STORYID integer NOT NULL,
                            SPRINTID integer NOT NULL,
+
                            ORIGINALESTIMATEHOURS integer,
                            REMAININGESTIMATEHOURS integer,
+
+                           COMPLETED_DATE date,
+                           COMPLETED_AT timestamp,
+
                            CREATEDAT timestamp,
                            CREATEDBY varchar,
                            UPDATEDAT timestamp,
                            UPDATEDBY varchar,
+
                            TASK_CODE varchar(50) GENERATED ALWAYS AS ('T' || ID) STORED
 );
 

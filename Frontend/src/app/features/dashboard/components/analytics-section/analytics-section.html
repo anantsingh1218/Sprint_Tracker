@@ -1,36 +1,43 @@
-<div class="analytics-section">
+<div class="dashboard-grid">
 
-    <div class="section-header">
-        <h2>Analytics</h2>
-        <p>Monitor sprint performance and delivery metrics.</p>
-    </div>
+    <!-- Hero Burndown -->
+    <section class="dashboard-card burndown-card">
 
-    <div class="analytics-grid">
-
-        <!-- Velocity -->
-        <app-velocity-card
-            *ngIf="velocity"
-            [velocity]="velocity">
-        </app-velocity-card>
-
-        <!-- Team Capacity -->
-        <app-team-capacity-card
-            *ngIf="teamCapacity"
-            [teamCapacity]="teamCapacity">
-        </app-team-capacity-card>
-
-        <!-- Burndown -->
         <app-burndown-card
             *ngIf="burndown"
             [burndown]="burndown">
         </app-burndown-card>
 
-        <!-- Release Readiness -->
+    </section>
+
+    <!-- Sprint Velocity -->
+    <section class="dashboard-card velocity-card">
+
+        <app-velocity-card
+            *ngIf="velocity"
+            [velocity]="velocity">
+        </app-velocity-card>
+
+    </section>
+
+    <!-- Team Capacity -->
+    <section class="dashboard-card capacity-card">
+
+        <app-team-capacity-card
+            *ngIf="teamCapacity"
+            [teamCapacity]="teamCapacity">
+        </app-team-capacity-card>
+
+    </section>
+
+    <!-- Release Readiness -->
+    <section class="dashboard-card release-card">
+
         <app-release-card
             *ngIf="releaseReadiness"
             [releaseReadiness]="releaseReadiness">
         </app-release-card>
 
-    </div>
+    </section>
 
 </div>

@@ -71,7 +71,7 @@ export class Sidebar {
     {
       label: 'Tasks',
       route: '/tasks',
-      roles: ['ROLE_PM', 'ROLE_Scrum_Master']
+      roles: ['ROLE_PM', 'ROLE_Scrum_Master',  'ROLE_Developer', 'ROLE_QA', 'ROLE_BA']
     },
 
     {
