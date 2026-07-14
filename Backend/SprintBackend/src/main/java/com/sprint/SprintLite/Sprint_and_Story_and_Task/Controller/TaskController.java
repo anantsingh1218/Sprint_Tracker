@@ -3,6 +3,7 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ITaskService;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl.TaskServiceImpl;
 import com.sprint.SprintLite.dto.CreateTaskRequest;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.dto.TaskResponseDto;
 import com.sprint.SprintLite.dto.GetAllResponseDto;
 import com.sprint.SprintLite.entity.Product;
@@ -70,12 +71,12 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTask(
+    public ResponseEntity<RegisterResponseDto> deleteTask(
             @PathVariable String id) {
 
         taskService.deleteTask(CodeUtils.decodeToLong("T", id));
 
-        return ResponseEntity.ok("Task deleted successfully");
+        return ResponseEntity.ok(new RegisterResponseDto("Task deleted successfully"));
     }
 
     @GetMapping("/getAllTasks")

@@ -3,10 +3,12 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl.StoryServiceImpl;
 import com.sprint.SprintLite.dto.CreateStoryRequest;
 import com.sprint.SprintLite.dto.GetAllResponseDto;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.dto.StoryResponseDto;
 import com.sprint.SprintLite.entity.Story;
 import com.sprint.SprintLite.repository.StoryRepository;
+import com.sprint.SprintLite.util.CodeUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +41,12 @@ public class StoryController {
     public ResponseEntity<StoryResponseDto> updateStory(@PathVariable Integer id,@RequestBody CreateStoryRequest story) {
         StoryResponseDto st=storyService.updateStory(id,story);
         return ResponseEntity.ok().body(st);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<RegisterResponseDto> deleteStory(@PathVariable String id) {
+        storyService.deleteStory(CodeUtils.decodeToInteger("S",id));
+        return ResponseEntity.ok(new RegisterResponseDto(("Story deleted successfully")));
     }
 
     @GetMapping("/getAllStories")

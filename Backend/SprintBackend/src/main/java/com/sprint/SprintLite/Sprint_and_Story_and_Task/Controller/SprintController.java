@@ -3,11 +3,13 @@ package com.sprint.SprintLite.Sprint_and_Story_and_Task.Controller;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ISprintService;
 import com.sprint.SprintLite.dto.CreateSprintRequest;
 import com.sprint.SprintLite.dto.GetAllResponseDto;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.entity.Product;
 import com.sprint.SprintLite.dto.SprintResponseDto;
 import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
 import com.sprint.SprintLite.repository.SprintRepository;
+import com.sprint.SprintLite.util.CodeUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -83,12 +85,12 @@ public class SprintController {
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteSprint(
-            @PathVariable Long id) {
+    public ResponseEntity<RegisterResponseDto> deleteSprint(
+            @PathVariable String id) {
 
-        sprintService.deleteSprint(id);
+        sprintService.deleteSprint(CodeUtils.decodeToLong("SP", id));
 
-        return ResponseEntity.ok("Sprint deleted successfully");
+        return ResponseEntity.ok(new RegisterResponseDto("Sprint deleted successfully"));
     }
 }
 

@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Priority, WorkItem, WorkItemType, WorkStatus } from '../models/workItem';
 import { IComment } from '../models/storyInterface';
+import { ApiService } from '../core/apiService/api-service';
 
 @Injectable({ providedIn: 'root' })
 export class WorkItemService {
-  constructor() {
+  private endpointMap: { [key: string]: string } = {
+    F: 'feature',
+    S: 'story',
+    T: 'task',
+    B: 'Bug',
+    SP: 'sprint', // Example extra
+  };
+  constructor(private apiService: ApiService) {
     this.syncCountersFromItems(this.itemsSubject.value);
   }
 
@@ -15,7 +23,7 @@ export class WorkItemService {
     Task: 0,
     Bug: 0,
   };
-  
+
   private itemsSubject = new BehaviorSubject<WorkItem[]>([]);
 
   items$ = this.itemsSubject.asObservable();
@@ -101,5 +109,29 @@ export class WorkItemService {
       remainingPoints: 0,
       comments: [],
     };
+  }
+  deleteByCode(combinedCode: string): Observable<any> {
+    // 1. Parse the string using the RegEx
+    const match = combinedCode.match(/^([A-Za-z]+)(\d+)$/);
+
+    if (!match) {
+      throw new Error(`Invalid work item code format: ${combinedCode}`);
+    }
+
+    const prefix = match[1].toUpperCase(); // Ensure uppercase matching (e.g., "s" -> "S")
+    const id = parseInt(match[2], 10);
+
+    // 2. Get the matching endpoint path
+    const resource = this.endpointMap[prefix];
+
+    if (!resource) {
+      throw new Error(`No API endpoint mapped for prefix: ${prefix}`);
+    }
+
+    // 3. Construct the URL (e.g., "https://api.yourdomain.com/api/stories/3")
+    const deleteUrl = `/${resource}/${combinedCode}`;
+    console.log(deleteUrl);
+    // 4. Return the HTTP Delete Observable
+    return this.apiService.deleteRequest(deleteUrl);
   }
 }

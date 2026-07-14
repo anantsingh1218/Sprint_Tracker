@@ -1,3 +1,83 @@
+<!-- =========================
+     DELETE FAILURE/ERROR OVERLAY
+     ========================= -->
+@if (showErrorOverlay) {
+  <div class="delete-overlay-backdrop error-backdrop">
+    <mat-card class="delete-confirm-card error-card">
+      <mat-card-header>
+        <div class="error-header-icon">
+          <svg viewBox="0 0 24 24" class="error-svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        </div>
+        <mat-card-title class="error-title">Deletion Failed</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content class="error-content">
+        <p>We encountered an error while trying to permanently delete this item:</p>
+        
+        <div class="failed-item-details">
+          <strong>{{ failedItemTitle }}</strong> 
+          <span class="failed-id">(ID: {{ failedItemId }})</span>
+        </div>
+
+        <div class="error-technical-details">
+          <p class="error-label">Reason:</p>
+          <code class="error-text">{{ errorMessage }}</code>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions class="action-buttons error-actions">
+        <button mat-raised-button color="primary" (click)="closeErrorOverlay()">Dismiss</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}
+
+<!-- =========================
+     DELETE CONFIRMATION OVERLAY
+     ========================= -->
+@if (showDeleteConfirmation && itemToDelete) {
+  <div class="delete-overlay-backdrop">
+    <mat-card class="delete-confirm-card">
+      <mat-card-header>
+        <mat-card-title class="warn-title">Confirm Deletion</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        <p>Are you sure you want to permanently delete this item?</p>
+        <div class="target-item">
+          <span class="work-item-type" [ngClass]="'type-' + itemToDeleteType.toLowerCase()">
+            {{ itemToDeleteType }}
+          </span>
+          <strong>{{ itemToDelete.title }}</strong>
+        </div>
+
+        <!-- Cascading warning list -->
+        @if (hasChildren(itemToDelete)) {
+          <div class="cascade-warning">
+            <p class="warning-alert-text">
+              <strong>Warning:</strong> Deleting this item will also delete all nested children:
+            </p>
+            <ul class="nested-delete-list">
+              @for (child of getFlattenedChildren(itemToDelete); track child.id) {
+                <li>
+                  <span class="child-type">[{{ child.type }}]</span> {{ child.title }}
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </mat-card-content>
+
+      <mat-card-actions class="action-buttons">
+        <button mat-button (click)="cancelDelete()">Cancel</button>
+        <button mat-raised-button color="warn" (click)="executeDelete()">Delete Permanently</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}
+
 <div class="backlog">
   <div class="toolbar">
     <h2>Integrated View</h2>
@@ -12,16 +92,16 @@
   <div class="filter-bar">
     <div class="filter-group">
       <label for="searchFilter">Search</label>
-      <input 
-        id="searchFilter" 
-        type="text" 
-        placeholder="Filter by name..." 
-        [(ngModel)]="searchTerm" 
+      <input
+        id="searchFilter"
+        type="text"
+        placeholder="Filter by name..."
+        [(ngModel)]="searchTerm"
         (input)="applyFilters()"
       />
     </div>
 
-    <!-- User Filter (NEW) -->
+    <!-- User Filter -->
     <div class="filter-group">
       <label for="userFilter">Assigned To</label>
       <select id="userFilter" [(ngModel)]="selectedUser" (change)="applyFilters()">
@@ -86,7 +166,21 @@
           {{ feature.assignedTo || 'Unassigned' }}
         </span>
 
-        <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
+        <button mat-icon-button [matMenuTriggerFor]="featureMenu" class="add-btn">+</button>
+
+        <!-- Prettified Red Delete Button -->
+        <button
+          mat-icon-button
+          class="delete-btn"
+          (click)="promptDelete(feature, WorkItemType.Feature); $event.stopPropagation()"
+          title="Delete Feature"
+        >
+          <svg viewBox="0 0 24 24" class="delete-icon">
+            <path
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+            />
+          </svg>
+        </button>
 
         <mat-menu #featureMenu="matMenu">
           <button mat-menu-item (click)="openCreate(WorkItemType.Story, feature)">Add Story</button>
@@ -113,7 +207,21 @@
                   {{ story.assignedTo || 'Unassigned' }}
                 </span>
 
-                <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
+                <button mat-icon-button [matMenuTriggerFor]="storyMenu" class="add-btn">+</button>
+
+                <!-- Prettified Red Delete Button -->
+                <button
+                  mat-icon-button
+                  class="delete-btn"
+                  (click)="promptDelete(story, WorkItemType.Story); $event.stopPropagation()"
+                  title="Delete Story"
+                >
+                  <svg viewBox="0 0 24 24" class="delete-icon">
+                    <path
+                      d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                    />
+                  </svg>
+                </button>
 
                 <mat-menu #storyMenu="matMenu">
                   <button mat-menu-item (click)="openCreate(WorkItemType.Task, story)">
@@ -148,7 +256,19 @@
                           {{ taskItem.assignedTo || 'Unassigned' }}
                         </span>
 
-                        <div style="width: 28px"></div>
+                        <!-- Prettified Red Delete Button -->
+                        <button
+                          mat-icon-button
+                          class="delete-btn"
+                          (click)="promptDelete(taskItem, taskItem.type); $event.stopPropagation()"
+                          title="Delete Item"
+                        >
+                          <svg viewBox="0 0 24 24" class="delete-icon">
+                            <path
+                              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+                            />
+                          </svg>
+                        </button>
                       </div>
                     </mat-card>
                   }
@@ -170,14 +290,38 @@
 }
 
 @if (overlayType === WorkItemType.Story && selectedStory) {
-  <app-story [isOpen]="true" [selectedStory]="selectedStory" [usersList]="usersList()" [featuresList]="featuresList()" [sprintsList]="sprintsList()" (saved)="saveStory($event)" (close)="closeOverlay()">
+  <app-story
+    [isOpen]="true"
+    [selectedStory]="selectedStory"
+    [usersList]="usersList()"
+    [featuresList]="featuresList()"
+    [sprintsList]="sprintsList()"
+    (saved)="saveStory($event)"
+    (close)="closeOverlay()"
+  >
   </app-story>
 }
 
-@if ((overlayType === WorkItemType.Task) && selectedTask) {
-  <app-task-overlay [task]="selectedTask" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveTask($event)" (close)="closeOverlay()"> </app-task-overlay>
+@if (overlayType === WorkItemType.Task && selectedTask) {
+  <app-task-overlay
+    [task]="selectedTask"
+    [users]="usersList()"
+    [sprints]="sprintsList()"
+    [stories]="storyList()"
+    (save)="saveTask($event)"
+    (close)="closeOverlay()"
+  >
+  </app-task-overlay>
 }
 
-@if ((overlayType === WorkItemType.Bug) && selectedBug) {
-  <app-bug [bug]="selectedBug" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveBug($event)" (close)="closeOverlay()"> </app-bug>
+@if (overlayType === WorkItemType.Bug && selectedBug) {
+  <app-bug
+    [bug]="selectedBug"
+    [users]="usersList()"
+    [sprints]="sprintsList()"
+    [stories]="storyList()"
+    (save)="saveBug($event)"
+    (close)="closeOverlay()"
+  >
+  </app-bug>
 }
