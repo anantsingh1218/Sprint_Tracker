@@ -23,12 +23,24 @@ public class BacklogServiceImpl implements IBacklogService {
     private final StoryRepository storyRepository;
     private final TaskRepository taskRepository;
     private final BugRepository bugRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<FeatureResponseDto> getAllFeatures() {
         List<FeatureResponseDto> featureResponseDtosList = new ArrayList<FeatureResponseDto>();
         List<Feature> featureList = featureRepository.findAll();
         featureList.forEach(feature -> {
+            java.util.List<com.sprint.SprintLite.dto.CommentDto> commentDtos = commentRepository
+                    .findByEntitytypeAndEntityid(com.sprint.SprintLite.entity.enums.EntityType.FEATURE, feature.getId())
+                    .stream()
+                    .map(c -> {
+                        com.sprint.SprintLite.dto.CommentDto cDto = new com.sprint.SprintLite.dto.CommentDto();
+                        cDto.setUserCode(c.getCreatedBy());
+                        cDto.setText(c.getComment());
+                        cDto.setCreatedAt(c.getCreatedAt());
+                        return cDto;
+                    }).toList();
+
             FeatureResponseDto featureResponseDto = new FeatureResponseDto(
                     feature.getFeatureCode(),
                     feature.getTitle(),
@@ -38,8 +50,9 @@ public class BacklogServiceImpl implements IBacklogService {
                     feature.getSprintId().getSprintName(),
                     feature.getRemainingStoryPoints(),
                     feature.getEstimatedStoryPoints(),
-                    feature.getProductId().getProductname(),
-                    feature.getUserid().getUsername()
+                    feature.getProductId() != null ? feature.getProductId().getProductname() : null,
+                    feature.getUserid().getUsername(),
+                    commentDtos
             );
             featureResponseDtosList.add(featureResponseDto);
         });

@@ -2,15 +2,17 @@ import { IComment } from "./storyInterface";
 import { Priority, WorkStatus } from "./workItem";
 
 export interface IFeature {
-  id: string;
+  featureCode?: string;
+  id?: string;
   title: string;
   description: string;
-  productCode: string | null;
-  sprintCode: string | null;
-  userCode: string | null;
-  status: WorkStatus;
+  featureStatus: WorkStatus;
   priority: Priority;
+  productName: string | null;
+  sprintName: string | null;
+  assignedTo: string | null;
   estimatedStoryPoints: number;
-  remainingStoryPoint: number;
-  comments: IComment[];
+  remainingStoryPoints: number;
+  commentsList?: IComment[];
+  comments?: string;
 }

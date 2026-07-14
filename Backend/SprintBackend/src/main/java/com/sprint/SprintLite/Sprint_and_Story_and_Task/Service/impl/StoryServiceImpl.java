@@ -36,7 +36,9 @@ public class StoryServiceImpl implements IStoryService {
         Feature feature = featureRepository.findFeatureByFeatureCode(request.getFeatureCode())
                 .orElseThrow(() -> new RuntimeException("Feature not found"));
 
-        Users assignedUser = usersRepository.findByUsername(request.getUserCode())
+        Integer userId = CodeUtils.decodeToInteger("U", request.getUserCode());
+
+        Users assignedUser = usersRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Sprint sprint = sprintRepository.findSprintBySprintCode(request.getSprintCode());

@@ -2,27 +2,19 @@
   <div class="workitem">
     <div class="header">
       <div class="title-block">
-        <div class="story-id">
-          @if (feature.id) {
-            Feature #{{ feature.id }}
-          } @else {
-            New Feature
-          }
-        </div>
+        <div class="story-id">Feature {{ feature.featureCode ? '#' + feature.featureCode : '(New)' }}</div>
         <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
       </div>
 
       <div class="header-center">
-        @if (feature.id) {
-          <button
-            class="icon-btn"
-            (click)="toggleAttachmentsView()"
-            [class.active]="isAttachmentView"
-            title="Attachments"
-          >
-            {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
-          </button>
-        }
+        <button
+          class="icon-btn"
+          (click)="toggleAttachmentsView()"
+          [class.active]="isAttachmentView"
+          title="Attachments"
+        >
+          {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+        </button>
       </div>
 
       <button class="btn-close" (click)="closeOverlay()">✕</button>
@@ -34,25 +26,20 @@
           <label>Description</label>
           <textarea [(ngModel)]="feature.description"></textarea>
 
-          @if (feature.id) {
-            <div class="comments">
-              <h4>Discussion</h4>
-
-              <div class="comment" *ngFor="let c of feature.comments">
-                <b>{{ getUserName(c.userCode) }}</b>
-                <p>{{ c.text }}</p>
-                <small>{{ c.createdAt | date: 'short' }}</small>
-              </div>
-
-              <div class="add-comment">
-                <input [(ngModel)]="newComment" placeholder="Add comment..." />
-                <button (click)="addComment()">Add</button>
-              </div>
+          <div *ngIf="feature.featureCode" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+            <h4 style="margin-bottom: 10px;">Comments</h4>
+            <div *ngFor="let c of feature.commentsList" style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #eaeaea;">
+              <b style="color: #333;">{{ c.userCode || 'System' }}</b>
+              <p style="margin: 4px 0; color: #555; font-size: 14px;">{{ c.text }}</p>
+              <small style="color: #888; font-size: 11px;">{{ c.createdAt | date: 'short' }}</small>
             </div>
-          }
+            <div style="margin-top: 10px;">
+              <textarea [(ngModel)]="newComment" placeholder="Type a new comment here. It will be added when you click Update Feature..." style="width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 60px;"></textarea>
+            </div>
+          </div>
         }
 
-        @if (isAttachmentView && feature.id) {
+        @if (isAttachmentView) {
           <h4>Attachments</h4>
 
           <input type="file" multiple (change)="onFileSelected($event)" />
@@ -79,26 +66,25 @@
 
       <div class="right">
         <label>Product</label>
-        <select [(ngModel)]="feature.productCode">
+        <select [(ngModel)]="feature.productName">
           <option value="">Select Products</option>
           <option *ngFor="let f of products" [value]="f.name">{{ f.name }}</option>
         </select>
 
         <label>Sprint</label>
-        <select [(ngModel)]="feature.sprintCode">
+        <select [(ngModel)]="feature.sprintName">
           <option value="">Select Sprint</option>
           <option *ngFor="let s of sprints" [value]="s.name">{{ s.name }}</option>
         </select>
 
         <label>Assigned To</label>
-        <select [(ngModel)]="feature.userCode">
+        <select [(ngModel)]="feature.assignedTo">
           <option value="">Unassigned</option>
-          <option value="SYSTEM">SYSTEM</option>
-          <option *ngFor="let u of users" [value]="u.name">{{ u.name }}</option>
+          <option *ngFor="let u of users" [value]="u.username">{{ u.username }}</option>
         </select>
 
         <label>Status</label>
-        <select [(ngModel)]="feature.status">
+        <select [(ngModel)]="feature.featureStatus">
           <option value="OPEN">Open</option>
           <option value="IN_PROGRESS">In Progress</option>
           <option value="DONE">Done</option>
@@ -116,12 +102,12 @@
         <input type="number" [(ngModel)]="feature.estimatedStoryPoints" />
 
         <label>Remaining Estimate</label>
-        <input type="number" [(ngModel)]="feature.remainingStoryPoint" />
+        <input type="number" [(ngModel)]="feature.remainingStoryPoints" />
       </div>
     </div>
     <div class="footer">
-      <button class="btn-save" (click)="saveFeature()">{{ feature.id ? 'Save' : 'Create' }}</button>
       <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
+      <button class="btn-save" (click)="saveFeature()">{{ feature.featureCode ? 'Update Feature' : 'Create Feature' }}</button>
     </div>
   </div>
 </div>

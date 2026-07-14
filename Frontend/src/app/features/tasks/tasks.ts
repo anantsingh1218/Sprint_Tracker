@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { TaskOverlay } from '../task-overlay/task-overlay';
 import { ITask } from '../../models/taskInterface';
 import { ITasksResponse } from '../../models/taskResponseInterface';
+import { Priority, WorkStatus } from '../../models/workItem';
 
 @Component({
   selector: 'app-tasks',
@@ -159,7 +160,19 @@ export class Tasks implements OnChanges,OnInit {
   }
 
   openTaskForm() {
-    this.selectedTaskForOverlay = null; // null means new task
+    this.selectedTaskForOverlay = {
+            id: null as unknown as string,
+            title: '',
+            description: '',
+            status: WorkStatus.OPEN,
+            priority: Priority.LOW,
+            estimatedHours: 0,
+            remainingHours: 0,
+            storyCode: '',
+            sprintCode: '',
+            userCode: '',
+            comments: [],
+          };; // null means new task
     this.showTaskModal = true;
   }
 

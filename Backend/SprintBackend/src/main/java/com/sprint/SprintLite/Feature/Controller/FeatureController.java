@@ -23,9 +23,9 @@ public class FeatureController {
     private final SprintRepository sprintRepository;
 
     @PostMapping("/add")
-    public ResponseEntity<RegisterResponseDto> addFeature(@RequestBody CreateFeatureRequest request) {
-        RegisterResponseDto registerResponseDto = featureService.createFeature(request);
-        return ResponseEntity.ok(registerResponseDto);
+    public ResponseEntity<FeatureResponseDto> addFeature(@RequestBody CreateFeatureRequest request) {
+        FeatureResponseDto responseDto = featureService.createFeature(request);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping("/{featureCode}")

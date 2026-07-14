@@ -1,3 +1,4 @@
+import { FeatureList } from './../feature-list/feature-list';
 import { Component, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -204,14 +205,14 @@ export class Backlog {
       id: item.id,
       title: item.title,
       description: item.description,
-      status: item.status,
+      featureStatus: item.status,
       priority: item.priority,
       estimatedStoryPoints: item.estimatedPoints,
-      remainingStoryPoint: item.remainingPoints,
-      productCode: item.productCategory,
-      sprintCode: item.sprintName,
-      userCode: item.assignedTo,
-      comments: item.comments,
+      remainingStoryPoints: item.remainingPoints,
+      productName: item.productCategory,
+      sprintName: item.sprintName,
+      assignedTo: item.assignedTo,
+      commentsList: item.comments,
     };
   }
 
@@ -268,20 +269,20 @@ export class Backlog {
 
   fromFeature(f: IFeature): WorkItem {
     return {
-      id: f.id,
+      id: f.id || f.featureCode || '',
       title: f.title,
       type: WorkItemType.Feature,
-      parentId: f.productCode ?? null,
-      status: f.status,
+      parentId: null,
+      status: f.featureStatus,
       description: f.description,
-      sprintName: f.sprintCode,
+      sprintName: f.sprintName,
       priority: f.priority,
-      assignedTo: f.userCode,
-      productCategory: f.productCode,
+      assignedTo: f.assignedTo,
+      productCategory: f.productName,
       reopenCount: 0,
       estimatedPoints: f.estimatedStoryPoints,
-      remainingPoints: f.remainingStoryPoint,
-      comments: f.comments,
+      remainingPoints: f.remainingStoryPoints,
+      comments: f.commentsList || [],
     };
   }
 
@@ -437,7 +438,7 @@ export class Backlog {
   ): TreeNode[] {
     // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
-    
+
     // 2. Add Features to the map
     features.forEach((f) => {
       map.set(f.id, {
@@ -516,8 +517,8 @@ export class Backlog {
       storyData: this.apiService.getRequest<any[]>('/story/all'),
       tasks: this.apiService.getRequest<ITasksResponse[]>('/task/all'),
       bugs: this.apiService.getRequest<IBugResponse[]>('/Bug'),
-      // Fetch dropdown reference entries simultaneously 
-      usersData: this.apiService.getRequest<any[]>('/users/all'), 
+      // Fetch dropdown reference entries simultaneously
+      usersData: this.apiService.getRequest<any[]>('/users/all'),
       featuresData: this.apiService.getRequest<any[]>('/feature'),
       sprintsData: this.apiService.getRequest<any[]>('/sprint/all')
 

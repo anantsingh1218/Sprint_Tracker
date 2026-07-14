@@ -11,6 +11,7 @@ import com.sprint.SprintLite.util.ApplicationUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -30,10 +31,21 @@ public class FeatureServiceImpl implements IFeatureService {
 
     @Override
     @Transactional
-    public RegisterResponseDto createFeature(CreateFeatureRequest request) {
+    public FeatureResponseDto createFeature(CreateFeatureRequest request) {
         Feature feature = this.createNewFeatureFromDto(request);
         Feature savedFeature = featureRepository.save(feature);
-        return new RegisterResponseDto("Feature Created successfully with Code: " + savedFeature.getFeatureCode());
+
+        if (request.comments() != null && !request.comments().isBlank()) {
+            Comment comment = new Comment();
+            comment.setComment(request.comments());
+            comment.setEntitytype(EntityType.FEATURE);
+            comment.setEntityid(savedFeature.getId());
+            comment.setCreatedBy(savedFeature.getCreatedBy());
+            comment.setCreatedAt(Instant.now());
+            commentRepository.save(comment);
+        }
+
+        return this.mapFeatureToResponseDto(savedFeature);
     }
 
     @Override
@@ -91,6 +103,37 @@ public class FeatureServiceImpl implements IFeatureService {
             existingFeature.setDescription(request.description());
         }
 
+        if (request.productCategory() != null && !request.productCategory().isBlank()) {
+            existingFeature.setProductId(productRepository.findProductByProductname(request.productCategory()));
+        } else if (request.productCategory() != null && request.productCategory().isBlank()) {
+            existingFeature.setProductId(null);
+        }
+
+        if (request.sprintName() != null && !request.sprintName().isBlank()) {
+            sprintRepository.findSprintBySprintName(request.sprintName()).ifPresent(existingFeature::setSprintId);
+        } else if (request.sprintName() != null && request.sprintName().isBlank()) {
+            existingFeature.setSprintId(null);
+        }
+
+        if (request.assignedTo() != null && !request.assignedTo().isBlank() && !request.assignedTo().equalsIgnoreCase("SYSTEM")) {
+            usersRepository.findByUsername(request.assignedTo()).ifPresent(existingFeature::setUserid);
+        } else if (request.assignedTo() != null && (request.assignedTo().isBlank() || request.assignedTo().equalsIgnoreCase("SYSTEM"))) {
+            usersRepository.findByUsername("System").ifPresent(existingFeature::setUserid);
+        }
+
+        if (request.featureStatus() != null) {
+            existingFeature.setFeatureStatus(request.featureStatus());
+        }
+        if (request.featurePriority() != null) {
+            existingFeature.setPriority(request.featurePriority());
+        }
+        if (request.estimatedStoryPoints() != null) {
+            existingFeature.setEstimatedStoryPoints(request.estimatedStoryPoints());
+        }
+        if (request.remainingStoryPoints() != null) {
+            existingFeature.setRemainingStoryPoints(request.remainingStoryPoints());
+        }
+
         existingFeature.setUpdatedBy(username);
         existingFeature.setUpdatedAt(Instant.now());
 
@@ -98,9 +141,9 @@ public class FeatureServiceImpl implements IFeatureService {
             Comment comment = new Comment();
             comment.setComment(request.comments());
             comment.setEntitytype(EntityType.FEATURE);
-            comment.setEntityid(Math.toIntExact(existingFeature.getId()));
-            comment.setCreatedAt(Instant.now());
+            comment.setEntityid(existingFeature.getId());
             comment.setCreatedBy(username);
+            comment.setCreatedAt(Instant.now());
             commentRepository.save(comment);
         }
 
@@ -119,12 +162,29 @@ public class FeatureServiceImpl implements IFeatureService {
         return new RegisterResponseDto("Deleted Feature with Feature code : " + featureCode);
     }
 
-    private Feature createNewFeatureFromDto(CreateFeatureRequest request) throws UsernameNotFoundException{
-        Product product = productRepository.findProductByProductname(request.productCategory());
-        Users user = usersRepository.findByUsername(request.assignedTo())
-                .orElseThrow(() -> new UsernameNotFoundException("User Name not found"));
-        Sprint sprint = sprintRepository.findSprintBySprintName(request.sprintName())
-                .orElseThrow(() -> new UsernameNotFoundException("Sprint Name not found"));
+    private Feature createNewFeatureFromDto(CreateFeatureRequest request) {
+        Product product = null;
+        if (request.productCategory() != null && !request.productCategory().isBlank()) {
+            product = productRepository.findProductByProductname(request.productCategory());
+        }
+
+        Users user = null;
+        if (request.assignedTo() != null && !request.assignedTo().isBlank() && !request.assignedTo().equalsIgnoreCase("SYSTEM")) {
+            user = usersRepository.findByUsername(request.assignedTo())
+                    .orElseThrow(() -> new UsernameNotFoundException("User Name not found: " + request.assignedTo()));
+        } else {
+            // Assign to current user if unassigned, since Feature requires a User
+            String currentUsername = ApplicationUtility.getLoggedInUser();
+            if (currentUsername == null || currentUsername.equalsIgnoreCase("anonymousUser")) currentUsername = "System";
+            user = usersRepository.findByUsername(currentUsername).orElse(null);
+        }
+
+        Sprint sprint = null;
+        if (request.sprintName() != null && !request.sprintName().isBlank()) {
+            sprint = sprintRepository.findSprintBySprintName(request.sprintName())
+                    .orElseThrow(() -> new RuntimeException("Sprint Name not found: " + request.sprintName()));
+        }
+
         Feature newFeature = new Feature();
         newFeature.setTitle(request.featureTitle());
         newFeature.setDescription(request.description());
@@ -141,6 +201,17 @@ public class FeatureServiceImpl implements IFeatureService {
     }
 
     private FeatureResponseDto mapFeatureToResponseDto(Feature feature){
+        java.util.List<com.sprint.SprintLite.dto.CommentDto> commentDtos = commentRepository
+                .findByEntitytypeAndEntityid(EntityType.FEATURE, feature.getId())
+                .stream()
+                .map(c -> {
+                    com.sprint.SprintLite.dto.CommentDto cDto = new com.sprint.SprintLite.dto.CommentDto();
+                    cDto.setUserCode(c.getCreatedBy());
+                    cDto.setText(c.getComment());
+                    cDto.setCreatedAt(c.getCreatedAt());
+                    return cDto;
+                }).toList();
+
         return new FeatureResponseDto(
                 feature.getFeatureCode(),
                 feature.getTitle(),
@@ -151,7 +222,8 @@ public class FeatureServiceImpl implements IFeatureService {
                 feature.getRemainingStoryPoints(),
                 feature.getEstimatedStoryPoints(),
                 feature.getProductId() != null ? feature.getProductId().getProductname() : null,
-                feature.getUserid().getUsername()
+                feature.getUserid().getUsername(),
+                commentDtos
         );
     }
 
