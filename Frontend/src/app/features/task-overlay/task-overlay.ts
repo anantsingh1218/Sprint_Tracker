@@ -127,14 +127,16 @@ export class TaskOverlay implements OnInit {
       taskToSave.comments = taskToSave.comments;
     }
 
-    console.log("SENDING TASK TO BACKEND:", JSON.stringify(taskToSave));
+    let {comments, ...destructuredTask} = taskToSave;
+    const payload = {...taskToSave, comments: comments?.at(-1)?.text}
+    console.log("SENDING TASK TO BACKEND:", JSON.stringify(payload));
     if (this.task?.id) {
-      this.taskService.updateTask(taskToSave).subscribe({
+      this.taskService.updateTask(payload).subscribe({
         next: (res) => this.save.emit(res),
         error: (err) => console.error('Failed to update task', err)
       });
     } else {
-      this.taskService.addTask(taskToSave).subscribe({
+      this.taskService.addTask(payload).subscribe({
         next: (res) => this.save.emit(res),
         error: (err) => console.error('Failed to create task', err)
       });

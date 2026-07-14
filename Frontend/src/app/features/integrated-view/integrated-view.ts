@@ -200,7 +200,7 @@ export class IntegrateView {
           payload = this.toBug(item);
           break;
       }
-
+      console.log(payload);
       this.apiService.postRequest<any>(endpoint, payload).subscribe({
         next: (response) => {
           let savedWorkItem: WorkItem;

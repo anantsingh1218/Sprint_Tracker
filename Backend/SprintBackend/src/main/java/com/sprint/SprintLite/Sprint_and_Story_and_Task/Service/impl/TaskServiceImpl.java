@@ -72,17 +72,18 @@ public class TaskServiceImpl implements ITaskService {
         Task task = new Task();
 
         task.setTitle(request.getTitle());
-        task.setBody(request.getBody());
+        task.setBody(request.getDescription());
 
         task.setUserid(userid);
         task.setSprintid(sprint);
         task.setStoryid(story);
 
-        task.setTaskstatus(request.getTaskstatus());
+        task.setTaskstatus(request.getStatus());
         task.setPriority(request.getPriority());
 
-        task.setOriginalestimatehours(request.getOriginalestimatehours());
-        task.setRemainingestimatehours(request.getRemainingestimatehours());
+        task.setOriginalestimatehours(request.getEstimatedHours());
+        task.setRemainingestimatehours(request.getRemainingHours());
+        task.setCreatedAt(Instant.now());
         task.setCreatedBy(username);
 
         Task t1=taskRepository.save(task);
@@ -138,8 +139,8 @@ public class TaskServiceImpl implements ITaskService {
             existingTask.setTitle(request.getTitle());
         }
 
-        if (request.getBody() != null) {
-            existingTask.setBody(request.getBody());
+        if (request.getDescription() != null) {
+            existingTask.setBody(request.getDescription());
         }
 
         if (request.getUserCode() != null) {
@@ -163,20 +164,20 @@ public class TaskServiceImpl implements ITaskService {
             existingTask.setStoryid(story);
         }
 
-        if (request.getTaskstatus() != null) {
-            existingTask.setTaskstatus(request.getTaskstatus());
+        if (request.getStatus() != null) {
+            existingTask.setTaskstatus(request.getStatus());
         }
 
         if (request.getPriority() != null) {
             existingTask.setPriority(request.getPriority());
         }
 
-        if (request.getOriginalestimatehours() != null) {
-            existingTask.setOriginalestimatehours(request.getOriginalestimatehours());
+        if (request.getEstimatedHours() != null) {
+            existingTask.setOriginalestimatehours(request.getEstimatedHours());
         }
 
-        if (request.getRemainingestimatehours() != null) {
-            existingTask.setRemainingestimatehours(request.getRemainingestimatehours());
+        if (request.getRemainingHours() != null) {
+            existingTask.setRemainingestimatehours(request.getRemainingHours());
         }
 
         existingTask.setUpdatedBy(username);
