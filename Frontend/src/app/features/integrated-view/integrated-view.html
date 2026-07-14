@@ -1,21 +1,22 @@
 <div class="backlog">
   <div class="toolbar">
-    <h2>Backlog</h2>
-    <!-- <button mat-raised-button color="primary" (click)="openCreate(WorkItemType.Feature)">
+    <h2>Integrated View</h2>
+    <button mat-raised-button color="primary" (click)="openCreate(WorkItemType.Feature)">
       + New Feature
-    </button> -->
+    </button>
   </div>
+
   <!-- =========================
        FILTER TOOLBAR
        ========================= -->
   <div class="filter-bar">
     <div class="filter-group">
       <label for="searchFilter">Search</label>
-      <input
-        id="searchFilter"
-        type="text"
-        placeholder="Filter by name..."
-        [(ngModel)]="searchTerm"
+      <input 
+        id="searchFilter" 
+        type="text" 
+        placeholder="Filter by name..." 
+        [(ngModel)]="searchTerm" 
         (input)="applyFilters()"
       />
     </div>
@@ -64,7 +65,10 @@
     <button class="clear-btn" (click)="resetFilters()">Clear Filters</button>
   </div>
 
-  @for (feature of tree; track feature.id) {
+  <!-- =========================
+       BACKLOG TREE VIEW
+       ========================= -->
+  @for (feature of filteredTree; track feature.id) {
     <mat-card class="feature">
       <div class="row">
         <span class="arrow" (click)="toggle(feature); $event.stopPropagation()">
@@ -76,16 +80,17 @@
         <strong class="title" (click)="openEdit(feature)">
           {{ feature.title }}
         </strong>
+
         <!-- Assigned To Display -->
         <span class="assignee-badge" [class.unassigned]="!feature.assignedTo">
           {{ feature.assignedTo || 'Unassigned' }}
         </span>
 
-        <!-- <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
+        <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
 
         <mat-menu #featureMenu="matMenu">
           <button mat-menu-item (click)="openCreate(WorkItemType.Story, feature)">Add Story</button>
-        </mat-menu> -->
+        </mat-menu>
       </div>
 
       @if (feature.expanded) {
@@ -102,11 +107,13 @@
                 <span class="title" (click)="openEdit(story)">
                   {{ story.title }}
                 </span>
+
+                <!-- Assigned To Display -->
                 <span class="assignee-badge" [class.unassigned]="!story.assignedTo">
                   {{ story.assignedTo || 'Unassigned' }}
                 </span>
 
-                <!-- <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
+                <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
 
                 <mat-menu #storyMenu="matMenu">
                   <button mat-menu-item (click)="openCreate(WorkItemType.Task, story)">
@@ -115,7 +122,7 @@
                   <button mat-menu-item (click)="openCreate(WorkItemType.Bug, story)">
                     Add Bug
                   </button>
-                </mat-menu> -->
+                </mat-menu>
               </div>
 
               @if (story.expanded) {
@@ -163,38 +170,14 @@
 }
 
 @if (overlayType === WorkItemType.Story && selectedStory) {
-  <app-story
-    [isOpen]="true"
-    [selectedStory]="selectedStory"
-    [usersList]="usersList()"
-    [featuresList]="featuresList()"
-    [sprintsList]="sprintsList()"
-    (saved)="closeOverlay()"
-    (close)="closeOverlay()"
-  >
+  <app-story [isOpen]="true" [selectedStory]="selectedStory" [usersList]="usersList()" [featuresList]="featuresList()" [sprintsList]="sprintsList()" (saved)="saveStory($event)" (close)="closeOverlay()">
   </app-story>
 }
 
-@if (overlayType === WorkItemType.Task && selectedTask) {
-  <app-task-overlay
-    [task]="selectedTask"
-    [users]="usersList()"
-    [sprints]="sprintsList()"
-    [stories]="storyList()"
-    (save)="saveTask($event)"
-    (close)="closeOverlay()"
-  >
-  </app-task-overlay>
+@if ((overlayType === WorkItemType.Task) && selectedTask) {
+  <app-task-overlay [task]="selectedTask" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveTask($event)" (close)="closeOverlay()"> </app-task-overlay>
 }
 
-@if (overlayType === WorkItemType.Bug && selectedBug) {
-  <app-bug
-    [bug]="selectedBug"
-    [users]="usersList()"
-    [sprints]="sprintsList()"
-    [stories]="storyList()"
-    (save)="saveBug($event)"
-    (close)="closeOverlay()"
-  >
-  </app-bug>
+@if ((overlayType === WorkItemType.Bug) && selectedBug) {
+  <app-bug [bug]="selectedBug" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveBug($event)" (close)="closeOverlay()"> </app-bug>
 }

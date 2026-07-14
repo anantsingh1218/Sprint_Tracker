@@ -1,114 +1,145 @@
-<div class="overlay">
-  <div class="workitem">
-    <div class="header">
-      <div class="title-block">
-        <div class="story-id">Task #{{ task.taskCode || 'New' }}</div>
-        <input class="title" [(ngModel)]="task.title" placeholder="Enter title..." />
+@if (task) {
+  <div class="overlay">
+    <div class="workitem">
+      <div class="header">
+        <div class="title-block">
+          <div class="story-id">Task #{{ task.id || 'New' }}</div>
+          <input class="title" [(ngModel)]="task.title" placeholder="Enter title..." />
+        </div>
+
+        <div class="header-center">
+          <button
+            class="icon-btn"
+            (click)="toggleAttachmentsView()"
+            [class.active]="isAttachmentView"
+            title="Attachments"
+          >
+            {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+          </button>
+        </div>
+
+        <button class="btn-close" (click)="closeOverlay()">✕</button>
       </div>
 
-      <div class="header-center">
-        <button
-          class="icon-btn"
-          (click)="toggleAttachmentsView()"
-          [class.active]="isAttachmentView"
-          title="Attachments"
-        >
-          {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+      <div class="body">
+        <div class="left">
+          @if (!isAttachmentView) {
+            <label>Description</label>
+
+            <textarea [(ngModel)]="task.description"></textarea>
+
+            <!-- Comments (Only when updating) -->
+            <div
+              *ngIf="task.id"
+              style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px"
+            >
+              <h4 style="margin-bottom: 10px">Comments</h4>
+              <div
+                *ngFor="let c of task.comments"
+                style="
+                  background: #f9f9f9;
+                  padding: 10px;
+                  margin-bottom: 10px;
+                  border-radius: 4px;
+                  border: 1px solid #eaeaea;
+                "
+              >
+                <b style="color: #333">{{ c.userCode || 'System' }}</b>
+                <p style="margin: 4px 0; color: #555; font-size: 14px">{{ c.text }}</p>
+                <small style="color: #888; font-size: 11px">{{
+                  c.createdAt | date: 'short'
+                }}</small>
+              </div>
+              <div style="margin-top: 10px">
+                <textarea
+                  [(ngModel)]="newComment"
+                  placeholder="Type a new comment here. It will be added when you click Update Task..."
+                  style="
+                    width: 100%;
+                    box-sizing: border-box;
+                    margin: 0;
+                    padding: 8px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    min-height: 60px;
+                  "
+                ></textarea>
+              </div>
+            </div>
+          }
+
+          @if (isAttachmentView) {
+            <h4>Attachments</h4>
+
+            <input type="file" multiple (change)="onFileSelected($event)" />
+
+            <div class="selected-files" *ngIf="selectedFiles().length">
+              <h5>Selected Files</h5>
+              <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
+            </div>
+
+            <button (click)="uploadFiles()">Upload</button>
+
+            <div class="attachment-list">
+              <div class="attachment" *ngFor="let file of attachments()">
+                <a [href]="file.filename" target="_blank">
+                  {{ file.filename }}
+                </a>
+
+                <button class="remove-btn" (click)="deleteAttachment(file.filename)">X</button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="right">
+          <label>Story Code</label>
+          <select [(ngModel)]="task.storyCode">
+            <option [ngValue]="null">Select Story</option>
+            <option *ngFor="let st of stories" [ngValue]="'S' + st.id">{{ st.title }}</option>
+          </select>
+
+          <label>Sprint Code</label>
+          <select [(ngModel)]="task.sprintCode">
+            <option [ngValue]="null">Select Sprint</option>
+            <option *ngFor="let sp of sprints" [ngValue]="'SP' + sp.id">{{ sp.sprintName }}</option>
+          </select>
+
+          <label>Assigned To (User Code)</label>
+          <select [(ngModel)]="task.userCode">
+            <option [ngValue]="null">Unassigned</option>
+            <option *ngFor="let u of users" [ngValue]="'U' + u.id">{{ u.username }}</option>
+          </select>
+
+          <label>Status</label>
+          <select [(ngModel)]="task.status">
+            <option value="OPEN">Open</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="DONE">Done</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+
+          <label>Priority</label>
+          <select [(ngModel)]="task.priority">
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+
+          <label>Original Estimate (Hours)</label>
+          <input type="number" [(ngModel)]="task.estimatedHours" />
+
+          <label>Remaining Estimate (Hours)</label>
+          <input type="number" [(ngModel)]="task.remainingHours" />
+        </div>
+      </div>
+      <div class="footer">
+        <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
+        <button class="btn-save" (click)="saveTask()">
+          {{ task.id ? 'Update Task' : 'Create Task' }}
         </button>
       </div>
-
-      <button class="btn-close" (click)="closeOverlay()">✕</button>
-    </div>
-
-    <div class="body">
-      <div class="left">
-        @if (!isAttachmentView) {
-          <label>Description</label>
-          <textarea [(ngModel)]="task.body"></textarea>
-
-          <!-- Comments (Only when updating) -->
-          <div *ngIf="task.taskCode" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-            <h4 style="margin-bottom: 10px;">Comments</h4>
-            <div *ngFor="let c of task.commentsList" style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #eaeaea;">
-              <b style="color: #333;">{{ c.userCode || 'System' }}</b>
-              <p style="margin: 4px 0; color: #555; font-size: 14px;">{{ c.text }}</p>
-              <small style="color: #888; font-size: 11px;">{{ c.createdAt | date: 'short' }}</small>
-            </div>
-            <div style="margin-top: 10px;">
-              <textarea [(ngModel)]="newComment" placeholder="Type a new comment here. It will be added when you click Update Task..." style="width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 60px;"></textarea>
-            </div>
-          </div>
-        }
-
-        @if (isAttachmentView) {
-          <h4>Attachments</h4>
-
-          <input type="file" multiple (change)="onFileSelected($event)" />
-
-          <div class="selected-files" *ngIf="selectedFiles().length">
-            <h5>Selected Files</h5>
-            <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
-          </div>
-
-          <button (click)="uploadFiles()">Upload</button>
-
-          <div class="attachment-list">
-            <div class="attachment" *ngFor="let file of attachments()">
-              <a [href]="file.filename" target="_blank">
-                {{ file.filename }}
-              </a>
-
-              <button class="remove-btn" (click)="deleteAttachment(file.filename)">X</button>
-            </div>
-          </div>
-        }
-      </div>
-
-      <div class="right">
-        <label>Story Code</label>
-        <select [(ngModel)]="task.storyCode">
-          <option [ngValue]="null">Select Story</option>
-          <option *ngFor="let st of stories" [ngValue]="'S' + st.id">{{ st.title }}</option>
-        </select>
-
-        <label>Sprint Code</label>
-        <select [(ngModel)]="task.sprintCode">
-          <option [ngValue]="null">Select Sprint</option>
-          <option *ngFor="let sp of sprints" [ngValue]="'SP' + sp.id">{{ sp.sprintName }}</option>
-        </select>
-
-        <label>Assigned To (User Code)</label>
-        <select [(ngModel)]="task.userCode">
-          <option [ngValue]="null">Unassigned</option>
-          <option *ngFor="let u of users" [ngValue]="'U' + u.id">{{ u.username }}</option>
-        </select>
-
-        <label>Status</label>
-        <select [(ngModel)]="task.taskstatus">
-          <option value="OPEN">Open</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="DONE">Done</option>
-          <option value="CLOSED">Closed</option>
-        </select>
-
-        <label>Priority</label>
-        <select [(ngModel)]="task.priority">
-          <option value="LOW">Low</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HIGH">High</option>
-          <option value="CRITICAL">Critical</option>
-        </select>
-
-        <label>Original Estimate (Hours)</label>
-        <input type="number" [(ngModel)]="task.originalestimatehours" />
-
-        <label>Remaining Estimate (Hours)</label>
-        <input type="number" [(ngModel)]="task.remainingestimatehours" />
-      </div>
-    </div>
-    <div class="footer">
-      <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
-      <button class="btn-save" (click)="saveTask()">{{ task.taskCode ? 'Update Task' : 'Create Task' }}</button>
     </div>
   </div>
-</div>
+}

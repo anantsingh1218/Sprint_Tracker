@@ -15,10 +15,10 @@
         <p class="story-card-body">{{ story.body }}</p>
 
         <div class="story-card-footer">
-          <span class="status-badge" [ngClass]="story.storyStatus?.toLowerCase()">
-            {{ story.storyStatus || 'todo' }}
+          <span class="status-badge" [ngClass]="story.status.toLowerCase()">
+            {{ story.status || 'todo' }}
           </span>
-          <span class="story-points-badge">{{ story.storyPoints || 0 }} pts</span>
+          <span class="story-points-badge">{{ story.remainingStoryPoint || 0 }} pts</span>
         </div>
       </div>
     } @empty {
@@ -148,20 +148,20 @@
               <label>Assigned To</label>
               <select [(ngModel)]="selectedStory.userCode" class="select-dropdown-meta">
                 <option [ngValue]="null">Unassigned</option>
-                @for (u of users(); track u.username) {
-                  <option [ngValue]="u.username">{{ u.username }}</option>
+                @for (u of users(); track u) {
+                  <option [ngValue]="'U' + u.id">{{ u.username }}</option>
                 }
               </select>
             </div>
 
             <div class="meta-field-select-row">
               <label>Status</label>
-              <select [(ngModel)]="selectedStory.storyStatus" class="select-dropdown-meta">
-                <option value="OPEN">open</option>
+              <select [(ngModel)]="selectedStory.status" class="select-dropdown-meta">
+                <option value="OPEN">Open</option>
                 <option value="IN_PROGRESS">IN_PROGRESS</option>
-                <option value=" BLOCKED"> BLOCKED</option>
-                <option value=" DONE"> DONE</option>
-                <option value=" CLOSED"> CLOSED</option>
+                <option value="BLOCKED"> BLOCKED</option>
+                <option value="DONE"> DONE</option>
+                <option value="CLOSED"> CLOSED</option>
               </select>
             </div>
 
@@ -178,7 +178,7 @@
               <label>Story Points (Estimated)</label>
               <input
                 type="number"
-                [(ngModel)]="selectedStory.storyPoints"
+                [(ngModel)]="selectedStory.remainingStoryPoint"
                 class="input-numeric-points"
                 min="0"
               />

@@ -143,7 +143,10 @@
     <input placeholder="Sprint Name" [(ngModel)]="newSprint.sprintName" />
 
     <!-- Product ID -->
-    <input type="number" placeholder="Product ID" [(ngModel)]="newSprint.productCode" />
+    <input
+    type="text"
+    placeholder="Product Code (e.g. P1)"
+    [(ngModel)]="newSprint.productCode" />
 
     <!-- Start Date -->
     <label>Start Date</label>

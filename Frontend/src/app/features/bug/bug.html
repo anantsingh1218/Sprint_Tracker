@@ -1,107 +1,111 @@
-<div class="overlay">
-  <div class="modal">
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="margin: 0;">{{ bug.id > 0 ? 'Update Bug' : 'Create Bug' }}</h2>
-      <button *ngIf="bug.id > 0" (click)="toggleAttachmentsView()" style="padding: 6px 12px; background: #eee; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; color: black;">
-        {{ !isAttachmentView ? 'View Attachments' : 'Back to Details' }}
-      </button>
+@if(bug){
+  <div class="overlay">
+    <div class="modal">
+  
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">{{ bug.id > 0 ? 'Update Bug' : 'Create Bug' }}</h2>
+        <button *ngIf="bug.id > 0" (click)="toggleAttachmentsView()" style="padding: 6px 12px; background: #eee; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; color: black;">
+          {{ !isAttachmentView ? 'View Attachments' : 'Back to Details' }}
+        </button>
+      </div>
+  
+      @if (!isAttachmentView) {
+        <!-- Bug Title -->
+        <label>Bug Title</label>
+        <input [(ngModel)]="bug.title" placeholder="Enter Bug Title" />
+  
+        <!-- Description -->
+        <label>Description</label>
+        <textarea [(ngModel)]="bug.description" placeholder="Enter Bug Description"></textarea>
+  
+        <!-- Story Code -->
+        <label>Story</label>
+        <select [(ngModel)]="bug.storyCode">
+          <option [ngValue]="null">Select Story</option>
+          <option *ngFor="let st of stories" [ngValue]="'S' + st.id">{{ st.title }}</option>
+        </select>
+  
+        <!-- Sprint Code -->
+        <label>Sprint</label>
+        <select [(ngModel)]="bug.sprintCode">
+          <option [ngValue]="null">Select Sprint</option>
+          <option *ngFor="let s of sprints" [ngValue]="'SP' + s.id">{{ s.sprintName }}</option>
+        </select>
+  
+        <!-- Assigned User Code -->
+        <label>Assigned User</label>
+        <select [(ngModel)]="bug.assignedUserCode">
+          <option [ngValue]="null">Select User</option>
+          <option *ngFor="let u of users" [ngValue]="'U' + u.id">{{ u.username }}</option>
+        </select>
+  
+        <!-- Status -->
+        <label>Status</label>
+        <select [(ngModel)]="bug.bugstatus">
+          <option value="OPEN">Open</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+  
+        <!-- Priority -->
+        <label>Priority</label>
+        <select [(ngModel)]="bug.priority">
+          <option value="">Select Priority</option>
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+          <option value="CRITICAL">CRITICAL</option>
+        </select>
+  
+        <!-- Original Estimate -->
+        <label>Original Estimate Hours</label>
+        <input [(ngModel)]="bug.originalestimatehours" type="number" placeholder="Enter Original Estimate Hours" />
+  
+        <!-- Remaining Estimate -->
+        <label>Remaining Estimate Hours</label>
+        <input [(ngModel)]="bug.remainingestimatehours" type="number" placeholder="Enter Remaining Estimate Hours" />
+  
+        <!-- Comments (Only when updating) -->
+        <div *ngIf="bug.id > 0" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+          <h4 style="margin-bottom: 10px;">Comments</h4>
+          <div *ngFor="let c of bug.comments" style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #eaeaea;">
+            <b style="color: #333;">{{ c.userCode || 'System' }}</b>
+            <p style="margin: 4px 0; color: #555; font-size: 14px;">{{ c.text }}</p>
+            <small style="color: #888; font-size: 11px;">{{ c.createdAt | date: 'short' }}</small>
+          </div>
+          <div style="margin-top: 10px;">
+            <textarea [(ngModel)]="newComment" placeholder="Type a new comment here. It will be added when you click Update Bug..." style="width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 60px;"></textarea>
+          </div>
+        </div>
+      }
+  
+      @if (isAttachmentView) {
+        <h4 style="margin-bottom: 15px;">Attachments</h4>
+  
+        <input type="file" multiple (change)="onFileSelected($event)" style="margin-bottom: 15px;" />
+  
+        <div *ngIf="selectedFiles().length" style="margin-bottom: 15px; padding: 10px; background: #f0f4f8; border-radius: 4px;">
+          <h5 style="margin-top: 0;">Files ready to upload:</h5>
+          <div *ngFor="let file of selectedFiles()" style="font-size: 13px;">• {{ file.name }}</div>
+          <button (click)="uploadFiles()" style="margin-top: 10px; padding: 6px 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">Upload Files</button>
+        </div>
+  
+        <div style="margin-top: 20px;">
+          <div *ngFor="let file of attachments()" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee; margin-bottom: 8px;">
+            <a [href]="file.filename" target="_blank" style="color: #2563eb; text-decoration: none; font-size: 14px;">{{ file.filename }}</a>
+            <button (click)="deleteAttachment(file.filename)" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+          </div>
+          <p *ngIf="!attachments().length" style="color: #666; font-style: italic;">No attachments found for this bug.</p>
+        </div>
+      }
+  
+      <!-- Buttons -->
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+        <button (click)="closeOverlay()" style="padding: 8px 16px; background: #e5e7eb; color: #333; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Cancel</button>
+        <button (click)="saveBug()" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">{{ bug.id > 0 ? 'Update Bug' : 'Create Bug' }}</button>
+      </div>
+  
     </div>
-
-    @if (!isAttachmentView) {
-      <!-- Bug Title -->
-      <label>Bug Title</label>
-      <input [(ngModel)]="bug.title" placeholder="Enter Bug Title" />
-
-      <!-- Description -->
-      <label>Description</label>
-      <textarea [(ngModel)]="bug.description" placeholder="Enter Bug Description"></textarea>
-
-      <!-- Story Code -->
-      <label>Story</label>
-      <select [(ngModel)]="bug.storyCode">
-        <option [ngValue]="null">Select Story</option>
-        <option *ngFor="let st of stories" [ngValue]="'S' + st.id">{{ st.title }}</option>
-      </select>
-
-      <!-- Sprint Code -->
-      <label>Sprint</label>
-      <select [(ngModel)]="bug.sprintCode">
-        <option [ngValue]="null">Select Sprint</option>
-        <option *ngFor="let s of sprints" [ngValue]="'SP' + s.id">{{ s.sprintName }}</option>
-      </select>
-
-      <!-- Assigned User Code -->
-      <label>Assigned User</label>
-      <select [(ngModel)]="bug.assignedUserCode">
-        <option [ngValue]="null">Select User</option>
-        <option *ngFor="let u of users" [ngValue]="'U' + u.id">{{ u.username }}</option>
-      </select>
-
-      <!-- Status -->
-      <label>Status</label>
-      <select [(ngModel)]="bug.bugstatus">
-        <option value="OPEN">Open</option>
-        <option value="IN_PROGRESS">In Progress</option>
-        <option value="CLOSED">Closed</option>
-      </select>
-
-      <!-- Priority -->
-      <label>Priority</label>
-      <select [(ngModel)]="bug.priority">
-        <option value="">Select Priority</option>
-        <option value="LOW">LOW</option>
-        <option value="MEDIUM">MEDIUM</option>
-        <option value="HIGH">HIGH</option>
-      </select>
-
-      <!-- Original Estimate -->
-      <label>Original Estimate Hours</label>
-      <input [(ngModel)]="bug.originalestimatehours" type="number" placeholder="Enter Original Estimate Hours" />
-
-      <!-- Remaining Estimate -->
-      <label>Remaining Estimate Hours</label>
-      <input [(ngModel)]="bug.remainingestimatehours" type="number" placeholder="Enter Remaining Estimate Hours" />
-
-      <!-- Comments (Only when updating) -->
-      <div *ngIf="bug.id > 0" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-        <h4 style="margin-bottom: 10px;">Comments</h4>
-        <div *ngFor="let c of bug.comments" style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #eaeaea;">
-          <b style="color: #333;">{{ c.userCode || 'System' }}</b>
-          <p style="margin: 4px 0; color: #555; font-size: 14px;">{{ c.text }}</p>
-          <small style="color: #888; font-size: 11px;">{{ c.createdAt | date: 'short' }}</small>
-        </div>
-        <div style="margin-top: 10px;">
-          <textarea [(ngModel)]="newComment" placeholder="Type a new comment here. It will be added when you click Update Bug..." style="width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 60px;"></textarea>
-        </div>
-      </div>
-    }
-
-    @if (isAttachmentView) {
-      <h4 style="margin-bottom: 15px;">Attachments</h4>
-
-      <input type="file" multiple (change)="onFileSelected($event)" style="margin-bottom: 15px;" />
-
-      <div *ngIf="selectedFiles().length" style="margin-bottom: 15px; padding: 10px; background: #f0f4f8; border-radius: 4px;">
-        <h5 style="margin-top: 0;">Files ready to upload:</h5>
-        <div *ngFor="let file of selectedFiles()" style="font-size: 13px;">• {{ file.name }}</div>
-        <button (click)="uploadFiles()" style="margin-top: 10px; padding: 6px 12px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer;">Upload Files</button>
-      </div>
-
-      <div style="margin-top: 20px;">
-        <div *ngFor="let file of attachments()" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 4px; border: 1px solid #eee; margin-bottom: 8px;">
-          <a [href]="file.filename" target="_blank" style="color: #2563eb; text-decoration: none; font-size: 14px;">{{ file.filename }}</a>
-          <button (click)="deleteAttachment(file.filename)" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
-        </div>
-        <p *ngIf="!attachments().length" style="color: #666; font-style: italic;">No attachments found for this bug.</p>
-      </div>
-    }
-
-    <!-- Buttons -->
-    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-      <button (click)="closeOverlay()" style="padding: 8px 16px; background: #e5e7eb; color: #333; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Cancel</button>
-      <button (click)="saveBug()" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">{{ bug.id > 0 ? 'Update Bug' : 'Create Bug' }}</button>
-    </div>
-
   </div>
-</div>
+
+}

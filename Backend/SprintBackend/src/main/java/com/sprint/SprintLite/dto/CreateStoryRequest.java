@@ -21,7 +21,7 @@ public class CreateStoryRequest {
 
     private Status status;
     private Priority priority;
-    private Integer storyPoints;
+    private Integer remainingStoryPoint;
 
     private String comments;
 }

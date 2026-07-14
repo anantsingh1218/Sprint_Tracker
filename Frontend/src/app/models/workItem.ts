@@ -15,18 +15,18 @@ export const WORK_STATUSES = {
 } as const;
 
 export enum Priority {
-  LOW = 'Low',
-  MEDIUM = 'Medium',
-  HIGH = 'High',
-  CRITICAL = 'Critical'
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
 };
 
 export enum WorkStatus {
-  OPEN = 'Open',
-  IN_PROGRESS = 'In Progress',
-  BLOCKED = 'Blocked',
-  CLOSED = 'Closed',
-  DONE = 'Done',
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  BLOCKED = 'BLOCKED',
+  CLOSED = 'CLOSED',
+  DONE = 'DONE',
 }
 
 export interface WorkItem {

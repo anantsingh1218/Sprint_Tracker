@@ -223,3 +223,126 @@
 .mat-mdc-option {
   font-size: 14px;
 }
+
+.task-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.icon-delete{
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    font-size:16px;
+    padding:2px;
+    color:#6b7280;
+    transition:all .2s ease;
+}
+
+.icon-delete:hover{
+    color:#dc3545;
+    transform:scale(1.15);
+}
+
+.popup-overlay{
+
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999;
+
+}
+
+.popup-card{
+
+    width:340px;
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:24px;
+
+    text-align:center;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+
+}
+
+.popup-card h3{
+
+    margin-top:0;
+
+    margin-bottom:12px;
+
+}
+
+.popup-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:16px;
+
+    margin-top:25px;
+
+}
+
+.confirm-btn{
+
+    background:#dc3545;
+
+    color:white;
+
+    border:none;
+
+    padding:8px 18px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.cancel-btn{
+
+    background:#6c757d;
+
+    color:white;
+
+    border:none;
+
+    padding:8px 18px;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+}
+
+.confirm-btn:hover{
+
+    background:#bb2d3b;
+
+}
+
+.cancel-btn:hover{
+
+    background:#5c636a;
+
+}
+ 

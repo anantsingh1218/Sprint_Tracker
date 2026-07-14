@@ -29,7 +29,7 @@ interface TreeNode extends WorkItem {
 }
 
 @Component({
-  selector: 'app-backlog',
+  selector: 'app-integrated-view',
   standalone: true,
   imports: [
     CommonModule,
@@ -42,11 +42,11 @@ interface TreeNode extends WorkItem {
     TaskOverlay,
     Bug,
   ],
-  templateUrl: './backlog.html',
-  styleUrls: ['./backlog.css'],
+  templateUrl: './integrated-view.html',
+  styleUrls: ['./integrated-view.css'],
   animations: [fadeSlide],
 })
-export class Backlog {
+export class IntegrateView {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
@@ -70,26 +70,6 @@ export class Backlog {
   uniqueSprints: string[] = [];
   uniqueStatuses: string[] = [];
   uniqueUsers: string[] = [];
-  // uniqueProducts = computed(() => {
-  //   const products = this.service.items
-  //     .map(item => item.productCategory)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(products)).sort();
-  // });
-
-  // uniqueSprints = computed(() => {
-  //   const sprints = this.service.items
-  //     .map(item => item.sprintName)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(sprints)).sort();
-  // });
-
-  // uniqueStatuses = computed(() => {
-  //   const statuses = this.service.items
-  //     .map(item => item.status)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(statuses)).sort();
-  // });
 
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
@@ -306,7 +286,7 @@ applyFilters() {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = '/story/add';
+          endpoint = '/story/create';
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -318,7 +298,10 @@ applyFilters() {
           payload = this.toBug(item);
           break;
       }
-      this.apiService.postRequest<any>(endpoint, payload).subscribe({
+      let {comments, ...destructedPayload} = payload;
+      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      this.apiService.postRequest<any>(endpoint, payloadToSend).subscribe({
         next: (response) => {
           let savedWorkItem: WorkItem;
           switch (item.type) {
@@ -354,7 +337,7 @@ applyFilters() {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = `/story/${item.id}`;
+          endpoint = `/story/${item.id.substring(1)}`;
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -366,8 +349,10 @@ applyFilters() {
           payload = this.toBug(item);
           break;
       }
-
-      this.apiService.putRequest<any>(endpoint, payload).subscribe({
+      let {comments, ...destructedPayload} = payload;
+      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      this.apiService.putRequest<any>(endpoint, payloadToSend).subscribe({
         next: () => {
           const items = [...this.service.items];
           const index = items.findIndex((i) => i.id === item.id);
@@ -381,6 +366,7 @@ applyFilters() {
         error: (err) => console.error('Failed to update work item', err),
       });
     }
+    this.closeOverlay();
   }
 
 private refreshTree() {
@@ -446,7 +432,6 @@ private refreshTree() {
   }
 
   toBug(item: WorkItem): IBug {
-    console.log(item);
     return {
       id: Number(item.id.substring(1)),
       bugCode: item.id,
@@ -466,7 +451,7 @@ private refreshTree() {
 
   fromFeature(f: IFeature): WorkItem {
     return {
-      id: f.id || f.featureCode || '',
+      id: f.id ?? '',
       title: f.title,
       type: WorkItemType.Feature,
       parentId: null,
@@ -479,7 +464,7 @@ private refreshTree() {
       reopenCount: 0,
       estimatedPoints: f.estimatedStoryPoints,
       remainingPoints: f.remainingStoryPoints,
-      comments: f.commentsList || [],
+      comments: f.commentsList != undefined ? f.commentsList : [],
     };
   }
 
@@ -633,8 +618,10 @@ private refreshTree() {
     tasks: WorkItem[],
     bugs: WorkItem[],
   ): TreeNode[] {
+    // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
 
+    // 2. Add Features to the map
     features.forEach((f) => {
       map.set(this.normalizeId(f.id), {
         ...f,
@@ -643,10 +630,12 @@ private refreshTree() {
       });
     });
 
+    // 3. Add Stories to the map AND push them to their Feature parents
     stories.forEach((s) => {
       const normalizedStoryId = this.normalizeId(s.id);
       const parentId = this.normalizeId(s.parentId);
 
+      // Create the story node shell in our map so its upcoming tasks can find it
       const storyNode: TreeNode = {
         ...s,
         children: [],
@@ -654,12 +643,14 @@ private refreshTree() {
       };
       map.set(normalizedStoryId, storyNode);
 
+      // Attach story node to its feature parent
       const parentFeature = map.get(parentId);
       if (parentFeature) {
         parentFeature.children.push(storyNode);
       }
     });
 
+    // 4. Push Tasks to their Story parents
     tasks.forEach((t) => {
       const parentId = this.normalizeId(t.parentId);
       const parentStory = map.get(parentId);
@@ -677,6 +668,7 @@ private refreshTree() {
       }
     });
 
+    // 5. Push Bugs to their Story parents
     bugs.forEach((b) => {
       const parentId = this.normalizeId(b.parentId);
       const parentStory = map.get(parentId);
@@ -694,6 +686,8 @@ private refreshTree() {
       }
     });
 
+    // 6. Return ONLY the root level nodes (Features)
+    // We filter the full map values down to items that have no parentId
     return Array.from(map.values()).filter((node) => node.parentId === null);
   }
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Priority, WorkItem, WorkItemType, WorkStatus } from '../models/workItem';
+import { IComment } from '../models/storyInterface';
 
 @Injectable({ providedIn: 'root' })
 export class WorkItemService {
@@ -39,7 +40,7 @@ export class WorkItemService {
 
   update(items: WorkItem[]) {
     this.itemsSubject.next(items);
-    this.syncCountersFromItems(items);
+    // this.syncCountersFromItems(items);
   }
 
   updateStatus(id: string, status: any) {
@@ -85,8 +86,7 @@ export class WorkItemService {
 
   createEmptyItem(type: WorkItemType, parentId: string | null = null): WorkItem {
     return {
-      // id: '',
-      id: this.generateId(type),
+      id: null as unknown as string,
       title: 'New Work Item',
       type,
       parentId,
