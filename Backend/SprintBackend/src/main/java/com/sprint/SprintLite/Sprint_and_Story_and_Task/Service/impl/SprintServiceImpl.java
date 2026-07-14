@@ -10,10 +10,12 @@ import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
 import com.sprint.SprintLite.repository.ProductRepository;
 import com.sprint.SprintLite.repository.SprintRepository;
+import com.sprint.SprintLite.util.ApplicationUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.sprint.SprintLite.util.CodeUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,8 @@ public class SprintServiceImpl implements ISprintService {
         sprint.setSprintDuration(Math.toIntExact(request.getSprintDuration()));
         sprint.setStatus(request.getStatus());
         sprint.setProductid(product);
+        sprint.setCreatedAt(Instant.now());
+        sprint.setCreatedBy(ApplicationUtility.getLoggedInUser());
 
         Sprint savedSprint = sprintRepository.save(sprint);
 
@@ -89,7 +93,6 @@ public class SprintServiceImpl implements ISprintService {
             sprint.setSprintName(request.getSprintName());
         }
 
-
         if (request.getStartDate() != null) {
             sprint.setStartDate(request.getStartDate());
         }
@@ -112,6 +115,9 @@ public class SprintServiceImpl implements ISprintService {
 
             sprint.setProductid(product);
         }
+
+        sprint.setUpdatedAt(Instant.now());
+        sprint.setUpdatedBy(ApplicationUtility.getLoggedInUser());
 
         return sprintRepository.save(sprint);
     }

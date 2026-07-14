@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -24,8 +24,11 @@ export class FeatureList implements OnInit {
 
   constructor(
     private featureService: FeatureService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr:ChangeDetectorRef
   ) {}
+
+
 
   ngOnInit() {
     this.loadFeatures();
@@ -40,6 +43,7 @@ export class FeatureList implements OnInit {
       next: (data) => {
         this.features = data;
         this.checkAndOpenId(this.route.snapshot.paramMap.get('id'));
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching features', err)
     });

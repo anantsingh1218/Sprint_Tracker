@@ -11,7 +11,7 @@ public class CreateTaskRequest {
 
     private String title;
 
-    private String body;
+    private String description;
 
     private String userCode;
 
@@ -19,13 +19,13 @@ public class CreateTaskRequest {
 
     private String storyCode;
 
-    private Status taskstatus;
+    private Status status;
 
     private Priority priority;
 
-    private Integer originalestimatehours;
+    private Integer estimatedHours;
 
-    private Integer remainingestimatehours;
+    private Integer remainingHours;
 
     private String comments;
 }

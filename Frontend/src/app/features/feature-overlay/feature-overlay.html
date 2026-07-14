@@ -1,86 +1,179 @@
 <div class="overlay">
   <div class="workitem">
+
+    <!-- HEADER -->
     <div class="header">
+
       <div class="title-block">
-        <div class="story-id">Feature {{ feature.featureCode ? '#' + feature.featureCode : '(New)' }}</div>
-        <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
+        <div class="story-id">
+          @if (feature.featureCode) {
+            Feature #{{ feature.featureCode }}
+          } @else {
+            New Feature
+          }
+        </div>
+
+        <input
+          class="title"
+          [(ngModel)]="feature.title"
+          placeholder="Enter title..."
+        />
       </div>
 
       <div class="header-center">
-        <button
-          class="icon-btn"
-          (click)="toggleAttachmentsView()"
-          [class.active]="isAttachmentView"
-          title="Attachments"
-        >
-          {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
-        </button>
+        @if (feature.featureCode) {
+          <button
+            class="icon-btn"
+            (click)="toggleAttachmentsView()"
+            [class.active]="isAttachmentView"
+            title="Attachments"
+          >
+            {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+          </button>
+        }
       </div>
 
       <button class="btn-close" (click)="closeOverlay()">✕</button>
+
     </div>
 
+    <!-- BODY -->
     <div class="body">
+
+      <!-- LEFT -->
       <div class="left">
+
         @if (!isAttachmentView) {
+
           <label>Description</label>
+
           <textarea [(ngModel)]="feature.description"></textarea>
 
-          <div *ngIf="feature.featureCode" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
-            <h4 style="margin-bottom: 10px;">Comments</h4>
-            <div *ngFor="let c of feature.commentsList" style="background: #f9f9f9; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #eaeaea;">
-              <b style="color: #333;">{{ c.userCode || 'System' }}</b>
-              <p style="margin: 4px 0; color: #555; font-size: 14px;">{{ c.text }}</p>
-              <small style="color: #888; font-size: 11px;">{{ c.createdAt | date: 'short' }}</small>
+          @if (feature.featureCode) {
+
+            <div class="comments">
+
+              <h4>Comments</h4>
+
+              <div
+                class="comment"
+                *ngFor="let c of feature.commentsList"
+              >
+                <b>{{ c.userCode || 'System' }}</b>
+
+                <p>{{ c.text }}</p>
+
+                <small>
+                  {{ c.createdAt | date:'short' }}
+                </small>
+
+              </div>
+
+              <div class="add-comment">
+
+                <textarea
+                  [(ngModel)]="newComment"
+                  placeholder="Type a new comment here. It will be added when you click Update Feature..."
+                ></textarea>
+
+              </div>
+
             </div>
-            <div style="margin-top: 10px;">
-              <textarea [(ngModel)]="newComment" placeholder="Type a new comment here. It will be added when you click Update Feature..." style="width: 100%; box-sizing: border-box; margin: 0; padding: 8px; border: 1px solid #ccc; border-radius: 4px; min-height: 60px;"></textarea>
-            </div>
-          </div>
+
+          }
+
         }
 
-        @if (isAttachmentView) {
+        @if (isAttachmentView && feature.featureCode) {
+
           <h4>Attachments</h4>
 
-          <input type="file" multiple (change)="onFileSelected($event)" />
+          <input
+            type="file"
+            multiple
+            (change)="onFileSelected($event)"
+          />
 
-          <div class="selected-files" *ngIf="selectedFiles().length">
+          <div
+            class="selected-files"
+            *ngIf="selectedFiles().length"
+          >
+
             <h5>Selected Files</h5>
 
-            <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
+            <div *ngFor="let file of selectedFiles()">
+              To be uploaded : {{ file.name }}
+            </div>
+
           </div>
 
-          <button (click)="uploadFiles()">Upload</button>
+          <button (click)="uploadFiles()">
+            Upload
+          </button>
 
           <div class="attachment-list">
-            <div class="attachment" *ngFor="let file of attachments()">
-              <a [href]="file.filename" target="_blank">
+
+            <div
+              class="attachment"
+              *ngFor="let file of attachments()"
+            >
+
+              <a
+                [href]="file.filename"
+                target="_blank"
+              >
                 {{ file.filename }}
               </a>
 
-              <button class="remove-btn" (click)="deleteAttachment(file.filename)">X</button>
+              <button
+                class="remove-btn"
+                (click)="deleteAttachment(file.filename)"
+              >
+                X
+              </button>
+
             </div>
+
           </div>
+
         }
+
       </div>
 
+      <!-- RIGHT -->
       <div class="right">
+
         <label>Product</label>
         <select [(ngModel)]="feature.productName">
-          <option value="">Select Products</option>
-          <option *ngFor="let f of products" [value]="f.name">{{ f.name }}</option>
+          <option value="">Select Product</option>
+          <option
+            *ngFor="let p of products"
+            [value]="p.name"
+          >
+            {{ p.name }}
+          </option>
         </select>
 
         <label>Sprint</label>
         <select [(ngModel)]="feature.sprintName">
           <option value="">Select Sprint</option>
-          <option *ngFor="let s of sprints" [value]="s.name">{{ s.name }}</option>
+          <option
+            *ngFor="let s of sprints"
+            [value]="s.name"
+          >
+            {{ s.name }}
+          </option>
         </select>
 
         <label>Assigned To</label>
         <select [(ngModel)]="feature.assignedTo">
           <option value="">Unassigned</option>
-          <option *ngFor="let u of users" [value]="u.username">{{ u.username }}</option>
+          <option
+            *ngFor="let u of users"
+            [value]="u.username"
+          >
+            {{ u.username }}
+          </option>
         </select>
 
         <label>Status</label>
@@ -99,15 +192,39 @@
         </select>
 
         <label>Story Points (Estimated)</label>
-        <input type="number" [(ngModel)]="feature.estimatedStoryPoints" />
+        <input
+          type="number"
+          [(ngModel)]="feature.estimatedStoryPoints"
+        />
 
         <label>Remaining Estimate</label>
-        <input type="number" [(ngModel)]="feature.remainingStoryPoints" />
+        <input
+          type="number"
+          [(ngModel)]="feature.remainingStoryPoints"
+        />
+
       </div>
+
     </div>
+
+    <!-- FOOTER -->
     <div class="footer">
-      <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
-      <button class="btn-save" (click)="saveFeature()">{{ feature.featureCode ? 'Update Feature' : 'Create Feature' }}</button>
+
+      <button
+        class="btn-cancel"
+        (click)="closeOverlay()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="btn-save"
+        (click)="saveFeature()"
+      >
+        {{ feature.featureCode ? 'Update Feature' : 'Create Feature' }}
+      </button>
+
     </div>
+
   </div>
 </div>

@@ -6,6 +6,7 @@ import com.sprint.SprintLite.dto.StoryResponseDto;
 import com.sprint.SprintLite.entity.*;
 import com.sprint.SprintLite.entity.enums.EntityType;
 import com.sprint.SprintLite.repository.*;
+import com.sprint.SprintLite.util.ApplicationUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -52,7 +53,7 @@ public class StoryServiceImpl implements IStoryService {
         story.setSprintid(sprint);
         story.setStorystatus(request.getStatus());
         story.setPriority(request.getPriority());
-        story.setStorypoints(request.getStoryPoints());
+        story.setStorypoints(request.getRemainingStoryPoint());
         story.setCreatedBy(currentUsername);
         story.setCreatedAt(Instant.now());
         Story savedStory = storyRepository.save(story);
@@ -97,13 +98,14 @@ public class StoryServiceImpl implements IStoryService {
         }
 
 
-        if (story.getStoryPoints() != null) {
-            existingStory.setStorypoints(story.getStoryPoints());
+        if (story.getRemainingStoryPoint() != null) {
+            existingStory.setStorypoints(story.getRemainingStoryPoint());
         }
 
         // 3. Map relations carefully
         if (story.getUserCode() != null) {
-            Users user = usersRepository.findByUsername(story.getUserCode())
+            Integer userId = CodeUtils.decodeToInteger("U", story.getUserCode());
+            Users user = usersRepository.findById(userId)
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
             existingStory.setUserid(user);
         }
@@ -119,6 +121,7 @@ public class StoryServiceImpl implements IStoryService {
         }
 
         existingStory.setUpdatedBy(username);
+        existingStory.setUpdatedAt(Instant.now());
 
         // 4. Handle Comments
         Comment savedComment = null;
