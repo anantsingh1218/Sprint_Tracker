@@ -29,13 +29,13 @@ export class FeatureList {
       estimatedStoryPoints: 8,
       remainingStoryPoint: 5,
 
-      productId: 'FSM',
-      sprintId: 'Sprint 1',
-      userId: 'User 1',
+      productCode: 'FSM',
+      sprintCode: 'Sprint 1',
+      userCode: 'User 1',
 
       comments: [
         {
-          userId: 0,
+          userCode: 'U0',
           text: 'Feature created',
           createdAt: new Date().toISOString(),
         },
@@ -52,13 +52,13 @@ export class FeatureList {
       estimatedStoryPoints: 8,
       remainingStoryPoint: 5,
 
-      productId: 'Starwatch',
-      sprintId: 'Sprint 2',
-      userId: 'User 2',
+      productCode: 'Starwatch',
+      sprintCode: 'Sprint 2',
+      userCode: 'User 2',
 
       comments: [
         {
-          userId: 1,
+          userCode: 'U1',
           text: 'Working on API contract',
           createdAt: new Date().toISOString(),
         },
@@ -85,9 +85,9 @@ export class FeatureList {
       estimatedStoryPoints: 0,
       remainingStoryPoint: 0,
 
-      productId: null,
-      sprintId: null,
-      userId: null,
+      productCode: null,
+      sprintCode: null,
+      userCode: null,
 
       comments: [],
     };

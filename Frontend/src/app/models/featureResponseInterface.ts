@@ -1,7 +1,7 @@
 import { Priority, WorkStatus } from "./workItem";
 
 export interface IFeatureResponse {
-  id: number;
+  featureCode: string;
   title: string;
   description: string;
   featureStatus: WorkStatus;

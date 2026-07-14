@@ -3,22 +3,24 @@ package com.sprint.SprintLite.Bugs.Service;
 import com.sprint.SprintLite.dto.BugDto;
 import com.sprint.SprintLite.entity.Bug;
 
+import com.sprint.SprintLite.dto.BugResponseDto;
+
 import java.util.List;
 
 public interface IBugService {
-    Bug createBug(BugDto request);
+    BugResponseDto createBug(BugDto request);
 
-    Bug getBugByiD(Integer id);
+    BugResponseDto getBugByiD(Integer id);
 
-    List<Bug> getAllBugs();
+    List<BugResponseDto> getAllBugs();
 
-    List<Bug> getBugsBySprintid(Integer sprintId);
+    List<BugResponseDto> getBugsBySprintid(Integer sprintId);
 
-    List<Bug> getBugsByStoryid(Integer storyId);
+    List<BugResponseDto> getBugsByStoryid(Integer storyId);
 
-    Bug getBugsBySprintIdAndStoryId(Integer sprintId, Integer storyId);
+    BugResponseDto getBugsBySprintIdAndStoryId(Integer sprintId, Integer storyId);
 
-    Bug updateBug(Integer id,BugDto request);
+    BugResponseDto updateBug(Integer id,BugDto request);
 
     void deleteBugByiD(Integer id);
 

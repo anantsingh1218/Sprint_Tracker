@@ -29,7 +29,7 @@ export class SprintService {
   }
 
   // GET sprint by ID
-  getSprintById(id: number): Observable<any> {
+  getSprintById(id: string): Observable<any> {
     return this.http.get<any>(
       `${this.baseUrl}/${id}`,
       {
@@ -50,7 +50,7 @@ export class SprintService {
   }
 
   // UPDATE sprint
-  updateSprint(id: number, sprint: any): Observable<any> {
+  updateSprint(id: string, sprint: any): Observable<any> {
     return this.http.put<any>(
       `${this.baseUrl}/${id}`,
       sprint,
@@ -61,7 +61,7 @@ export class SprintService {
   }
 
   // DELETE sprint
-  deleteSprint(id: number): Observable<any> {
+  deleteSprint(id: string): Observable<any> {
     return this.http.delete<any>(
       `${this.baseUrl}/${id}`,
       {

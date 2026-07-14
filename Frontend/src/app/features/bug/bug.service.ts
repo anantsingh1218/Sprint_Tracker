@@ -36,4 +36,10 @@ export class BugService {
       headers: this.getAuthHeaders()
     });
   }
+
+  updateBug(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, data, {
+      headers: this.getAuthHeaders()
+    });
+  }
 }

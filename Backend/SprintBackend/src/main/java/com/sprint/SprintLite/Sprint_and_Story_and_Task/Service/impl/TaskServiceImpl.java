@@ -1,5 +1,6 @@
 package com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.impl;
 
+import java.time.Instant;
 import com.sprint.SprintLite.Sprint_and_Story_and_Task.Service.ITaskService;
 import com.sprint.SprintLite.dto.CreateTaskRequest;
 import com.sprint.SprintLite.dto.TaskResponseDto;
@@ -9,6 +10,7 @@ import com.sprint.SprintLite.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 
 import java.util.List;
 
@@ -22,6 +24,34 @@ public class TaskServiceImpl implements ITaskService {
     private final UsersRepository usersRepository;
     private final CommentRepository commentRepository;
 
+    private TaskResponseDto mapToDto(Task task) {
+        TaskResponseDto response = new TaskResponseDto();
+        response.setTaskCode(CodeUtils.encode("T", task.getId()));
+        response.setTitle(task.getTitle());
+        response.setBody(task.getBody());
+        response.setUserCode(task.getUserid() != null ? CodeUtils.encode("U", task.getUserid().getId()) : null);
+        response.setSprintCode(task.getSprintid() != null ? CodeUtils.encode("SP", task.getSprintid().getId()) : null);
+        response.setStoryCode(task.getStoryid() != null ? CodeUtils.encode("S", task.getStoryid().getId()) : null);
+        response.setTaskstatus(task.getTaskstatus());
+        response.setPriority(task.getPriority());
+        response.setOriginalestimatehours(task.getOriginalestimatehours());
+        response.setRemainingestimatehours(task.getRemainingestimatehours());
+
+        java.util.List<com.sprint.SprintLite.dto.CommentDto> commentDtos = commentRepository
+                .findByEntitytypeAndEntityid(EntityType.TASK, task.getId())
+                .stream()
+                .map(c -> {
+                    com.sprint.SprintLite.dto.CommentDto cDto = new com.sprint.SprintLite.dto.CommentDto();
+                    cDto.setUserCode(c.getCreatedBy());
+                    cDto.setText(c.getComment());
+                    cDto.setCreatedAt(c.getCreatedAt());
+                    return cDto;
+                }).toList();
+        response.setCommentsList(commentDtos);
+
+        return response;
+    }
+
     @Override
     public TaskResponseDto createTask(CreateTaskRequest request) {
         String username = SecurityContextHolder
@@ -29,111 +59,68 @@ public class TaskServiceImpl implements ITaskService {
                 .getAuthentication()
                 .getName();
 
-        Users userid = usersRepository.findById(request.getUserId())
+        Users userid = usersRepository.findById(CodeUtils.decodeToInteger("U", request.getUserCode()))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
 
-        Sprint sprint = sprintRepository.findById(request.getSprintid())
+        Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
                 .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
 
-        Story story = storyRepository.findById(request.getStoryid())
+        Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
                 .orElseThrow(() -> new IllegalArgumentException("Story not found"));
 
         Task task = new Task();
 
         task.setTitle(request.getTitle());
-        task.setBody(request.getBody());
+        task.setBody(request.getDescription());
 
         task.setUserid(userid);
         task.setSprintid(sprint);
         task.setStoryid(story);
 
-        task.setTaskstatus(request.getTaskstatus());
+        task.setTaskstatus(request.getStatus());
         task.setPriority(request.getPriority());
 
-        task.setOriginalestimatehours(request.getOriginalestimatehours());
-        task.setRemainingestimatehours(request.getRemainingestimatehours());
+        task.setOriginalestimatehours(request.getEstimatedHours());
+        task.setRemainingestimatehours(request.getRemainingHours());
+        task.setCreatedAt(Instant.now());
         task.setCreatedBy(username);
 
         Task t1=taskRepository.save(task);
 
-       TaskResponseDto response = new TaskResponseDto();
-       response.setTitle(t1.getTitle());
-       response.setBody(t1.getBody());
-       response.setUserId(t1.getId());
-       response.setSprintid(sprint.getId());
-       response.setStoryid(story.getId());
-       response.setTaskstatus(t1.getTaskstatus());
-       response.setOriginalestimatehours(t1.getOriginalestimatehours());
-       response.setRemainingestimatehours(t1.getRemainingestimatehours());
-       response.setTaskstatus(t1.getTaskstatus());
-       response.setPriority(t1.getPriority());
-       return response;
+        if (request.getComments() != null && !request.getComments().isBlank()) {
+            Comment comment = new Comment();
+            comment.setComment(request.getComments());
+            comment.setEntitytype(EntityType.TASK);
+            comment.setEntityid(t1.getId());
+            comment.setCreatedBy(username);
+            comment.setCreatedAt(Instant.now());
+            commentRepository.save(comment);
+        }
+
+        return mapToDto(t1);
     }
+
     @Override
     public TaskResponseDto getTaskById(Long id) {
-
         Task task = taskRepository.findById(Math.toIntExact(id))
                 .orElseThrow(() -> new RuntimeException("Task not found"));
-
-        TaskResponseDto response = new TaskResponseDto();
-
-        response.setUserId(task.getId());
-        response.setTitle(task.getTitle());
-        response.setBody(task.getBody());
-        response.setUserId(task.getUserid().getId());
-        response.setSprintid(task.getSprintid().getId());
-        response.setStoryid(task.getStoryid().getId());
-        response.setTaskstatus(task.getTaskstatus());
-        response.setPriority(task.getPriority());
-        response.setOriginalestimatehours(task.getOriginalestimatehours());
-        response.setRemainingestimatehours(task.getRemainingestimatehours());
-
-        return response;
+        return mapToDto(task);
     }
 
     @Override
     public List<TaskResponseDto> getAllTasks() {
         return taskRepository.findAll()
                 .stream()
-                .map(task -> {
-                    TaskResponseDto response = new TaskResponseDto();
-
-                    response.setUserId(task.getId());
-                    response.setTitle(task.getTitle());
-                    response.setBody(task.getBody());
-                    response.setUserId(task.getUserid().getId());
-                    response.setSprintid(task.getSprintid().getId());
-                    response.setStoryid(task.getStoryid().getId());
-                    response.setTaskstatus(task.getTaskstatus());
-                    response.setPriority(task.getPriority());
-                    response.setOriginalestimatehours(task.getOriginalestimatehours());
-                    response.setRemainingestimatehours(task.getRemainingestimatehours());
-
-                    return response;
-                })
+                .map(this::mapToDto)
                 .toList();
     }
+
     @Override
     public List<TaskResponseDto> getTasksBySprintId(Long sprintId) {
         return taskRepository.findBySprintid_Id(sprintId)
                 .stream()
-                .map(task -> {
-                    TaskResponseDto response = new TaskResponseDto();
-
-                    response.setUserId(task.getId());
-                    response.setTitle(task.getTitle());
-                    response.setBody(task.getBody());
-                    response.setUserId(task.getUserid().getId());
-                    response.setSprintid(task.getSprintid().getId());
-                    response.setUserId(task.getStoryid().getId());
-                    response.setTaskstatus(task.getTaskstatus());
-                    response.setPriority(task.getPriority());
-                    response.setOriginalestimatehours(task.getOriginalestimatehours());
-                    response.setRemainingestimatehours(task.getRemainingestimatehours());
-
-                    return response;
-                })
+                .map(this::mapToDto)
                 .toList();
     }
 
@@ -152,104 +139,66 @@ public class TaskServiceImpl implements ITaskService {
             existingTask.setTitle(request.getTitle());
         }
 
-        if (request.getBody() != null) {
-            existingTask.setBody(request.getBody());
+        if (request.getDescription() != null) {
+            existingTask.setBody(request.getDescription());
         }
 
-        if (request.getUserId() != null) {
-            Users assignedUser = usersRepository.findById(request.getUserId())
+        if (request.getUserCode() != null) {
+            Users assignedUser = usersRepository.findById(CodeUtils.decodeToInteger("U", request.getUserCode()))
                     .orElseThrow(() -> new IllegalArgumentException("Assigned user not found"));
 
             existingTask.setUserid(assignedUser);
         }
 
-        if (request.getSprintid() != null) {
-            Sprint sprint = sprintRepository.findById(request.getSprintid())
+        if (request.getSprintCode() != null) {
+            Sprint sprint = sprintRepository.findById(CodeUtils.decodeToInteger("SP", request.getSprintCode()))
                     .orElseThrow(() -> new IllegalArgumentException("Sprint not found"));
 
             existingTask.setSprintid(sprint);
         }
 
-        if (request.getStoryid() != null) {
-            Story story = storyRepository.findById(request.getStoryid())
+        if (request.getStoryCode() != null) {
+            Story story = storyRepository.findById(CodeUtils.decodeToInteger("S", request.getStoryCode()))
                     .orElseThrow(() -> new IllegalArgumentException("Story not found"));
 
             existingTask.setStoryid(story);
         }
 
-        if (request.getTaskstatus() != null) {
-            existingTask.setTaskstatus(request.getTaskstatus());
+        if (request.getStatus() != null) {
+            existingTask.setTaskstatus(request.getStatus());
         }
 
         if (request.getPriority() != null) {
             existingTask.setPriority(request.getPriority());
         }
 
-        if (request.getOriginalestimatehours() != null) {
-            existingTask.setOriginalestimatehours(request.getOriginalestimatehours());
+        if (request.getEstimatedHours() != null) {
+            existingTask.setOriginalestimatehours(request.getEstimatedHours());
         }
 
-        if (request.getRemainingestimatehours() != null) {
-            existingTask.setRemainingestimatehours(request.getRemainingestimatehours());
+        if (request.getRemainingHours() != null) {
+            existingTask.setRemainingestimatehours(request.getRemainingHours());
         }
 
         existingTask.setUpdatedBy(username);
+        existingTask.setUpdatedAt(Instant.now());
 
+        System.out.println("RECEIVED COMMENTS IN UPDATE TASK: " + request.getComments());
 
-        Comment savedComment = null;
         if (request.getComments() != null && !request.getComments().isBlank()) {
-
             Comment comment = new Comment();
             comment.setComment(request.getComments());
             comment.setEntitytype(EntityType.TASK);
             comment.setEntityid(id);
             comment.setCreatedBy(username);
-            savedComment = commentRepository.save(comment);
+            comment.setCreatedAt(Instant.now());
+            commentRepository.save(comment);
         }
+
         Task updatedTask = taskRepository.save(existingTask);
-
-        TaskResponseDto response = new TaskResponseDto();
-
-        response.setUserId(updatedTask.getId());
-        response.setTitle(updatedTask.getTitle());
-        response.setBody(updatedTask.getBody());
-
-        response.setUserId(
-                updatedTask.getUserid() != null
-                        ? updatedTask.getUserid().getId()
-                        : null
-        );
-
-        response.setSprintid(
-                updatedTask.getSprintid() != null
-                        ? updatedTask.getSprintid().getId()
-                        : null
-        );
-
-        response.setStoryid(
-                updatedTask.getStoryid() != null
-                        ? updatedTask.getStoryid().getId()
-                        : null
-        );
-
-        response.setTaskstatus(updatedTask.getTaskstatus());
-        response.setPriority(updatedTask.getPriority());
-
-        response.setOriginalestimatehours(
-                updatedTask.getOriginalestimatehours()
-        );
-
-        response.setRemainingestimatehours(
-                updatedTask.getRemainingestimatehours()
-        );
-        if (request.getComments() != null) {
-            response.setComments(savedComment.getComment());
-        }
-
-        return response;
-
-
+        return mapToDto(updatedTask);
     }
+
     @Override
     public void deleteTask(Long id) {
         Task task = taskRepository.findById(Math.toIntExact(id))

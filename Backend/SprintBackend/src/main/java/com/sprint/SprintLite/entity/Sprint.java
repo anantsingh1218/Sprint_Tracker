@@ -49,10 +49,11 @@ public class Sprint extends BaseEntity {
     private Product productid;
 
     @Column(name = "startdate")
-    private Instant startDate;
+    private LocalDate startDate;
 
     @Column(name = "enddate")
-    private Instant endDate;
+    private LocalDate endDate;
+
     @NonNull
     @JsonIgnore
     @OneToMany(mappedBy = "sprintid")

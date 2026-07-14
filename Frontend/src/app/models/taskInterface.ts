@@ -5,9 +5,9 @@ export interface ITask {
   id: string;
   title: string;
   description: string;
-  storyId: number | null;
-  sprintId: string | null;
-  userId: string | null;
+  storyCode: string | null;
+  sprintCode: string | null;
+  userCode: string | null;
   status: WorkStatus;
   priority: Priority;
   estimatedHours: number;

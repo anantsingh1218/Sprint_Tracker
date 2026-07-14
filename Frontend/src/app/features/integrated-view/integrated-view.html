@@ -1,0 +1,183 @@
+<div class="backlog">
+  <div class="toolbar">
+    <h2>Integrated View</h2>
+    <button mat-raised-button color="primary" (click)="openCreate(WorkItemType.Feature)">
+      + New Feature
+    </button>
+  </div>
+
+  <!-- =========================
+       FILTER TOOLBAR
+       ========================= -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="searchFilter">Search</label>
+      <input 
+        id="searchFilter" 
+        type="text" 
+        placeholder="Filter by name..." 
+        [(ngModel)]="searchTerm" 
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <!-- User Filter (NEW) -->
+    <div class="filter-group">
+      <label for="userFilter">Assigned To</label>
+      <select id="userFilter" [(ngModel)]="selectedUser" (change)="applyFilters()">
+        <option value="">All Users</option>
+        @for (user of uniqueUsers; track user) {
+          <option [value]="user">{{ user }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="productFilter">Product</label>
+      <select id="productFilter" [(ngModel)]="selectedProduct" (change)="applyFilters()">
+        <option value="">All Products</option>
+        @for (product of uniqueProducts; track product) {
+          <option [value]="product">{{ product }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="sprintFilter">Sprint</label>
+      <select id="sprintFilter" [(ngModel)]="selectedSprint" (change)="applyFilters()">
+        <option value="">All Sprints</option>
+        @for (sprint of uniqueSprints; track sprint) {
+          <option [value]="sprint">{{ sprint }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="statusFilter">Status</label>
+      <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">All Statuses</option>
+        @for (status of uniqueStatuses; track status) {
+          <option [value]="status">{{ status }}</option>
+        }
+      </select>
+    </div>
+
+    <button class="clear-btn" (click)="resetFilters()">Clear Filters</button>
+  </div>
+
+  <!-- =========================
+       BACKLOG TREE VIEW
+       ========================= -->
+  @for (feature of filteredTree; track feature.id) {
+    <mat-card class="feature">
+      <div class="row">
+        <span class="arrow" (click)="toggle(feature); $event.stopPropagation()">
+          {{ feature.expanded ? '▼' : '▶' }}
+        </span>
+
+        <span class="work-item-type type-feature">Feature</span>
+
+        <strong class="title" (click)="openEdit(feature)">
+          {{ feature.title }}
+        </strong>
+
+        <!-- Assigned To Display -->
+        <span class="assignee-badge" [class.unassigned]="!feature.assignedTo">
+          {{ feature.assignedTo || 'Unassigned' }}
+        </span>
+
+        <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
+
+        <mat-menu #featureMenu="matMenu">
+          <button mat-menu-item (click)="openCreate(WorkItemType.Story, feature)">Add Story</button>
+        </mat-menu>
+      </div>
+
+      @if (feature.expanded) {
+        <div class="children">
+          @for (story of feature.children; track story.id) {
+            <mat-card class="story">
+              <div class="row">
+                <span class="arrow" (click)="toggle(story); $event.stopPropagation()">
+                  {{ story.expanded ? '▼' : '▶' }}
+                </span>
+
+                <span class="work-item-type type-story">Story</span>
+
+                <span class="title" (click)="openEdit(story)">
+                  {{ story.title }}
+                </span>
+
+                <!-- Assigned To Display -->
+                <span class="assignee-badge" [class.unassigned]="!story.assignedTo">
+                  {{ story.assignedTo || 'Unassigned' }}
+                </span>
+
+                <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
+
+                <mat-menu #storyMenu="matMenu">
+                  <button mat-menu-item (click)="openCreate(WorkItemType.Task, story)">
+                    Add Task
+                  </button>
+                  <button mat-menu-item (click)="openCreate(WorkItemType.Bug, story)">
+                    Add Bug
+                  </button>
+                </mat-menu>
+              </div>
+
+              @if (story.expanded) {
+                <div class="children">
+                  @for (taskItem of story.children; track taskItem.id) {
+                    <mat-card class="task" [class.bug]="taskItem.type === WorkItemType.Bug">
+                      <div class="row">
+                        <span class="arrow"></span>
+
+                        <span
+                          class="work-item-type"
+                          [ngClass]="taskItem.type === WorkItemType.Bug ? 'type-bug' : 'type-task'"
+                        >
+                          {{ taskItem.type === WorkItemType.Bug ? 'Bug' : 'Task' }}
+                        </span>
+
+                        <span class="title" (click)="openEdit(taskItem)">
+                          {{ taskItem.title }}
+                        </span>
+
+                        <!-- Assigned To Display -->
+                        <span class="assignee-badge" [class.unassigned]="!taskItem.assignedTo">
+                          {{ taskItem.assignedTo || 'Unassigned' }}
+                        </span>
+
+                        <div style="width: 28px"></div>
+                      </div>
+                    </mat-card>
+                  }
+                </div>
+              }
+            </mat-card>
+          }
+        </div>
+      }
+    </mat-card>
+  } @empty {
+    <div class="empty-state">No work items match your current filter selection.</div>
+  }
+</div>
+
+@if (overlayType === WorkItemType.Feature && selectedFeature) {
+  <app-feature [feature]="selectedFeature" (save)="saveFeature($event)" (close)="closeOverlay()">
+  </app-feature>
+}
+
+@if (overlayType === WorkItemType.Story && selectedStory) {
+  <app-story [isOpen]="true" [selectedStory]="selectedStory" [usersList]="usersList()" [featuresList]="featuresList()" [sprintsList]="sprintsList()" (saved)="saveStory($event)" (close)="closeOverlay()">
+  </app-story>
+}
+
+@if ((overlayType === WorkItemType.Task) && selectedTask) {
+  <app-task-overlay [task]="selectedTask" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveTask($event)" (close)="closeOverlay()"> </app-task-overlay>
+}
+
+@if ((overlayType === WorkItemType.Bug) && selectedBug) {
+  <app-bug [bug]="selectedBug" [users]="usersList()" [sprints]="sprintsList()" [stories]="storyList()" (save)="saveBug($event)" (close)="closeOverlay()"> </app-bug>
+}

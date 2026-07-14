@@ -9,13 +9,15 @@ import { Board } from './features/board/board';
 import { StoryList } from './features/story-list/story-list';
 import { Register } from './features/register/register';
 import { pmGuard } from './core/guards/pm-guard';
-import { DsuComponent } from './features/DSU/dsu';
+import { DsuService } from './features/DSU/dsu.service';
 import { ForgotPassword } from './features/forgot-password/forgot-password';
 import { FeatureList } from './features/feature-list/feature-list';
 import { TeamDashboard } from './features/dashboard/TeamDashboard/teamDashboard';
 
 import { BugList } from './features/bug-list/bug-list';
 import { Profile } from './features/profile/profile';
+import { DsuComponent } from './features/DSU/dsu';
+import { IntegrateView } from './features/integrated-view/integrated-view';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -26,9 +28,8 @@ export const routes: Routes = [
   {
     path: 'register',
     component: Register,
-    canActivate: [pmGuard]
+    canActivate: [pmGuard],
   },
-
 
   // APP routes (WITH layout)
   {
@@ -36,22 +37,22 @@ export const routes: Routes = [
     component: Layout,
     children: [
       { path: 'dashboard', component: Dashboard },
-      { path: 'teamDashboard', component: TeamDashboard},
+      { path: 'teamDashboard', component: TeamDashboard },
       { path: 'sprints', component: Sprint },
       { path: 'tasks', component: Tasks },
       { path: 'tasks/:id', component: Tasks },
       { path: 'backlog', component: Backlog },
+      { path: 'integrated-view', component: IntegrateView },
       { path: 'board', component: Board },
       { path: 'story', component: StoryList },
       { path: 'dsu', component: DsuComponent },
       { path: 'feature', component: FeatureList },
       { path: 'bugs', component: BugList },
       { path: 'profile', component: Profile },
-      { path: 'dsu/:id', component: DsuComponent },
       {
-  path: 'sprints/:id',
-  component: Sprint
-}
+        path: 'sprints/:id',
+        component: Sprint,
+      },
     ],
   },
 

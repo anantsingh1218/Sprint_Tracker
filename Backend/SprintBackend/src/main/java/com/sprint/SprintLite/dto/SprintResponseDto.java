@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 public class SprintResponseDto {
     private Integer id;
     private String sprintName;
-    private Integer productId;
+    private String productCode;
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer sprintDuration;

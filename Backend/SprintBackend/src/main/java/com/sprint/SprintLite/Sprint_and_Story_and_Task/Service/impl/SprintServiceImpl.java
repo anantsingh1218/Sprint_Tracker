@@ -10,9 +10,12 @@ import com.sprint.SprintLite.entity.Sprint;
 import com.sprint.SprintLite.entity.enums.SprintStatus;
 import com.sprint.SprintLite.repository.ProductRepository;
 import com.sprint.SprintLite.repository.SprintRepository;
+import com.sprint.SprintLite.util.ApplicationUtility;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.sprint.SprintLite.util.CodeUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +29,7 @@ public class SprintServiceImpl implements ISprintService {
 
     @Override
     public SprintResponseDto createSprint(CreateSprintRequest request) {
-        Product product = productRepository.findById(Math.toIntExact(request.getProductId()))
+        Product product = productRepository.findById(CodeUtils.decodeToInteger("P", request.getProductCode()))
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
 
         Sprint sprint = new Sprint();
@@ -36,6 +39,8 @@ public class SprintServiceImpl implements ISprintService {
         sprint.setSprintDuration(Math.toIntExact(request.getSprintDuration()));
         sprint.setStatus(request.getStatus());
         sprint.setProductid(product);
+        sprint.setCreatedAt(Instant.now());
+        sprint.setCreatedBy(ApplicationUtility.getLoggedInUser());
 
         Sprint savedSprint = sprintRepository.save(sprint);
 
@@ -88,7 +93,6 @@ public class SprintServiceImpl implements ISprintService {
             sprint.setSprintName(request.getSprintName());
         }
 
-
         if (request.getStartDate() != null) {
             sprint.setStartDate(request.getStartDate());
         }
@@ -105,12 +109,15 @@ public class SprintServiceImpl implements ISprintService {
             sprint.setStatus(request.getStatus());
         }
 
-        if (request.getProductId() != null) {
-            Product product = productRepository.findById(request.getProductId())
+        if (request.getProductCode() != null) {
+            Product product = productRepository.findById(CodeUtils.decodeToInteger("P", request.getProductCode()))
                     .orElseThrow(() -> new RuntimeException("Product not found"));
 
             sprint.setProductid(product);
         }
+
+        sprint.setUpdatedAt(Instant.now());
+        sprint.setUpdatedBy(ApplicationUtility.getLoggedInUser());
 
         return sprintRepository.save(sprint);
     }
@@ -119,9 +126,7 @@ public class SprintServiceImpl implements ISprintService {
         return new SprintResponseDto(
                 sprint.getId(),
                 sprint.getSprintName(),
-                sprint.getProductid() != null
-                        ? sprint.getProductid().getId()
-                        : null,
+                CodeUtils.encode("P", sprint.getProductid() != null ? sprint.getProductid().getId() : null),
                 sprint.getStartDate(),
                 sprint.getEndDate(),
                 sprint.getSprintDuration(),

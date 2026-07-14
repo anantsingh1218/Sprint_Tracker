@@ -1,9 +1,8 @@
 import { SearchService } from './../search/search.service';
-import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef, OnChanges, SimpleChange } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { Story } from '../story/story';
 import { IStory } from '../../models/storyInterface';
 import { Priority, WorkStatus } from '../../models/workItem';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -11,28 +10,29 @@ import { StoryService } from './story.service';
 import { ApiService } from '../../core/apiService/api-service';
 import { Attachment } from '../../models/attachmentInterface';
 import { WorkItemType } from '../../models/workItem';
+import { IStoryResponse } from '../../models/storyResponseInterface';
 
 @Component({
   selector: 'app-story-list',
-  standalone:true,
-  imports:[CommonModule,FormsModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './story-list.html',
   styleUrl: './story-list.css',
 })
-export class StoryList implements OnInit{
-  stories: any[]=[];
-  isStoryOpen=false;
+export class StoryList implements OnInit {
+  stories: IStory[] = [];
+  isStoryOpen = false;
 
-  selectedStory:any=null;
-  newComment='';
+  selectedStory: IStory | null = null;
+  newComment = '';
 
-  //Attachments Signals
+  // Attachments Signals
   selectedFiles = signal<File[]>([]);
   attachments = signal<Attachment[]>([]);
   isAttachmentView = false;
   attachmentUploadStatus = signal('');
 
- // dependency data
+  // Dependency data signals
   users = signal<any[]>([]);
   features = signal<any[]>([]);
   sprints = signal<any[]>([]);
@@ -40,7 +40,7 @@ export class StoryList implements OnInit{
   constructor(
     private St1: StoryService,
     private apiService: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -48,61 +48,65 @@ export class StoryList implements OnInit{
     this.loadDepedencyData();
   }
 
-loadStories(){
-  this.St1.getStories().subscribe({
-    next: (data:any[])=>{
-      this.stories=data;
-      this.cdr.markForCheck();
-    },
-    error: (err:any) =>console.error('Failed to retrieve stories:', err)
-  });
-}
+  loadStories() {
+    this.St1.getStories().subscribe({
+      next: (data: IStoryResponse[]) => {
+        this.stories = [];
+        data.map((ele) => {
+          console.log("Original = " + JSON.stringify(ele));
+          const story = this.mapResponseToInterface(ele);
+          this.stories.push(story);
+        });
+        console.log(this.stories);
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => console.error('Failed to retrieve stories:', err),
+    });
+  }
 
-loadDepedencyData(){
-  this.St1.getUsersDropdown().subscribe({
-    next: (res) => this.users.set(res),
-    error: (err) => console.error('Failed fetching users:', err)
-  });
+  loadDepedencyData() {
+    this.St1.getUsersDropdown().subscribe({
+      next: (res) => this.users.set(res),
+      error: (err) => console.error('Failed fetching users:', err),
+    });
 
-  // Requests the features through the proper authenticated pipeline
-  this.St1.getFeaturesDropdown().subscribe({
-    next: (res) => this.features.set(res),
-    error: (err) => console.error('Failed fetching features:', err)
-  });
+    this.St1.getFeaturesDropdown().subscribe({
+      next: (res) => this.features.set(res),
+      error: (err) => console.error('Failed fetching features:', err),
+    });
 
-  // Requests the sprints through the proper authenticated pipeline
-  this.St1.getSprintsDropdown().subscribe({
-    next: (res) => this.sprints.set(res),
-    error: (err) => console.error('Failed fetching sprints:', err)
-  });
-}
+    this.St1.getSprintsDropdown().subscribe({
+      next: (res) => this.sprints.set(res),
+      error: (err) => console.error('Failed fetching sprints:', err),
+    });
+  }
 
-openStory(story: any) {
-  // Spread Operator.
-  // this line below actually opens the story
-  // it takes a snapshot of all the properties inside the story object and duplicates them into a brand new, separate object.
-  //Why do this? In JavaScript, if you pass an object directly (like this.selectedStory = story;), both variables point to the exact same place in memory. If the user starts editing the story title in a popup form, the title would instantly change in the background list too, even before they click "Save"! By copying it, the user can edit selectedStory all they want without breaking the original data
+  openStory(story: any) {
+    // Creating a copy of the selected item to prevent dirty direct editing side effects
     this.selectedStory = { ...story };
-    this.selectedStory.comments ??= [];
+    if (this.selectedStory) {
+      this.selectedStory.comments = this.selectedStory.comments || [];
+    }
     this.isStoryOpen = true;
 
-    if (this.selectedStory.id) {
+    if (this.selectedStory?.id) {
       this.loadAttachments();
     }
   }
 
-openCreateStory() {
+  openCreateStory() {
     this.selectedStory = {
-      id: null,
+      id: null as unknown as string,
       title: '',
       body: '',
-      storyStatus: 'TODO',
-      priority: 'Medium',
-      storyPoints: 0,
-      featureId: null,
-      sprintId: null,
-      userId: null,
-      comments: []
+      featureCode: null,
+      sprintCode: null,
+      userCode: null,
+      status: WorkStatus.OPEN,
+      priority: Priority.LOW,
+      estimatedStoryPoints: 0,
+      remainingStoryPoint: 0,
+      comments: [],
     };
     this.attachments.set([]);
     this.isStoryOpen = true;
@@ -114,25 +118,38 @@ openCreateStory() {
     this.newComment = '';
   }
 
-  saveStory(){
-    const payload = {
-      title: this.selectedStory.title,
-      body: this.selectedStory.body,
-      featureId: this.selectedStory.featureId,
-      sprintId: this.selectedStory.sprintId,
-      userId: this.selectedStory.userId,
-      status: this.selectedStory.storyStatus || 'TODO',
-      priority: this.selectedStory.priority || 'Medium',
-      storyPoints: this.selectedStory.storyPoints || 0,
-      comments: this.newComment.trim() || null
-  };
-  if (this.selectedStory.id) {
-      this.St1.updateStory(this.selectedStory.id, payload).subscribe({
+  mapResponseToInterface(storyRes: IStoryResponse): IStory {
+    return {
+      id: 'S' + storyRes.id,
+      title: storyRes.title,
+      body: storyRes.body,
+      status: storyRes.storyStatus,
+      priority: storyRes.priority,
+      estimatedStoryPoints: storyRes.storyPoints,
+      remainingStoryPoint: storyRes.storyPoints,
+      featureCode: storyRes.featureCode,
+      sprintCode: storyRes.sprintCode,
+      userCode: storyRes.userCode,
+      comments: storyRes.comments || [],
+    };
+  }
+
+  saveStory() {
+    // 1. Guard check: Stop execution if selectedStory is null
+    if (!this.selectedStory) return;
+
+    const {comments , ...destructedPayload} = this.selectedStory;
+    const payload = {...destructedPayload, comments: comments.at(-1)?.text};
+
+    console.log(payload);
+
+    if (this.selectedStory.id) {
+      this.St1.updateStory(Number(this.selectedStory.id.substring(1)), payload).subscribe({
         next: () => {
           this.loadStories();
           this.closeStory();
         },
-        error: (err:any) => console.error("Update failed", err)
+        error: (err: any) => console.error('Update failed', err),
       });
     } else {
       this.St1.createStory(payload).subscribe({
@@ -140,46 +157,55 @@ openCreateStory() {
           this.loadStories();
           this.closeStory();
         },
-        error: (err: any) => console.error("Creation failed", err)
+        error: (err: any) => console.error('Creation failed', err),
       });
     }
   }
 
   addComment() {
-    if (!this.newComment.trim() || !this.selectedStory.id) return;
+    // 2. Guard check: Ensure we have both a comment and an active valid story ID
+    if (!this.newComment.trim() || !this.selectedStory || !this.selectedStory.id) return;
 
-    this.St1.updateStory(this.selectedStory.id, { comments: this.newComment }).subscribe({
+    const storyToUpdate = this.selectedStory; // local reference helper to satisfy compiler
+    
+    this.St1.updateStory(Number(storyToUpdate.id.substring(1)), { comments: this.newComment }).subscribe({
       next: () => {
-        this.selectedStory.comments.push({
+        storyToUpdate.comments = storyToUpdate.comments || [];
+        storyToUpdate.comments.push({
+          userCode: storyToUpdate.userCode ? storyToUpdate.userCode : (null as unknown as string),
           text: this.newComment,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         });
         this.newComment = '';
         this.cdr.markForCheck();
       },
-      error: (err:any) => console.error("Failed to add comment", err)
+      error: (err: any) => console.error('Failed to add comment', err),
     });
   }
-
 
   toggleAttachmentsView() {
     this.isAttachmentView = !this.isAttachmentView;
   }
 
-  // Add this method inside the StoryList class in story-list.ts
-getUserName(userId: number | null): string {
-  // Finds the user in the dynamic signal array matching the id
-  return this.users().find((u) => u.id === userId)?.name || 'Unassigned';
-}
+  getUserName(userCode: string | null): string {
+    return this.users().find((u) => u.id === userCode)?.name || 'Unassigned';
+  }
 
   loadAttachments() {
-    this.apiService.getAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.selectedStory.id)).subscribe({
-      next: (data) => this.attachments.set(data.fileToBeFetched),
-      error: (err: HttpErrorResponse) => {
-        this.attachments.set([]);
-        if (err.status === 500) this.attachmentUploadStatus.set('Resource not found');
-      },
-    });
+    // 3. Guard check: Only proceed if selectedStory and its ID exist
+    if (!this.selectedStory || !this.selectedStory.id) return;
+
+    this.apiService
+      .getAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.selectedStory.id))
+      .subscribe({
+        next: (data) => {
+          if (data?.fileToBeFetched) this.attachments.set(data.fileToBeFetched);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.attachments.set([]);
+          if (err.status === 500) this.attachmentUploadStatus.set('Resource not found');
+        },
+      });
   }
 
   onFileSelected(event: any) {
@@ -188,14 +214,22 @@ getUserName(userId: number | null): string {
   }
 
   uploadFiles() {
-    if (!this.selectedFiles().length || !this.selectedStory.id) return;
-    this.apiService.uploadAttachments(WorkItemType.Story, this.apiService.toApiWorkItemId(this.selectedStory.id), this.selectedFiles()).subscribe({
-      next: (res: Attachment[]) => {
-        this.selectedFiles.set([]);
-        this.attachmentUploadStatus.set('Files uploaded Successfully');
-        this.attachments.set(res);
-      },
-    });
+    // 4. Guard check: Ensure story exists, files exist, and the ID is present
+    if (!this.selectedStory || !this.selectedStory.id || !this.selectedFiles().length) return;
+
+    this.apiService
+      .uploadAttachments(
+        WorkItemType.Story,
+        this.apiService.toApiWorkItemId(this.selectedStory.id),
+        this.selectedFiles(),
+      )
+      .subscribe({
+        next: (res: Attachment[]) => {
+          this.selectedFiles.set([]);
+          this.attachmentUploadStatus.set('Files uploaded Successfully');
+          this.attachments.set(res);
+        },
+      });
   }
 
   deleteAttachment(filename: string) {
@@ -203,7 +237,4 @@ getUserName(userId: number | null): string {
       this.attachments.update((list) => list.filter((a) => a.filename !== filename));
     });
   }
-
-
-
 }

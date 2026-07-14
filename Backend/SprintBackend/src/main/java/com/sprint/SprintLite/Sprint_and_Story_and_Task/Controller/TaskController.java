@@ -12,83 +12,84 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.sprint.SprintLite.util.CodeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-    @RestController
-    @RequestMapping("/task")
+@RestController
+@RequestMapping("/task")
 
-    @RequiredArgsConstructor
-    public class TaskController {
-        private final TaskServiceImpl taskService;
-        private final TaskRepository taskRepository;
+@RequiredArgsConstructor
+public class TaskController {
+    private final TaskServiceImpl taskService;
+    private final TaskRepository taskRepository;
 
-        @PostMapping("/add")
-        public ResponseEntity<TaskResponseDto> addTask(
-                @RequestBody CreateTaskRequest request) {
+    @PostMapping("/add")
+    public ResponseEntity<TaskResponseDto> addTask(
+            @RequestBody CreateTaskRequest request) {
 
-            TaskResponseDto task = taskService.createTask(request);
-            return ResponseEntity.ok(task);
-        }
-
-        @GetMapping("/{id}")
-        public ResponseEntity<TaskResponseDto> getTask(
-                @PathVariable Long id) {
-
-            TaskResponseDto task = taskService.getTaskById(id);
-            return ResponseEntity.ok(task);
-        }
-
-        @GetMapping("/all")
-        public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
-
-            List<TaskResponseDto> tasks = taskService.getAllTasks();
-            return ResponseEntity.ok(tasks);
-        }
-
-        @GetMapping("/sprint/{sprintId}")
-        public ResponseEntity<List<TaskResponseDto>> getTasksBySprint(
-                @PathVariable Long sprintId) {
-
-            List<TaskResponseDto> tasks =
-                    taskService.getTasksBySprintId(sprintId);
-
-            return ResponseEntity.ok(tasks);
-        }
-
-        @PutMapping("/{id}")
-        public ResponseEntity<TaskResponseDto> updateTask(
-                @PathVariable Integer id,
-                @RequestBody CreateTaskRequest request) {
-
-            TaskResponseDto updatedTask =
-                    taskService.updateTask(id, request);
-
-            return ResponseEntity.ok(updatedTask);
-        }
-
-        @DeleteMapping("/{id}")
-        public ResponseEntity<String> deleteTask(
-                @PathVariable Long id) {
-
-            taskService.deleteTask(id);
-
-            return ResponseEntity.ok("Task deleted successfully");
-        }
-
-        @GetMapping("/getAllTasks")
-        public ResponseEntity<List<GetAllResponseDto>> getAllProducts(){
-            List<Task> taskList = taskRepository.findAll();
-            if (taskList.isEmpty()){
-                throw new EntityNotFoundException("No Tasks registered");
-            }
-            List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
-            taskList.forEach(task -> {
-                GetAllResponseDto getAllResponseDto = new GetAllResponseDto(task.getId(), task.getTitle());
-                getAllResponseDtoList.add(getAllResponseDto);
-            });
-            return ResponseEntity.ok(getAllResponseDtoList);
-        }
-
+        TaskResponseDto task = taskService.createTask(request);
+        return ResponseEntity.ok(task);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskResponseDto> getTask(
+            @PathVariable String id) {
+
+        TaskResponseDto task = taskService.getTaskById(CodeUtils.decodeToLong("T", id));
+        return ResponseEntity.ok(task);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<TaskResponseDto>> getAllTasks() {
+
+        List<TaskResponseDto> tasks = taskService.getAllTasks();
+        return ResponseEntity.ok(tasks);
+    }
+
+    @GetMapping("/sprint/{sprintId}")
+    public ResponseEntity<List<TaskResponseDto>> getTasksBySprint(
+            @PathVariable String sprintId) {
+
+        List<TaskResponseDto> tasks =
+                taskService.getTasksBySprintId(CodeUtils.decodeToLong("SP", sprintId));
+
+        return ResponseEntity.ok(tasks);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TaskResponseDto> updateTask(
+            @PathVariable String id,
+            @RequestBody CreateTaskRequest request) {
+
+        TaskResponseDto updatedTask =
+                taskService.updateTask(CodeUtils.decodeToInteger("T", id), request);
+
+        return ResponseEntity.ok(updatedTask);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteTask(
+            @PathVariable String id) {
+
+        taskService.deleteTask(CodeUtils.decodeToLong("T", id));
+
+        return ResponseEntity.ok("Task deleted successfully");
+    }
+
+    @GetMapping("/getAllTasks")
+    public ResponseEntity<List<GetAllResponseDto>> getAllProducts(){
+        List<Task> taskList = taskRepository.findAll();
+        if (taskList.isEmpty()){
+            throw new EntityNotFoundException("No Tasks registered");
+        }
+        List<GetAllResponseDto> getAllResponseDtoList = new ArrayList<GetAllResponseDto>();
+        taskList.forEach(task -> {
+            GetAllResponseDto getAllResponseDto = new GetAllResponseDto(task.getId(), task.getTitle());
+            getAllResponseDtoList.add(getAllResponseDto);
+        });
+        return ResponseEntity.ok(getAllResponseDtoList);
+    }
+
+}

@@ -4,9 +4,9 @@ export interface IStory {
   id: string;
   title: string;
   body: string;
-  featureId: number | null;
-  sprintId: string | null;
-  userId: string | null;
+  featureCode: string | null;
+  sprintCode: string | null;
+  userCode: string | null;
   status: WorkStatus;
   priority: Priority;
   estimatedStoryPoints: number;
@@ -15,7 +15,7 @@ export interface IStory {
 }
 
 export interface IComment {
-  userId: number;
+  userCode: string;
   text: string;
   createdAt: string;
 }

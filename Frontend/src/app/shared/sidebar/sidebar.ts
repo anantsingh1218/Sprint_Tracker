@@ -71,7 +71,8 @@ export class Sidebar {
     {
       label: 'Tasks',
       route: '/tasks',
-      roles: ['ROLE_PM', 'ROLE_Scrum_Master']
+      // roles: ['ROLE_PM', 'ROLE_Scrum_Master']
+      roles: ['ROLE_PM', 'ROLE_Scrum_Master', 'ROLE_Developer', 'ROLE_QA', 'ROLE_BA']
     },
 
     {
@@ -87,9 +88,15 @@ export class Sidebar {
     },
 
     {
+      label: 'Integrated View',
+      route: '/integrated-view',
+      roles: ['ROLE_PM', 'ROLE_Scrum_Master']
+    },
+
+    {
       label: 'Backlog',
       route: '/backlog',
-      roles: ['ROLE_PM', 'ROLE_Scrum_Master']
+      roles: ['ROLE_PM','ROLE_Scrum_Master', 'ROLE_Developer', 'ROLE_QA', 'ROLE_BA']
     },
 
     {

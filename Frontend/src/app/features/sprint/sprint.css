@@ -142,12 +142,14 @@
 }
 
 .label {
+  display: block;
   font-size: 11px;
   color: #8a8886;
   text-transform: uppercase;
 }
 
 .value {
+  display: block;
   font-size: 13px;
   font-weight: 600;
   margin-top: 2px;

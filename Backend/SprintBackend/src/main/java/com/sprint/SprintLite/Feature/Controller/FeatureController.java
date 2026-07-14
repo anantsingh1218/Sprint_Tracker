@@ -74,9 +74,10 @@ public class FeatureController {
         return ResponseEntity.ok(registerResponseDto);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<FeatureResponseDto>> getAllFeaturesForDropdown() {
+        return ResponseEntity.ok(featureService.getAllFeatures());
+    }
 
 
 }
-
-
-

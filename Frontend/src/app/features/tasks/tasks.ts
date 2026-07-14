@@ -1,24 +1,43 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  OnInit,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { SprintService } from '../../core/sprint/sprint';
 import { TaskService } from './task.service';
+import { signal } from '@angular/core';
 
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
+import { TaskOverlay } from '../task-overlay/task-overlay';
 import { ITask } from '../../models/taskInterface';
+import { ITasksResponse } from '../../models/taskResponseInterface';
+import { Priority, WorkStatus } from '../../models/workItem';
 
 @Component({
   selector: 'app-tasks',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, MatAutocompleteModule, MatInputModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DragDropModule,
+    MatAutocompleteModule,
+    MatInputModule,
+    TaskOverlay,
+  ],
   templateUrl: './tasks.html',
   styleUrl: './tasks.css',
 })
-export class Tasks implements OnChanges,OnInit {
+export class Tasks implements OnChanges, OnInit {
+  tasksList: ITask[] = [];
   @Input() task: ITask | null = null;
   @Output() save = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
@@ -28,25 +47,31 @@ export class Tasks implements OnChanges,OnInit {
   selectedSprintId = '';
 
   selectedTask: any = null;
-  users = ['User 1', 'User 2', 'User 3', 'User 4', 'User 5'];
+  // Dependency Data Signals
+  sprints = signal<any[]>([]);
+  users = signal<any[]>([]);
+  stories = signal<any[]>([]);
 
   newTask = {
-    title: '',
-    description: '',
-    priority: 'Medium',
-    status: 'Open',
-    assignedTo: '',
-    originalEstimate: '',
-    remainingEstimate: '',
-    storyId: null as number | null
+    id: null as unknown as string,
+        title: '',
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
+        storyCode: '',
+        sprintCode: '',
+        userCode: '',
+        comments: [],
   };
 
-  editTask: any = null;
+  editTask: ITask | null = null;
+  selectedTaskForOverlay: ITask | null = null;
 
   constructor(
-    private sprintService: SprintService,
     private taskService: TaskService,
-     private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -54,22 +79,25 @@ export class Tasks implements OnChanges,OnInit {
       if (this.task.title === '') {
         // It's a brand new task draft being created from the Backlog row
         this.newTask = {
-          title: '',
-          description: '',
-          priority: this.task.priority || 'Medium',
-          status: this.task.status || 'Open',
-          assignedTo: '',
-          originalEstimate: String(this.task.estimatedHours || ''),
-          remainingEstimate: String(this.task.remainingHours || ''),
-          storyId: this.task.storyId
+          id: null as unknown as string,
+        title: '',
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
+        storyCode: '',
+        sprintCode: '',
+        userCode: '',
+        comments: [],
         };
         this.showTaskModal = true;
       } else {
         // It's an existing task being opened for modification
         this.editTask = {
           ...this.task,
-          originalEstimate: this.task.estimatedHours,
-          remainingEstimate: this.task.remainingHours
+          estimatedHours: this.task.estimatedHours,
+          remainingHours: this.task.remainingHours,
         };
         this.showEditModal = true;
       }
@@ -77,48 +105,99 @@ export class Tasks implements OnChanges,OnInit {
   }
 
   ngOnInit(): void {
-  const taskId = this.route.snapshot.paramMap.get('id');
+    const taskCode = this.route.snapshot.paramMap.get('id');
 
-  if (taskId) {
-    this.selectedTask = this.taskService.getTaskById(taskId);
+    if (taskCode) {
+      this.taskService.getTaskById(taskCode).subscribe((res) => {
+        this.selectedTask = res;
+      });
+    }
+
+    this.loadTasks();
+    this.loadDependencyData();
   }
-}
 
+  mapResponseToInterface(taskRes: ITasksResponse): ITask {
+    return {
+      id: taskRes.taskCode,
+      title: taskRes.title,
+      description: taskRes.body,
+      status: taskRes.taskstatus,
+      priority: taskRes.priority,
+      estimatedHours: taskRes.originalestimatehours,
+      remainingHours: taskRes.remainingestimatehours,
+      storyCode: taskRes.storyCode,
+      sprintCode: taskRes.sprintCode,
+      userCode: taskRes.userCode,
+      comments: taskRes.commentsList,
+    };
+  }
 
+  loadTasks() {
+    this.taskService.getTasks().subscribe({
+      next: (res) => {
+        this.tasksList = res.map(task => this.mapResponseToInterface(task));
+      },
+      error: (err) => console.error('Error loading tasks', err),
+    });
+  }
 
-  get sprints() {
-    return this.sprintService.getSprints();
+  loadDependencyData() {
+    this.taskService.getSprintsDropdown().subscribe({
+      next: (res) => this.sprints.set(res),
+      error: (err) => console.error('Error loading sprints', err),
+    });
+    this.taskService.getUsersDropdown().subscribe({
+      next: (res) => this.users.set(res),
+      error: (err) => console.error('Error loading users', err),
+    });
+    this.taskService.getStoriesDropdown().subscribe({
+      next: (res) => this.stories.set(res),
+      error: (err) => console.error('Error loading stories', err),
+    });
   }
 
   get allTasks() {
-    return this.taskService.getTasks();
-  }
-
-  get filteredUsers() {
-    const search = (this.editTask?.assignedTo || this.newTask.assignedTo || '').toLowerCase();
-
-    return this.users.filter((user) => user.toLowerCase().includes(search));
+    return this.tasksList;
   }
 
   get filteredTasks() {
     if (!this.selectedSprintId) return this.allTasks;
-
-    return this.allTasks.filter((t) => t.sprintId === this.selectedSprintId);
+    return this.allTasks.filter((t) => {
+    // Convert both to strings and trim any whitespace to prevent false negatives
+    const taskSprint = String(t.sprintCode || '').trim();
+    const selectedSprint = String(this.selectedSprintId).trim();
+    
+    return taskSprint === selectedSprint;
+  });
   }
 
   get todoTasks() {
-    return this.filteredTasks.filter((t) => t.status === 'Open');
+    return this.filteredTasks.filter((t) => t.status === WorkStatus.OPEN);
   }
 
   get inProgressTasks() {
-    return this.filteredTasks.filter((t) => t.status === 'In Progress');
+    return this.filteredTasks.filter((t) => t.status === WorkStatus.IN_PROGRESS);
   }
 
   get doneTasks() {
-    return this.filteredTasks.filter((t) => t.status === 'Done' || t.status === 'Closed');
+    return this.filteredTasks.filter((t) => t.status === WorkStatus.DONE || t.status === WorkStatus.CLOSED);
   }
 
   openTaskForm() {
+    this.selectedTaskForOverlay = {
+      id: null as unknown as string,
+      title: '',
+      description: '',
+      status: WorkStatus.OPEN,
+      priority: Priority.LOW,
+      estimatedHours: 0,
+      remainingHours: 0,
+      storyCode: '',
+      sprintCode: '',
+      userCode: '',
+      comments: [],
+    }; // null means new task
     this.showTaskModal = true;
   }
 
@@ -128,7 +207,7 @@ export class Tasks implements OnChanges,OnInit {
   }
 
   openEditTask(task: any) {
-    this.editTask = { ...task };
+    this.selectedTaskForOverlay = { ...task };
     this.showEditModal = true;
   }
 
@@ -141,8 +220,8 @@ export class Tasks implements OnChanges,OnInit {
   createTask() {
     if (!this.newTask.title) return;
 
-    const original = Number(this.newTask.originalEstimate);
-    const remaining = Number(this.newTask.remainingEstimate);
+    const original = Number(this.newTask.estimatedHours);
+    const remaining = Number(this.newTask.remainingHours);
 
     if (original < 0 || remaining < 0) {
       alert('Estimates cannot be negative');
@@ -154,28 +233,37 @@ export class Tasks implements OnChanges,OnInit {
       return;
     }
 
-    this.taskService.addTask({
-      ...this.newTask,
-      sprintId: this.selectedSprintId,
-    });
+    this.taskService
+      .addTask({
+        ...this.newTask,
+        sprintCode: this.selectedSprintId,
+      })
+      .subscribe({
+        next: () => {
+          this.loadTasks();
+          this.closeTaskForm();
+        },
+        error: (err) => console.error('Failed to create task', err),
+      });
 
     this.newTask = {
-      title: '',
-      description: '',
-      priority: 'Medium',
-      status: 'Open',
-      assignedTo: '',
-      originalEstimate: '',
-      remainingEstimate: '',
-      storyId: null as number | null
+      id: null as unknown as string,
+        title: '',
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
+        storyCode: '',
+        sprintCode: '',
+        userCode: '',
+        comments: [],
     };
-
-    this.closeTaskForm();
   }
 
   saveTaskChanges() {
-    const original = Number(this.editTask.originalEstimate);
-    const remaining = Number(this.editTask.remainingEstimate);
+    const original = Number(this.editTask?.estimatedHours);
+    const remaining = Number(this.editTask?.remainingHours);
 
     if (original < 0 || remaining < 0) {
       alert('Estimates cannot be negative');
@@ -187,14 +275,55 @@ export class Tasks implements OnChanges,OnInit {
       return;
     }
 
-    this.taskService.updateTask(this.editTask);
-    this.closeEditTask();
+    this.taskService.updateTask(this.editTask).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.closeEditTask();
+      },
+      error: (err) => console.error('Failed to update task', err),
+    });
   }
 
   drop(event: CdkDragDrop<any[]>, newStatus: string) {
     const task = event.previousContainer.data[event.previousIndex];
 
-    this.taskService.updateTaskStatus(task, newStatus);
+    this.taskService.updateTaskStatus(task, newStatus).subscribe(() => {
+      this.loadTasks();
+    });
+  }
+
+  onTaskSaved(savedTask: ITask) {
+    // Optionally refresh tasks list from API here
+    // For now we just close the modal
+    console.log(savedTask);
+    let {comments, ...destructedPayload} = savedTask;
+    const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+    console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+    if (savedTask.id){
+      this.taskService.updateTask(payloadToSend).subscribe({
+        next: (data : ITasksResponse) => {
+          this.tasksList.push(this.mapResponseToInterface(data));
+          this.loadTasks();
+        },
+        error: (err) => console.error('Failed to update task', err),
+      });
+    }
+    else{
+      this.taskService.addTask(payloadToSend).subscribe({
+        next: (data : ITasksResponse) => {
+          this.tasksList.push(this.mapResponseToInterface(data));
+          this.loadTasks();
+        },
+        error: (err) => console.error('Failed to update task', err),
+      });
+    }
+    this.closeTaskOverlay();
+  }
+
+  closeTaskOverlay() {
+    this.showTaskModal = false;
+    this.showEditModal = false;
+    this.selectedTaskForOverlay = null;
   }
 
   trackById(index: number, item: any) {

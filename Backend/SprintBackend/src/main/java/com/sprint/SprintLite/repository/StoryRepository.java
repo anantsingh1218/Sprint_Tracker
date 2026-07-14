@@ -13,39 +13,25 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
-public interface StoryRepository
-        extends JpaRepository<Story,Integer>{
+public interface StoryRepository extends JpaRepository<Story, Integer> {
 
-    Long countBySprintid(
-            Sprint sprint
-    );
+        Optional<Story> findByStoryCode(String storyCode);
 
-    Long countBySprintidAndStorystatus(
-            Sprint sprint,
-            Status status
-    );
+        Long countBySprintid(Sprint sprint);
 
-    Long countByFeatureid(
-            Feature feature
-    );
+        Long countBySprintidAndStorystatus(Sprint sprint, Status status);
 
-    Long countByFeatureidAndStorystatus(
-            Feature feature,
-            Status status
-    );
+        Long countByFeatureid(Feature feature);
 
-    Page<Story> findByUserid(
-            Users user,
-            Pageable pageable
-    );
+        Long countByFeatureidAndStorystatus(Feature feature, Status status);
 
-    List<Story> findByUpdatedAtBetween(
-            Instant start,
-            Instant end
-    );
+        Page<Story> findByUserid(Users user, Pageable pageable);
 
-    List<Story> findByFeatureid(Feature feature);
+        List<Story> findByUpdatedAtBetween(Instant start, Instant end);
 
-    List<Story> findByTitleContainingIgnoreCase(String keyword);
-}
+        List<Story> findByFeatureid(Feature feature);
+
+        List<Story> findByTitleContainingIgnoreCase(String keyword);
+    }

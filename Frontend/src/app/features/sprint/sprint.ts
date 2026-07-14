@@ -7,10 +7,10 @@ import { SprintService } from './sprint.service';
 import { TaskService } from '../tasks/task.service';
 
 interface SprintData {
-  id?: number;
+  id?: string;
   sprintName: string;
   description: string;
-  productId: number | null;
+  productCode: string | null;
   startDate: string;
   endDate: string;
   sprintDuration: number;
@@ -25,14 +25,16 @@ interface SprintData {
   styleUrl: './sprint.css',
 })
 export class Sprint implements OnInit {
+
   sprints: SprintData[] = [];
   selectedSprint: SprintData | null = null;
   showSprintModal = false;
+  allTasks: any[] = [];
 
   newSprint: SprintData = {
     sprintName: '',
     description: '',
-    productId: null,
+    productCode: null,
     startDate: '',
     endDate: '',
     sprintDuration: 0,
@@ -43,164 +45,344 @@ export class Sprint implements OnInit {
     private sprintService: SprintService,
     private taskService: TaskService,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef // Added to force UI rendering on async data receipt
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // 1. Initial load of all sprints
+
     this.loadSprints();
+    this.loadTasks();
 
-    // 2. Watch URL route parameters for changes cleanly
     this.route.paramMap.subscribe((params) => {
-      const sprintId = params.get('id');
 
-      if (sprintId) {
-        this.sprintService.getSprintById(Number(sprintId)).subscribe({
+      const sprintCode = params.get('id');
+
+      if (sprintCode) {
+
+        this.sprintService.getSprintById(sprintCode).subscribe({
+
           next: (res: SprintData) => {
             this.selectedSprint = res;
-            this.cdr.detectChanges(); // Wake up change detection
+            this.cdr.detectChanges();
           },
+
           error: (err: any) => {
             console.error('Error fetching specific sprint:', err);
-          },
+          }
+
         });
+
       } else {
+
         this.selectedSprint = null;
         this.cdr.detectChanges();
+
       }
+
     });
+
   }
 
   loadSprints(): void {
+
     this.sprintService.getSprints().subscribe({
+
       next: (res: SprintData[]) => {
         this.sprints = res;
-        this.cdr.detectChanges(); // Crucial: forces view to display records instantly
+        this.cdr.detectChanges();
       },
+
       error: (err: any) => {
         console.error('Error loading sprints:', err);
-      },
+      }
+
     });
+
   }
 
-  getTasksForSprint(sprintId: number | undefined) {
-    return this.taskService.getTasksBySprint(String(sprintId)) || [];
+  loadTasks(): void {
+
+    this.taskService.getTasks().subscribe({
+
+      next: (res: any[]) => {
+        this.allTasks = res;
+        this.cdr.detectChanges();
+      },
+
+      error: (err: any) => {
+        console.error('Error loading tasks:', err);
+      }
+
+    });
+
   }
 
-  getTaskCount(sprintId: number | undefined) {
-    const tasks = this.taskService.getTasksBySprint(String(sprintId));
-    return tasks ? tasks.length : 0;
+  getTasksForSprint(sprintId: string | undefined) {
+
+    if (!sprintId) return [];
+
+    return this.allTasks.filter(
+      (t: any) => t.sprintCode === 'SP' + sprintId
+    );
+
+  }
+
+  getTaskCount(sprintId: string | undefined) {
+
+    return this.getTasksForSprint(sprintId).length;
+
   }
 
   get totalTasks() {
-    const tasks = this.taskService.getTasks();
-    return tasks ? tasks.length : 0;
+
+    return this.allTasks.length;
+
   }
 
   get completedSprints() {
-    return this.sprints.filter((s: SprintData) => s.status === 'Completed').length;
+
+    return this.sprints.filter(
+      (s: SprintData) => s.status === 'Completed'
+    ).length;
+
   }
 
-  getSprintProgress(sprintId: number | undefined) {
-    const tasks = this.taskService.getTasksBySprint(String(sprintId));
-    if (!tasks || tasks.length === 0) return 0;
+  getSprintProgress(sprintId: string | undefined) {
 
-    const done = tasks.filter((t: any) => t.status === 'Done').length;
+    const tasks = this.getTasksForSprint(sprintId);
+
+    if (!tasks || tasks.length === 0) {
+      return 0;
+    }
+
+    const done = tasks.filter(
+      (t: any) =>
+        t.taskstatus === 'DONE' ||
+        t.taskstatus === 'CLOSED'
+    ).length;
+
     return Math.round((done / tasks.length) * 100);
+
   }
 
   openSprintForm() {
+
     this.showSprintModal = true;
+
   }
 
   closeSprintForm() {
+
     this.showSprintModal = false;
+
   }
 
+  // ====================================================
+  // WEEKEND HELPER METHODS
+  // ====================================================
+
+  private isWeekend(date: Date): boolean {
+
+    const day = date.getDay();
+
+    return day === 0 || day === 6;
+
+  }
+
+  /**
+   * If the selected start date falls on Saturday/Sunday,
+   * automatically begin counting from Monday.
+   */
+  private moveToNextWorkingDay(date: Date): Date {
+
+    const result = new Date(date);
+
+    while (this.isWeekend(result)) {
+      result.setDate(result.getDate() + 1);
+    }
+
+    return result;
+
+  }
+
+  /**
+   * Adds working days only.
+   * Saturdays and Sundays are skipped.
+   */
+  private addWorkingDays(start: Date, workingDays: number): Date {
+
+    let result = this.moveToNextWorkingDay(start);
+
+    if (workingDays <= 0) {
+      return result;
+    }
+
+    let count = 0;
+
+    while (count < workingDays) {
+
+      result.setDate(result.getDate() + 1);
+
+      if (!this.isWeekend(result)) {
+        count++;
+      }
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * Counts only weekdays between two dates.
+   */
+  private getWorkingDays(start: Date, end: Date): number {
+
+    let count = 0;
+
+    const current = this.moveToNextWorkingDay(start);
+
+    while (current < end) {
+
+      current.setDate(current.getDate() + 1);
+
+      if (!this.isWeekend(current)) {
+        count++;
+      }
+
+    }
+
+    return count;
+
+  }
+
+  // ====================================================
+  // CALCULATE DURATION
+  // ====================================================
+
   calculateDuration(): void {
+
     if (!this.newSprint.startDate || !this.newSprint.endDate) {
+
       this.newSprint.sprintDuration = 0;
       return;
+
     }
 
     const start = new Date(this.newSprint.startDate);
     const end = new Date(this.newSprint.endDate);
 
-    const diffTime = end.getTime() - start.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (end < start) {
 
-    this.newSprint.sprintDuration = diffDays;
-  }
+      this.newSprint.sprintDuration = 0;
+      return;
 
-  onDateChange() {
-    if (!this.newSprint.startDate || !this.newSprint.endDate) return;
-
-    if (!this.newSprint.sprintDuration) {
-      this.calculateDuration();
     }
+
+    this.newSprint.sprintDuration =
+      this.getWorkingDays(start, end);
+
+  }
+    onDateChange() {
+
+    if (!this.newSprint.startDate || !this.newSprint.endDate) {
+      return;
+    }
+
+    // Always recalculate duration whenever dates change
+    this.calculateDuration();
+
   }
 
   onDurationChange() {
-    if (!this.newSprint.startDate || !this.newSprint.sprintDuration) return;
+
+    if (!this.newSprint.startDate || !this.newSprint.sprintDuration) {
+      return;
+    }
 
     const start = new Date(this.newSprint.startDate);
-    const duration = this.newSprint.sprintDuration;
 
-    const end = new Date(start);
-    end.setDate(start.getDate() + duration);
+    const end = this.addWorkingDays(
+      start,
+      this.newSprint.sprintDuration
+    );
 
-    this.newSprint.endDate = end.toISOString().split('T')[0];
+    this.newSprint.endDate =
+      end.toISOString().split('T')[0];
+
   }
 
   createSprint() {
-    if (!this.newSprint.sprintName) return;
+
+    if (!this.newSprint.sprintName) {
+      return;
+    }
 
     this.sprintService.addSprint(this.newSprint).subscribe({
+
       next: () => {
-        // All state updates happen inside 'next' after server responds successfully
+
         this.loadSprints();
 
         this.newSprint = {
           sprintName: '',
           description: '',
-          productId: null,
+          productCode: null,
           startDate: '',
           endDate: '',
           sprintDuration: 0,
           status: 'Planned',
         };
 
-        this.closeSprintForm(); // Safe choice inside the stream
+        this.closeSprintForm();
+
       },
+
       error: (err: any) => {
+
         console.error('Error creating sprint:', err);
-      },
+
+      }
+
     });
-  }
-  deleteSprint(id: number | undefined): void {
-  if (!id) {
-    console.error('Cannot delete sprint: Missing ID');
-    return;
+
   }
 
-  // A quick confirmation alert prevents accidental clicking disasters!
-  if (confirm('Are you sure you want to delete this sprint?')) {
-    this.sprintService.deleteSprint(id).subscribe({
-      next: () => {
-        // Refresh the list immediately so the deleted item vanishes from the screen
-        this.loadSprints();
+  deleteSprint(id: string | undefined): void {
 
-        // If the user happens to have this specific sprint open for viewing, deselect it
-        if (this.selectedSprint?.id === id) {
-          this.selectedSprint = null;
+    if (!id) {
+
+      console.error('Cannot delete sprint: Missing ID');
+      return;
+
+    }
+
+    if (confirm('Are you sure you want to delete this sprint?')) {
+
+      this.sprintService.deleteSprint(id).subscribe({
+
+        next: () => {
+
+          this.loadSprints();
+
+          if (this.selectedSprint?.id === id) {
+            this.selectedSprint = null;
+          }
+
+          this.cdr.detectChanges();
+
+        },
+
+        error: (err: any) => {
+
+          console.error('Error deleting sprint:', err);
+
         }
 
-        this.cdr.detectChanges(); // Tell Angular to redraw the screen
-      },
-      error: (err: any) => {
-        console.error('Error deleting sprint:', err);
-      }
-    });
+      });
+
+    }
+
   }
-}
+
 }

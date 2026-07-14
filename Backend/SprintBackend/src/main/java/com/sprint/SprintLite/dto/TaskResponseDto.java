@@ -7,19 +7,25 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskResponseDto {
+
+    private String taskCode;
+
+
     private String title;
 
     private String body;
 
-    private Integer userId;
+    private String userCode;
 
-    private Integer sprintid;
+    private String sprintCode;
 
-    private Integer storyid;
+    private String storyCode;
 
     private Status taskstatus;
 
@@ -29,6 +35,6 @@ public class TaskResponseDto {
 
     private Integer remainingestimatehours;
 
-    private String comments;
+    private List<CommentDto> commentsList;
 
 }

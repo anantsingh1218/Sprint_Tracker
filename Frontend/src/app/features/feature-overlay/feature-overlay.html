@@ -2,19 +2,27 @@
   <div class="workitem">
     <div class="header">
       <div class="title-block">
-        <div class="story-id">Feature #{{ feature.id }}</div>
+        <div class="story-id">
+          @if (feature.id) {
+            Feature #{{ feature.id }}
+          } @else {
+            New Feature
+          }
+        </div>
         <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
       </div>
 
       <div class="header-center">
-        <button
-          class="icon-btn"
-          (click)="toggleAttachmentsView()"
-          [class.active]="isAttachmentView"
-          title="Attachments"
-        >
-          {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
-        </button>
+        @if (feature.id) {
+          <button
+            class="icon-btn"
+            (click)="toggleAttachmentsView()"
+            [class.active]="isAttachmentView"
+            title="Attachments"
+          >
+            {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+          </button>
+        }
       </div>
 
       <button class="btn-close" (click)="closeOverlay()">✕</button>
@@ -26,23 +34,25 @@
           <label>Description</label>
           <textarea [(ngModel)]="feature.description"></textarea>
 
-          <div class="comments">
-            <h4>Discussion</h4>
+          @if (feature.id) {
+            <div class="comments">
+              <h4>Discussion</h4>
 
-            <div class="comment" *ngFor="let c of feature.comments">
-              <b>{{ getUserName(c.userId) }}</b>
-              <p>{{ c.text }}</p>
-              <small>{{ c.createdAt | date: 'short' }}</small>
-            </div>
+              <div class="comment" *ngFor="let c of feature.comments">
+                <b>{{ getUserName(c.userCode) }}</b>
+                <p>{{ c.text }}</p>
+                <small>{{ c.createdAt | date: 'short' }}</small>
+              </div>
 
-            <div class="add-comment">
-              <input [(ngModel)]="newComment" placeholder="Add comment..." />
-              <button (click)="addComment()">Add</button>
+              <div class="add-comment">
+                <input [(ngModel)]="newComment" placeholder="Add comment..." />
+                <button (click)="addComment()">Add</button>
+              </div>
             </div>
-          </div>
+          }
         }
 
-        @if (isAttachmentView) {
+        @if (isAttachmentView && feature.id) {
           <h4>Attachments</h4>
 
           <input type="file" multiple (change)="onFileSelected($event)" />
@@ -69,19 +79,19 @@
 
       <div class="right">
         <label>Product</label>
-        <select [(ngModel)]="feature.productId">
+        <select [(ngModel)]="feature.productCode">
           <option value="">Select Products</option>
           <option *ngFor="let f of products" [value]="f.name">{{ f.name }}</option>
         </select>
 
         <label>Sprint</label>
-        <select [(ngModel)]="feature.sprintId">
+        <select [(ngModel)]="feature.sprintCode">
           <option value="">Select Sprint</option>
           <option *ngFor="let s of sprints" [value]="s.name">{{ s.name }}</option>
         </select>
 
         <label>Assigned To</label>
-        <select [(ngModel)]="feature.userId">
+        <select [(ngModel)]="feature.userCode">
           <option value="">Unassigned</option>
           <option value="SYSTEM">SYSTEM</option>
           <option *ngFor="let u of users" [value]="u.name">{{ u.name }}</option>
@@ -110,7 +120,7 @@
       </div>
     </div>
     <div class="footer">
-      <button class="btn-save" (click)="saveFeature()">Save</button>
+      <button class="btn-save" (click)="saveFeature()">{{ feature.id ? 'Save' : 'Create' }}</button>
       <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
     </div>
   </div>

@@ -30,6 +30,8 @@ public class Story extends BaseEntity {
     @Column(name = "story_code", insertable = false, updatable = false)
     private String storyCode;
 
+
+
     @Column(name = "title", length = Integer.MAX_VALUE)
     private String title;
 

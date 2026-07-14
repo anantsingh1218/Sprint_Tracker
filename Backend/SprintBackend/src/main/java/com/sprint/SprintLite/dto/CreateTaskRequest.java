@@ -11,21 +11,21 @@ public class CreateTaskRequest {
 
     private String title;
 
-    private String body;
+    private String description;
 
-    private Integer userId;
+    private String userCode;
 
-    private Integer sprintid;
+    private String sprintCode;
 
-    private Integer storyid;
+    private String storyCode;
 
-    private Status taskstatus;
+    private Status status;
 
     private Priority priority;
 
-    private Integer originalestimatehours;
+    private Integer estimatedHours;
 
-    private Integer remainingestimatehours;
+    private Integer remainingHours;
 
     private String comments;
 }
