@@ -37,7 +37,7 @@ import { Priority, WorkStatus } from '../../models/workItem';
   styleUrl: './tasks.css',
 })
 export class Tasks implements OnChanges, OnInit {
-  tasksList: any[] = [];
+  tasksList: ITask[] = [];
   @Input() task: ITask | null = null;
   @Output() save = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
@@ -53,18 +53,21 @@ export class Tasks implements OnChanges, OnInit {
   stories = signal<any[]>([]);
 
   newTask = {
-    title: '',
-    body: '',
-    priority: 'MEDIUM',
-    taskstatus: 'OPEN',
-    assignedTo: '',
-    originalestimatehours: '',
-    remainingestimatehours: '',
-    storyCode: null as string | null,
+    id: null as unknown as string,
+        title: '',
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
+        storyCode: '',
+        sprintCode: '',
+        userCode: '',
+        comments: [],
   };
 
-  editTask: any = null;
-  selectedTaskForOverlay: any = null;
+  editTask: ITask | null = null;
+  selectedTaskForOverlay: ITask | null = null;
 
   constructor(
     private taskService: TaskService,
@@ -76,22 +79,25 @@ export class Tasks implements OnChanges, OnInit {
       if (this.task.title === '') {
         // It's a brand new task draft being created from the Backlog row
         this.newTask = {
-          title: '',
-          body: '',
-          priority: this.task.priority || 'MEDIUM',
-          taskstatus: this.task.status || 'OPEN',
-          assignedTo: '',
-          originalestimatehours: String(this.task.estimatedHours || ''),
-          remainingestimatehours: String(this.task.remainingHours || ''),
-          storyCode: this.task.storyCode,
+          id: null as unknown as string,
+        title: '',
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
+        storyCode: '',
+        sprintCode: '',
+        userCode: '',
+        comments: [],
         };
         this.showTaskModal = true;
       } else {
         // It's an existing task being opened for modification
         this.editTask = {
           ...this.task,
-          originalEstimate: this.task.estimatedHours,
-          remainingEstimate: this.task.remainingHours,
+          estimatedHours: this.task.estimatedHours,
+          remainingHours: this.task.remainingHours,
         };
         this.showEditModal = true;
       }
@@ -129,7 +135,9 @@ export class Tasks implements OnChanges, OnInit {
 
   loadTasks() {
     this.taskService.getTasks().subscribe({
-      next: (res) => (this.tasksList = res),
+      next: (res) => {
+        this.tasksList = res.map(task => this.mapResponseToInterface(task));
+      },
       error: (err) => console.error('Error loading tasks', err),
     });
   }
@@ -155,20 +163,25 @@ export class Tasks implements OnChanges, OnInit {
 
   get filteredTasks() {
     if (!this.selectedSprintId) return this.allTasks;
-
-    return this.allTasks.filter((t) => t.sprintCode === this.selectedSprintId);
+    return this.allTasks.filter((t) => {
+    // Convert both to strings and trim any whitespace to prevent false negatives
+    const taskSprint = String(t.sprintCode || '').trim();
+    const selectedSprint = String(this.selectedSprintId).trim();
+    
+    return taskSprint === selectedSprint;
+  });
   }
 
   get todoTasks() {
-    return this.filteredTasks.filter((t) => t.taskstatus === 'OPEN');
+    return this.filteredTasks.filter((t) => t.status === WorkStatus.OPEN);
   }
 
   get inProgressTasks() {
-    return this.filteredTasks.filter((t) => t.taskstatus === 'IN_PROGRESS');
+    return this.filteredTasks.filter((t) => t.status === WorkStatus.IN_PROGRESS);
   }
 
   get doneTasks() {
-    return this.filteredTasks.filter((t) => t.taskstatus === 'DONE' || t.taskstatus === 'CLOSED');
+    return this.filteredTasks.filter((t) => t.status === WorkStatus.DONE || t.status === WorkStatus.CLOSED);
   }
 
   openTaskForm() {
@@ -207,8 +220,8 @@ export class Tasks implements OnChanges, OnInit {
   createTask() {
     if (!this.newTask.title) return;
 
-    const original = Number(this.newTask.originalestimatehours);
-    const remaining = Number(this.newTask.remainingestimatehours);
+    const original = Number(this.newTask.estimatedHours);
+    const remaining = Number(this.newTask.remainingHours);
 
     if (original < 0 || remaining < 0) {
       alert('Estimates cannot be negative');
@@ -234,20 +247,23 @@ export class Tasks implements OnChanges, OnInit {
       });
 
     this.newTask = {
-      title: '',
-      body: '',
-      priority: 'MEDIUM',
-      taskstatus: 'OPEN',
-      assignedTo: '',
-      originalestimatehours: '',
-      remainingestimatehours: '',
-      storyCode: null as string | null,
+      id: null as unknown as string,
+        title: '',
+        description: '',
+        status: WorkStatus.OPEN,
+        priority: Priority.LOW,
+        estimatedHours: 0,
+        remainingHours: 0,
+        storyCode: '',
+        sprintCode: '',
+        userCode: '',
+        comments: [],
     };
   }
 
   saveTaskChanges() {
-    const original = Number(this.editTask.originalestimatehours);
-    const remaining = Number(this.editTask.remainingestimatehours);
+    const original = Number(this.editTask?.estimatedHours);
+    const remaining = Number(this.editTask?.remainingHours);
 
     if (original < 0 || remaining < 0) {
       alert('Estimates cannot be negative');
@@ -276,10 +292,31 @@ export class Tasks implements OnChanges, OnInit {
     });
   }
 
-  onTaskSaved(savedTask: any) {
+  onTaskSaved(savedTask: ITask) {
     // Optionally refresh tasks list from API here
     // For now we just close the modal
-    this.loadTasks();
+    console.log(savedTask);
+    let {comments, ...destructedPayload} = savedTask;
+    const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+    console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+    if (savedTask.id){
+      this.taskService.updateTask(payloadToSend).subscribe({
+        next: (data : ITasksResponse) => {
+          this.tasksList.push(this.mapResponseToInterface(data));
+          this.loadTasks();
+        },
+        error: (err) => console.error('Failed to update task', err),
+      });
+    }
+    else{
+      this.taskService.addTask(payloadToSend).subscribe({
+        next: (data : ITasksResponse) => {
+          this.tasksList.push(this.mapResponseToInterface(data));
+          this.loadTasks();
+        },
+        error: (err) => console.error('Failed to update task', err),
+      });
+    }
     this.closeTaskOverlay();
   }
 

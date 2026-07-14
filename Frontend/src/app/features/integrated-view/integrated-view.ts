@@ -318,7 +318,10 @@ applyFilters() {
           payload = this.toBug(item);
           break;
       }
-      this.apiService.postRequest<any>(endpoint, payload).subscribe({
+      let {comments, ...destructedPayload} = payload;
+      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      this.apiService.postRequest<any>(endpoint, payloadToSend).subscribe({
         next: (response) => {
           let savedWorkItem: WorkItem;
           switch (item.type) {
@@ -366,8 +369,10 @@ applyFilters() {
           payload = this.toBug(item);
           break;
       }
-
-      this.apiService.putRequest<any>(endpoint, payload).subscribe({
+      let {comments, ...destructedPayload} = payload;
+      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      this.apiService.putRequest<any>(endpoint, payloadToSend).subscribe({
         next: () => {
           const items = [...this.service.items];
           const index = items.findIndex((i) => i.id === item.id);
