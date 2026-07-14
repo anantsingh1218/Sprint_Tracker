@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -474,64 +476,95 @@ public class DashBoardServiceImpl
     }
 
     @Override
-    public BurndownDto
-    getBurndown(
-            Integer productId
-    ){
+    public BurndownDto getBurndown(Integer productId) {
 
         Users user = getLoggedInUser();
 
-        Sprint sprint =
-                getActiveSprint(user, productId);
+        Sprint sprint = getActiveSprint(user, productId);
 
-        Long total =
-                taskRepository.count();
+        List<Task> tasks = taskRepository.findBySprintid(sprint);
 
-        List<ChartItemDto> points =
-                List.of(
+        int totalTasks = tasks.size();
 
-                        new ChartItemDto(
-                                "Day 1",
-                                total.intValue()
-                        ),
+        List<String> labels = new ArrayList<>();
+        List<Integer> actual = new ArrayList<>();
+        List<Integer> ideal = new ArrayList<>();
 
-                        new ChartItemDto(
-                                "Day 5",
-                                (
-                                        total.intValue()
-                                                *75
-                                )
-                                        /
-                                        100
-                        ),
+        DateTimeFormatter formatter =
+                DateTimeFormatter.ofPattern("dd MMM");
 
-                        new ChartItemDto(
-                                "Day 10",
-                                (
-                                        total.intValue()
-                                                *40
-                                )
-                                        /
-                                        100
-                        ),
+        LocalDate day = sprint.getStartDate();
 
-                        new ChartItemDto(
-                                "Today",
-                                (
-                                        total.intValue()
-                                                *20
-                                )
-                                        /
-                                        100
-                        )
+        while (!day.isAfter(sprint.getEndDate())) {
+
+            labels.add(day.format(formatter));
+
+            int remainingTasks = 0;
+
+            for (Task task : tasks) {
+
+                /*
+                 * A task is considered remaining if:
+                 * 1. It is not completed yet
+                 * OR
+                 * 2. It gets completed AFTER this day
+                 */
+
+                if (task.getCompletedDate() == null
+                        || task.getCompletedDate().isAfter(day)) {
+
+                    remainingTasks++;
+
+                }
+
+            }
+
+            actual.add(remainingTasks);
+
+            day = day.plusDays(1);
+
+        }
+
+        int totalDays = labels.size();
+
+        if (totalDays == 1) {
+
+            ideal.add(totalTasks);
+
+        } else {
+
+            double burnPerDay =
+                    (double) totalTasks / (totalDays - 1);
+
+            for (int i = 0; i < totalDays; i++) {
+
+                int remaining =
+
+                        (int) Math.round(
+
+                                totalTasks - (burnPerDay * i)
+
+                        );
+
+                ideal.add(
+
+                        Math.max(remaining, 0)
 
                 );
+
+            }
+
+        }
 
         return new BurndownDto(
 
                 sprint.getSprintName(),
 
-                points
+                labels,
+
+                actual,
+
+                ideal
 
         );
 
@@ -1003,38 +1036,40 @@ public class DashBoardServiceImpl
     }
 
     @Override
-    public void moveTask(
-            MoveTaskDto dto
-    ){
+    public void moveTask(MoveTaskDto dto) {
 
-        Task task =
+        Task task = taskRepository
+                .findByTaskCode(dto.getTaskCode())
+                .orElseThrow(() ->
+                        new RuntimeException("Task not found"));
 
-                taskRepository
-                        .findByTaskCode(
-                                dto.getTaskCode()
-                        )
-                        .orElseThrow(
-                                ()->
-                                        new RuntimeException(
-                                                "Task not found"
-                                        )
-                        );
+        Status previousStatus = task.getTaskstatus();
 
-        task.setTaskstatus(
+        Status newStatus = Status.valueOf(dto.getStatus());
 
-                Status.valueOf(
-                        dto.getStatus()
-                )
+        task.setTaskstatus(newStatus);
 
-        );
+        // Task moved to DONE
+        if (previousStatus != Status.DONE && newStatus == Status.DONE) {
 
-        taskRepository
-                .save(
-                        task
-                );
+            task.setCompletedDate(LocalDate.now());
+
+            task.setCompletedAt(Instant.now());
+
+        }
+
+        // Task reopened
+        else if (previousStatus == Status.DONE && newStatus != Status.DONE) {
+
+            task.setCompletedDate(null);
+
+            task.setCompletedAt(null);
+
+        }
+
+        taskRepository.save(task);
 
     }
-
     @Override
     public List<ProductDropdownDto> getProducts() {
 

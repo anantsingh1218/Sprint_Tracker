@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -28,10 +28,15 @@ export class BugList implements OnInit {
   stories: any[] = [];
   users: any[] = [];
 
+
+  showDeletePopup=false;
+  bugToDelete: IBug|null =null;
+
   constructor(
     private bugService: BugService,
     private sprintService: SprintService,
-    private storyService: StoryService
+    private storyService: StoryService,
+    private cdr:ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -58,6 +63,7 @@ export class BugList implements OnInit {
     this.bugService.getAllBugs().subscribe({
       next: (res: IBug[]) => {
         this.bugs = res;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching bugs:', err)
     });
@@ -128,4 +134,58 @@ export class BugList implements OnInit {
     }
     this.closeBug();
   }
+
+
+  deleteBug(bug: IBug, event: Event): void {
+
+    event.stopPropagation();
+
+    this.bugToDelete = bug;
+    this.showDeletePopup = true;
+
+  }
+
+  // ==========================
+  // YES button
+  // ==========================
+  confirmDelete(): void {
+
+    if (!this.bugToDelete) {
+      return;
+    }
+
+    this.bugService.deleteBug(this.bugToDelete.id).subscribe({
+
+      next: () => {
+
+        this.fetchBugs();
+
+        this.showDeletePopup = false;
+        this.bugToDelete = null;
+
+      },
+
+      error: err => {
+
+        console.error('Error deleting bug:', err);
+
+        this.showDeletePopup = false;
+        this.bugToDelete = null;
+
+      }
+
+    });
+
+  }
+
+  // ==========================
+  // NO button
+  // ==========================
+  cancelDelete(): void {
+
+    this.showDeletePopup = false;
+    this.bugToDelete = null;
+
+  }
+
 }

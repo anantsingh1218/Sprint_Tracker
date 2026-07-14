@@ -59,6 +59,7 @@ export class TeamDashboard implements OnInit {
         next: (res) => {
             this.teamDashboard = res;
             this.loading = false;
+            this.cdr.detectChanges();
         },
         error: (err) => {
             console.error(err);
@@ -97,6 +98,7 @@ export class TeamDashboard implements OnInit {
     console.log(res);
 
     this.tasks = res.content;
+    this.cdr.detectChanges();
 
 },
 
@@ -121,6 +123,7 @@ fetchMyStories(): void {
                 console.log("Stories", res);
 
                 this.stories = res.content;
+                this.cdr.detectChanges();
 
             },
 
@@ -143,6 +146,7 @@ fetchFocusTask(): void {
             next: (res) => {
 
                 this.focusTask = res;
+                this.cdr.detectChanges();
 
             },
 
@@ -169,6 +173,7 @@ fetchRecentWorklogs(): void {
                 console.log("Recent Worklogs", res);
 
                 this.recentWorklogs = res;
+                this.cdr.detectChanges();
 
             },
 

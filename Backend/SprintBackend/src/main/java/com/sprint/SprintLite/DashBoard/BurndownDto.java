@@ -15,6 +15,10 @@ public class BurndownDto {
 
     private String sprintName;
 
-    private List<ChartItemDto> points;
+    private List<String> labels;
+
+    private List<Integer> actual;
+
+    private List<Integer> ideal;
 
 }

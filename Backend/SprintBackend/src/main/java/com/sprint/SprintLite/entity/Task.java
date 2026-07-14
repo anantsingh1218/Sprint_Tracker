@@ -13,6 +13,7 @@ import org.hibernate.type.SqlTypes;
 import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.LinkedHashSet;
@@ -74,5 +75,11 @@ public class Task extends BaseEntity {
     @NonNull
     @OneToMany(mappedBy = "taskid")
     private Set<Worklog> worklogs = new LinkedHashSet<>();
+
+    @Column(name = "completed_date")
+    private LocalDate completedDate;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
 
 }

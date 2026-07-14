@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/apiService/api-service';
@@ -30,7 +30,9 @@ export class Bug implements OnInit {
   attachmentUploadStatus = signal('');
   newComment = '';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     if (this.bug && this.bug.id > 0) {

@@ -99,7 +99,11 @@ export interface Burndown {
 
     sprintName: string;
 
-    points: ChartItem[];
+    labels: string[];
+
+    actual: number[];
+
+    ideal: number[];
 
 }
 export interface TeamCapacity{

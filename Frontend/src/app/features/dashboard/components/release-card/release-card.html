@@ -1,36 +1,74 @@
 <div class="analytics-card" *ngIf="releaseReadiness">
 
     <div class="card-header">
-        <h3>Release Readiness</h3>
-        <span class="status-badge"
-              [class.ready]="releaseReadiness.releaseReady"
-              [class.not-ready]="!releaseReadiness.releaseReady">
-            {{ releaseReadiness.releaseReady ? 'Ready' : 'Not Ready' }}
-        </span>
-    </div>
 
-    <div class="release-body">
+        <div>
 
-        <div class="ring-wrap">
-            <svg class="progress-ring" viewBox="0 0 80 80">
-                <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
-                <circle class="ring-fill" cx="40" cy="40" r="34"
-                        [attr.stroke-dasharray]="213.6"
-                        [attr.stroke-dashoffset]="213.6 - (213.6 * (releaseReadiness.completion || 0) / 100)">
-                </circle>
-            </svg>
-            <div class="ring-value">{{ releaseReadiness.completion }}%</div>
+            <h3>Release Readiness</h3>
+
+            <p class="subtitle">
+
+                Overall Sprint Health
+
+            </p>
+
         </div>
 
-        <div class="stats">
-            <div>
-                <span>Open Bugs</span>
-                <strong>{{ releaseReadiness.openBugs }}</strong>
-            </div>
-            <div>
-                <span>Blocked Tasks</span>
-                <strong>{{ releaseReadiness.blockedTasks }}</strong>
-            </div>
+        <span
+                class="status"
+
+                [class.ready]="releaseReadiness.releaseReady"
+
+                [class.pending]="!releaseReadiness.releaseReady">
+
+            {{releaseReadiness.releaseReady ? 'Ready' : 'Pending'}}
+
+        </span>
+
+    </div>
+
+    <div class="release-center">
+
+        <div class="progress-circle">
+
+            {{releaseReadiness.completion}}%
+
+        </div>
+
+    </div>
+
+    <div class="release-stats">
+
+        <div class="release-item">
+
+            <span>
+
+                🐞 Open Bugs
+
+            </span>
+
+            <strong>
+
+                {{releaseReadiness.openBugs}}
+
+            </strong>
+
+        </div>
+
+        <div class="release-item">
+
+            <span>
+
+                🚫 Blocked
+
+            </span>
+
+            <strong>
+
+                {{releaseReadiness.blockedTasks}}
+
+            </strong>
+
         </div>
 
     </div>

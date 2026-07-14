@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ɵinjectChangeDetectorRef } from '@angular/core';
 import { DashboardService } from '../../services/dashboardService';
 import { DashboardResponse } from './models/dashboard.model';
 import { CommonModule } from '@angular/common';
@@ -107,6 +107,7 @@ export class Dashboard implements OnInit {
 
                     // Only after dashboard is loaded
                     this.fetchProducts();
+                    this.cdr.detectChanges();
 
                 },
 
@@ -137,6 +138,7 @@ export class Dashboard implements OnInit {
                 console.log("Summary:", res);
 
                 this.summary = res;
+                this.cdr.detectChanges();
 
             },
 
@@ -165,6 +167,7 @@ fetchExport(): void {
                 console.log("Export Report:", res);
 
                 this.exportReport = res;
+                this.cdr.detectChanges();
 
             },
 
@@ -197,6 +200,7 @@ fetchExport(): void {
                         this.onProductChange();
 
                     }
+                    this.cdr.detectChanges();
 
                 },
 
@@ -257,7 +261,7 @@ fetchExport(): void {
                         "Velocity",
                         res
                     );
-
+this.cdr.detectChanges();
                 },
 
                 error: (err) => {
@@ -281,6 +285,8 @@ fetchExport(): void {
                 next: (res) => {
 
                     this.burndown = res;
+
+                    this.cdr.detectChanges();
 
                 },
 
@@ -310,6 +316,7 @@ fetchExport(): void {
                     this.teamCapacity = res;
 
                     console.log("Team Capacity", res);
+                    this.cdr.detectChanges();
 
                 },
 
@@ -339,6 +346,7 @@ fetchExport(): void {
                     this.releaseReadiness = res;
 
                     console.log("Release Readiness", res);
+                    this.cdr.detectChanges();
 
                 },
 
@@ -367,6 +375,7 @@ fetchExport(): void {
                 console.log("Sprint Progress =", res);
 
                 this.sprintProgress = res;
+                this.cdr.detectChanges();
 
             },
 

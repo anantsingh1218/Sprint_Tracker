@@ -33,7 +33,7 @@ interface TreeNode extends WorkItem {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule, // <-- Added here
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
@@ -85,7 +85,7 @@ export class IntegrateView {
   bugs: IBugResponse[] = [];
 
   constructor(
-    public service: WorkItemService, // set to public to read from template/computed values safely
+    private service: WorkItemService,
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
   ) {
@@ -137,10 +137,10 @@ export class IntegrateView {
    * Keeps parent structures intact if a child node matches the filters.
    */
 applyFilters() {
-    const hasActiveFilters = 
-      !!this.searchTerm.trim() || 
-      !!this.selectedProduct || 
-      !!this.selectedSprint || 
+    const hasActiveFilters =
+      !!this.searchTerm.trim() ||
+      !!this.selectedProduct ||
+      !!this.selectedSprint ||
       !!this.selectedStatus ||
       !!this.selectedUser; // <-- Added user check
 
@@ -156,20 +156,20 @@ applyFilters() {
           const currentProduct = node.type === WorkItemType.Feature ? node.productCategory : parentProduct;
           const filteredChildren = filterNode(node.children || [], currentProduct);
 
-          const matchesSearch = !this.searchTerm.trim() || 
+          const matchesSearch = !this.searchTerm.trim() ||
             node.title.toLowerCase().includes(this.searchTerm.toLowerCase());
-          
-          const matchesSprint = !this.selectedSprint || 
+
+          const matchesSprint = !this.selectedSprint ||
             node.sprintName === this.selectedSprint;
 
-          const matchesStatus = !this.selectedStatus || 
+          const matchesStatus = !this.selectedStatus ||
             node.status === this.selectedStatus;
 
-          const matchesProduct = !this.selectedProduct || 
+          const matchesProduct = !this.selectedProduct ||
             currentProduct === this.selectedProduct;
 
           // --- New User Filter Check ---
-          const matchesUser = !this.selectedUser || 
+          const matchesUser = !this.selectedUser ||
             node.assignedTo === this.selectedUser;
 
           const nodeSelfMatches = matchesSearch && matchesSprint && matchesStatus && matchesProduct && matchesUser;
@@ -178,7 +178,7 @@ applyFilters() {
             return {
               ...node,
               children: filteredChildren,
-              expanded: true 
+              expanded: true
             };
           }
           return null;
@@ -388,14 +388,14 @@ private refreshTree() {
       id: item.id,
       title: item.title,
       description: item.description,
-      status: item.status,
+      featureStatus: item.status,
       priority: item.priority,
       estimatedStoryPoints: item.estimatedPoints,
-      remainingStoryPoint: item.remainingPoints,
-      productCode: item.productCategory,
-      sprintCode: item.sprintName,
-      userCode: item.assignedTo,
-      comments: item.comments,
+      remainingStoryPoints: item.remainingPoints,
+      productName: item.productCategory,
+      sprintName: item.sprintName,
+      assignedTo: item.assignedTo,
+      commentsList: item.comments,
     };
   }
 
@@ -451,20 +451,20 @@ private refreshTree() {
 
   fromFeature(f: IFeature): WorkItem {
     return {
-      id: f.id,
+      id: f.id ?? '',
       title: f.title,
       type: WorkItemType.Feature,
-      parentId: f.productCode ?? null,
-      status: f.status,
+      parentId: null,
+      status: f.featureStatus,
       description: f.description,
-      sprintName: f.sprintCode,
+      sprintName: f.sprintName,
       priority: f.priority,
-      assignedTo: f.userCode,
-      productCategory: f.productCode,
+      assignedTo: f.assignedTo,
+      productCategory: f.productName,
       reopenCount: 0,
       estimatedPoints: f.estimatedStoryPoints,
-      remainingPoints: f.remainingStoryPoint,
-      comments: f.comments,
+      remainingPoints: f.remainingStoryPoints,
+      comments: f.commentsList != undefined ? f.commentsList : [],
     };
   }
 
@@ -618,8 +618,10 @@ private refreshTree() {
     tasks: WorkItem[],
     bugs: WorkItem[],
   ): TreeNode[] {
+    // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
 
+    // 2. Add Features to the map
     features.forEach((f) => {
       map.set(this.normalizeId(f.id), {
         ...f,
@@ -628,10 +630,12 @@ private refreshTree() {
       });
     });
 
+    // 3. Add Stories to the map AND push them to their Feature parents
     stories.forEach((s) => {
       const normalizedStoryId = this.normalizeId(s.id);
       const parentId = this.normalizeId(s.parentId);
 
+      // Create the story node shell in our map so its upcoming tasks can find it
       const storyNode: TreeNode = {
         ...s,
         children: [],
@@ -639,12 +643,14 @@ private refreshTree() {
       };
       map.set(normalizedStoryId, storyNode);
 
+      // Attach story node to its feature parent
       const parentFeature = map.get(parentId);
       if (parentFeature) {
         parentFeature.children.push(storyNode);
       }
     });
 
+    // 4. Push Tasks to their Story parents
     tasks.forEach((t) => {
       const parentId = this.normalizeId(t.parentId);
       const parentStory = map.get(parentId);
@@ -662,6 +668,7 @@ private refreshTree() {
       }
     });
 
+    // 5. Push Bugs to their Story parents
     bugs.forEach((b) => {
       const parentId = this.normalizeId(b.parentId);
       const parentStory = map.get(parentId);
@@ -679,6 +686,8 @@ private refreshTree() {
       }
     });
 
+    // 6. Return ONLY the root level nodes (Features)
+    // We filter the full map values down to items that have no parentId
     return Array.from(map.values()).filter((node) => node.parentId === null);
   }
 
