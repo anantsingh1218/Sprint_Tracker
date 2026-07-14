@@ -9,6 +9,6 @@ import java.util.List;
 public interface IStoryService {
     StoryResponseDto createStory(CreateStoryRequest story);
     StoryResponseDto updateStory(Integer id,CreateStoryRequest story);
-
+    void deleteStory(Integer id);
     List<StoryResponseDto> getAllStories();
 }

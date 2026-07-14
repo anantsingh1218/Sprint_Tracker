@@ -3,6 +3,7 @@ package com.sprint.SprintLite.Bugs.Controller;
 import com.sprint.SprintLite.Bugs.Service.IBugService;
 import com.sprint.SprintLite.dto.BugDto;
 import com.sprint.SprintLite.dto.BugResponseDto;
+import com.sprint.SprintLite.dto.RegisterResponseDto;
 import com.sprint.SprintLite.repository.BugRepository;
 import com.sprint.SprintLite.util.CodeUtils;
 import lombok.RequiredArgsConstructor;
@@ -68,11 +69,11 @@ public class BugController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteBug(
-            @PathVariable Integer id
+    public ResponseEntity<RegisterResponseDto> deleteBug(
+            @PathVariable String id
     ) {
-        bugService.deleteBugByiD(id);
-        return ResponseEntity.ok("Bug deleted successfully");
+        bugService.deleteBugByiD(CodeUtils.decodeToInteger("B", id));
+        return ResponseEntity.ok(new RegisterResponseDto("Bug deleted successfully"));
     }
 
 }

@@ -1,8 +1,8 @@
 import { Component, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <-- Required for ngModel filtering
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
@@ -15,13 +15,14 @@ import { IStory } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
 import { IFeatureResponse } from '../../models/featureResponseInterface';
 import { IStoryResponse } from '../../models/storyResponseInterface';
-import { forkJoin } from 'rxjs';
+import { catchError, concat, forkJoin, throwError } from 'rxjs';
 import { ITasksResponse } from '../../models/taskResponseInterface';
 import { ITask } from '../../models/taskInterface';
 import { IBug } from '../../models/bugInterface';
 import { IBugResponse } from '../../models/bugResponseInterface';
 import { Bug } from '../bug/bug';
 import { TaskOverlay } from '../task-overlay/task-overlay';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface TreeNode extends WorkItem {
   children: TreeNode[];
@@ -37,6 +38,7 @@ interface TreeNode extends WorkItem {
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
+    MatIconButton,
     FeatureOverlay,
     Story,
     TaskOverlay,
@@ -50,7 +52,7 @@ export class IntegrateView {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
-  filteredTree: TreeNode[] = []; // <-- Render this in the HTML instead of 'tree'
+  filteredTree: TreeNode[] = [];
 
   // --- FILTER BINDINGS ---
   searchTerm: string = '';
@@ -71,6 +73,10 @@ export class IntegrateView {
   uniqueStatuses: string[] = [];
   uniqueUsers: string[] = [];
 
+  showDeleteConfirmation = false;
+  itemToDelete: any = null;
+  itemToDeleteType: string = '';
+
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
   selectedTask: ITask | null = null;
@@ -79,17 +85,136 @@ export class IntegrateView {
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
 
+  showErrorOverlay = false;
+  failedItemTitle = '';
+  failedItemId: string | number = '';
+  errorMessage = '';
+
   features: IFeatureResponse[] = [];
   stories: IStoryResponse[] = [];
   tasks: ITasksResponse[] = [];
   bugs: IBugResponse[] = [];
 
   constructor(
-    private service: WorkItemService,
+    public service: WorkItemService, // set to public to read from template/computed values safely
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
   ) {
     this.getBacklog();
+  }
+
+  promptDelete(item: WorkItem, type: WorkItemType): void {
+    this.itemToDelete = item;
+    this.itemToDeleteType = type;
+    this.showDeleteConfirmation = true;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirmation = false;
+    this.itemToDelete = null;
+    this.itemToDeleteType = '';
+  }
+
+  hasChildren(item: any): boolean {
+    return !!(item.children && item.children.length > 0);
+  }
+
+  // Flattens all nested children to display a complete overview of what will be lost
+  getFlattenedChildren(item: any): { id: any; title: string; type: string }[] {
+    const list: { id: any; title: string; type: string }[] = [];
+
+    const traverse = (node: any) => {
+      if (node.children && node.children.length > 0) {
+        node.children.forEach((child: any) => {
+          // Fallback type determination if child.type doesn't exist (e.g. nested stories under features)
+          const childType = child.type || (node.type === 'Feature' ? 'Story' : 'Task');
+          list.push({ id: child.id, title: child.title, type: childType });
+          traverse(child);
+        });
+      }
+    };
+
+    traverse(item);
+    return list;
+  }
+
+  executeDelete(): void {
+    if (!this.itemToDelete) return;
+
+    const targetId = this.itemToDelete.id;
+    const targetTitle = this.itemToDelete.title;
+
+    // 1. Gather all IDs in bottom-up order
+    const childIds = (this.getFlattenedChildren(this.itemToDelete) || []).map(
+      (child: any) => child.id,
+    );
+    const idsToDelete = [...childIds, targetId];
+
+    // 2. Close the confirmation overlay immediately so we don't have overlapping dialogs
+    this.cancelDelete();
+
+    // 3. Create the delete observables, catch errors at the request level!
+    const deleteObservables = idsToDelete.map((id) =>
+      this.service.deleteByCode(id).pipe(
+        catchError((err: HttpErrorResponse) => {
+          // Intercepting here prevents the concat pipe from swallowing the context.
+          // We re-throw the error so that the main subscriber block catches it.
+          return throwError(() => err);
+        }),
+      ),
+    );
+
+    // 4. Execute deletion sequentially
+    concat(...deleteObservables).subscribe({
+      next: (data) => {
+        console.log('Successfully deleted a node segment: ', data);
+      },
+      error: (err: HttpErrorResponse) => {
+        // The API failed! Trigger the error popup instantly without breaking local state.
+        console.error('Delete failed on server:', err);
+
+        const friendlyMessage = err.error?.message || err.message || 'Server error occurred.';
+        this.triggerErrorOverlay(targetId, targetTitle, friendlyMessage);
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        // SUCCESS: Only remove it from the local UI tree once ALL deletions successfully complete
+        this.filteredTree = this.deleteNodeFromTree(this.filteredTree, targetId);
+        console.log('Entire hierarchy successfully deleted.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // --- Helper methods for the Error Overlay ---
+  triggerErrorOverlay(id: string | number, title: string, message: string): void {
+    this.failedItemId = id;
+    this.failedItemTitle = title;
+    this.errorMessage = message;
+    this.showErrorOverlay = true;
+  }
+
+  closeErrorOverlay(): void {
+    this.showErrorOverlay = false;
+    this.failedItemId = '';
+    this.failedItemTitle = '';
+    this.errorMessage = '';
+  }
+
+  private deleteNodeFromTree(tree: any[], targetId: string | number): any[] {
+    // Return a fresh array copy (Immutability)
+    return tree
+      .filter((node) => node.id !== targetId) // Filter out target at root level
+      .map((node) => {
+        // If it has children, recursively filter them and return a new node copy
+        if (node.children && node.children.length > 0) {
+          return {
+            ...node,
+            children: this.deleteNodeFromTree(node.children, targetId),
+          };
+        }
+        return node;
+      });
   }
 
   // ---------- TREE & FILTERING ----------
@@ -136,7 +261,7 @@ export class IntegrateView {
    * Applies all filters on the base hierarchical tree.
    * Keeps parent structures intact if a child node matches the filters.
    */
-applyFilters() {
+  applyFilters() {
     const hasActiveFilters =
       !!this.searchTerm.trim() ||
       !!this.selectedProduct ||
@@ -153,32 +278,31 @@ applyFilters() {
     const filterNode = (nodes: TreeNode[], parentProduct: string | null = null): TreeNode[] => {
       return nodes
         .map((node): TreeNode | null => {
-          const currentProduct = node.type === WorkItemType.Feature ? node.productCategory : parentProduct;
+          const currentProduct =
+            node.type === WorkItemType.Feature ? node.productCategory : parentProduct;
           const filteredChildren = filterNode(node.children || [], currentProduct);
 
-          const matchesSearch = !this.searchTerm.trim() ||
+          const matchesSearch =
+            !this.searchTerm.trim() ||
             node.title.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-          const matchesSprint = !this.selectedSprint ||
-            node.sprintName === this.selectedSprint;
+          const matchesSprint = !this.selectedSprint || node.sprintName === this.selectedSprint;
 
-          const matchesStatus = !this.selectedStatus ||
-            node.status === this.selectedStatus;
+          const matchesStatus = !this.selectedStatus || node.status === this.selectedStatus;
 
-          const matchesProduct = !this.selectedProduct ||
-            currentProduct === this.selectedProduct;
+          const matchesProduct = !this.selectedProduct || currentProduct === this.selectedProduct;
 
           // --- New User Filter Check ---
-          const matchesUser = !this.selectedUser ||
-            node.assignedTo === this.selectedUser;
+          const matchesUser = !this.selectedUser || node.assignedTo === this.selectedUser;
 
-          const nodeSelfMatches = matchesSearch && matchesSprint && matchesStatus && matchesProduct && matchesUser;
+          const nodeSelfMatches =
+            matchesSearch && matchesSprint && matchesStatus && matchesProduct && matchesUser;
 
           if (nodeSelfMatches || filteredChildren.length > 0) {
             return {
               ...node,
               children: filteredChildren,
-              expanded: true
+              expanded: true,
             };
           }
           return null;
@@ -298,9 +422,9 @@ applyFilters() {
           payload = this.toBug(item);
           break;
       }
-      let {comments, ...destructedPayload} = payload;
-      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
-      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      let { comments, ...destructedPayload } = payload;
+      const payloadToSend = { ...destructedPayload, comments: comments?.at(-1)?.text };
+      console.log('To Save Payload = ' + JSON.stringify(payloadToSend));
       this.apiService.postRequest<any>(endpoint, payloadToSend).subscribe({
         next: (response) => {
           let savedWorkItem: WorkItem;
@@ -349,9 +473,9 @@ applyFilters() {
           payload = this.toBug(item);
           break;
       }
-      let {comments, ...destructedPayload} = payload;
-      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
-      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      let { comments, ...destructedPayload } = payload;
+      const payloadToSend = { ...destructedPayload, comments: comments?.at(-1)?.text };
+      console.log('To Save Payload = ' + JSON.stringify(payloadToSend));
       this.apiService.putRequest<any>(endpoint, payloadToSend).subscribe({
         next: () => {
           const items = [...this.service.items];
@@ -369,7 +493,7 @@ applyFilters() {
     this.closeOverlay();
   }
 
-private refreshTree() {
+  private refreshTree() {
     const items = this.service.items;
     this.populateDropdownOptions(items); // <-- Refresh dropdown arrays
 
@@ -618,10 +742,8 @@ private refreshTree() {
     tasks: WorkItem[],
     bugs: WorkItem[],
   ): TreeNode[] {
-    // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
 
-    // 2. Add Features to the map
     features.forEach((f) => {
       map.set(this.normalizeId(f.id), {
         ...f,
@@ -630,12 +752,10 @@ private refreshTree() {
       });
     });
 
-    // 3. Add Stories to the map AND push them to their Feature parents
     stories.forEach((s) => {
       const normalizedStoryId = this.normalizeId(s.id);
       const parentId = this.normalizeId(s.parentId);
 
-      // Create the story node shell in our map so its upcoming tasks can find it
       const storyNode: TreeNode = {
         ...s,
         children: [],
@@ -643,14 +763,12 @@ private refreshTree() {
       };
       map.set(normalizedStoryId, storyNode);
 
-      // Attach story node to its feature parent
       const parentFeature = map.get(parentId);
       if (parentFeature) {
         parentFeature.children.push(storyNode);
       }
     });
 
-    // 4. Push Tasks to their Story parents
     tasks.forEach((t) => {
       const parentId = this.normalizeId(t.parentId);
       const parentStory = map.get(parentId);
@@ -668,7 +786,6 @@ private refreshTree() {
       }
     });
 
-    // 5. Push Bugs to their Story parents
     bugs.forEach((b) => {
       const parentId = this.normalizeId(b.parentId);
       const parentStory = map.get(parentId);
@@ -686,16 +803,22 @@ private refreshTree() {
       }
     });
 
-    // 6. Return ONLY the root level nodes (Features)
-    // We filter the full map values down to items that have no parentId
     return Array.from(map.values()).filter((node) => node.parentId === null);
   }
 
   private populateDropdownOptions(items: WorkItem[]) {
-    this.uniqueProducts = Array.from(new Set(items.map(i => i.productCategory).filter(Boolean))).sort() as string[];
-    this.uniqueSprints = Array.from(new Set(items.map(i => i.sprintName).filter(Boolean))).sort() as string[];
-    this.uniqueStatuses = Array.from(new Set(items.map(i => i.status).filter(Boolean))).sort() as string[];
-    this.uniqueUsers = Array.from(new Set(items.map(i => i.assignedTo).filter(Boolean))).sort() as string[];
+    this.uniqueProducts = Array.from(
+      new Set(items.map((i) => i.productCategory).filter(Boolean)),
+    ).sort() as string[];
+    this.uniqueSprints = Array.from(
+      new Set(items.map((i) => i.sprintName).filter(Boolean)),
+    ).sort() as string[];
+    this.uniqueStatuses = Array.from(
+      new Set(items.map((i) => i.status).filter(Boolean)),
+    ).sort() as string[];
+    this.uniqueUsers = Array.from(
+      new Set(items.map((i) => i.assignedTo).filter(Boolean)),
+    ).sort() as string[];
   }
 
   private getBacklog() {

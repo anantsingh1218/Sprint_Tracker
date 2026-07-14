@@ -264,3 +264,215 @@ button[mat-icon-button]:hover {
   align-items: center;
   z-index: 1000;
 }
+
+.delete-overlay-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1100; /* Ensure it stays above standard content and modals */
+}
+
+.delete-confirm-card {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  box-shadow: 0px 11px 15px -7px rgba(0,0,0,0.2), 0px 24px 38px 3px rgba(0,0,0,0.14);
+  
+  .warn-title {
+    color: #f44336;
+    font-weight: 600;
+  }
+}
+
+.target-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fdf2f2;
+  border-left: 4px solid #f44336;
+  padding: 10px 12px;
+  margin: 15px 0;
+  border-radius: 4px;
+}
+
+.cascade-warning {
+  margin-top: 15px;
+  padding: 10px;
+  background: #fff8f0;
+  border: 1px solid #ffe8cc;
+  border-radius: 4px;
+
+  .warning-alert-text {
+    color: #e65100;
+    margin: 0 0 8px 0;
+    font-size: 0.9rem;
+  }
+}
+
+.nested-delete-list {
+  max-height: 150px;
+  overflow-y: auto;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.85rem;
+  color: #555;
+
+  li {
+    margin-bottom: 4px;
+    .child-type {
+      font-weight: bold;
+      color: #888;
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* =====================================================
+   ADD AND DELETE ROW BUTTON STYLES
+   ===================================================== */
+
+/* Base icon buttons configuration */
+button.add-btn,
+button.delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+/* Plus sign styling */
+button.add-btn {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0078d4;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(0, 120, 212, 0.08);
+  }
+}
+
+/* Prettified Red Delete button */
+button.delete-btn {
+  opacity: 0.4;
+
+  .delete-icon {
+    width: 16px;
+    height: 16px;
+    fill: #d13438; /* Crisp Red color */
+    transition: fill 0.2s ease, transform 0.15s ease;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: rgba(209, 52, 56, 0.08); /* Light Red hover background */
+
+    .delete-icon {
+      fill: #a4262c; /* Deeper red on active hover */
+      transform: scale(1.1);
+    }
+  }
+}
+
+/* Keep features, stories, and task rows clean and well-spaced */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Backdrop matching your delete-overlay-backdrop */
+.delete-overlay-backdrop.error-backdrop {
+  background-color: rgba(0, 0, 0, 0.65); /* slightly darker backdrop for errors */
+}
+
+/* Red accent borders/header for errors */
+.error-card {
+  border-top: 5px solid #d32f2f;
+  max-width: 450px;
+  width: 100%;
+}
+
+.error-header-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  
+  .error-svg {
+    width: 40px;
+    height: 40px;
+    fill: #d32f2f;
+  }
+}
+
+.error-title {
+  color: #d32f2f !important;
+  font-weight: bold;
+}
+
+.error-content {
+  margin-top: 15px;
+}
+
+.failed-item-details {
+  background-color: #fafafa;
+  border-left: 3px solid #757575;
+  padding: 8px 12px;
+  margin: 12px 0;
+  border-radius: 4px;
+  
+  .failed-id {
+    color: #666;
+    font-size: 0.9em;
+    margin-left: 8px;
+  }
+}
+
+.error-technical-details {
+  background-color: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 15px;
+  
+  .error-label {
+    margin: 0 0 5px 0;
+    font-weight: bold;
+    color: #c62828;
+    font-size: 0.85em;
+    text-transform: uppercase;
+  }
+
+  .error-text {
+    font-family: monospace;
+    color: #b71c1c;
+    word-break: break-word;
+  }
+}
+
+.error-actions {
+  justify-content: flex-end;
+  margin-top: 15px;
+}

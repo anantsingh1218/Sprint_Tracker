@@ -171,6 +171,13 @@ public class StoryServiceImpl implements IStoryService {
         return response;
     }
 
+    @Override
+    public void deleteStory(Integer id) {
+        Story story =  storyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Story not found"));
+        storyRepository.delete(story);
+    }
+
     // Add this method inside your StoryServiceImpl class
 
     @Override
