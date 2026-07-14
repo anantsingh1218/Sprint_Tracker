@@ -1,3 +1,114 @@
+/* =====================================================
+   FILTER BAR STYLING
+   ===================================================== */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #edebe9;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #605e5c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group input,
+.filter-group select {
+  height: 32px;
+  border: 1px solid #d2d0ce;
+  border-radius: 2px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #323130;
+  outline: none;
+  background-color: #FAF9F8;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  border-color: #0078d4;
+  background-color: #fff;
+}
+
+.clear-btn {
+  height: 32px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px dashed #a19f9d;
+  color: #323130;
+  font-size: 13px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clear-btn:hover {
+  background: #f3f2f1;
+  border-color: #323130;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  background: #ffffff;
+  border: 1px dashed #edebe9;
+  color: #605e5c;
+  font-size: 14px;
+}
+
+/* =====================================================
+   ASSIGNEE BADGE STYLING
+   ===================================================== */
+.assignee-badge {
+  font-size: 12px;
+  color: #4f4f4f;
+  background: #f3f2f1;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e1dfdd;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assignee-badge.unassigned {
+  color: #a19f9d;
+  background: transparent;
+  border-style: dashed;
+}
+
+/* Base modifications for the row to align the items nicely */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+}
+
+/* Make sure elements stack elegantly in smaller container viewports */
 .backlog {
   padding: 24px;
   background: #f3f2f1;
@@ -28,16 +139,6 @@ mat-card {
   border: 1px solid #edebe9;
   border-radius: 3px;
   background: #fff;
-}
-
-/* =========================
-   ROW LAYOUT
-   ========================= */
-.row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 34px;
 }
 
 /* title */
@@ -90,7 +191,7 @@ mat-card {
   background: #f8fbff;
 }
 
-/* TASK (if used later) */
+/* TASK */
 .task {
   border-left: 5px solid #107c10;
   background: #f3fff5;
@@ -103,7 +204,7 @@ mat-card {
 }
 
 /* =====================================================
-   TYPE BADGES (VERY IMPORTANT FOR RECOGNITION)
+   TYPE BADGES
    ===================================================== */
 .work-item-type {
   font-size: 11px;
@@ -152,7 +253,7 @@ button[mat-icon-button]:hover {
 }
 
 /* =========================
-   OVERLAY (unchanged)
+   OVERLAY
    ========================= */
 .overlay {
   position: fixed;

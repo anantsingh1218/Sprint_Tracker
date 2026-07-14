@@ -5,7 +5,70 @@
       + New Feature
     </button>
   </div>
-  @for (feature of tree; track feature.id) {
+
+  <!-- =========================
+       FILTER TOOLBAR
+       ========================= -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="searchFilter">Search</label>
+      <input 
+        id="searchFilter" 
+        type="text" 
+        placeholder="Filter by name..." 
+        [(ngModel)]="searchTerm" 
+        (input)="applyFilters()"
+      />
+    </div>
+
+    <!-- User Filter (NEW) -->
+    <div class="filter-group">
+      <label for="userFilter">Assigned To</label>
+      <select id="userFilter" [(ngModel)]="selectedUser" (change)="applyFilters()">
+        <option value="">All Users</option>
+        @for (user of uniqueUsers; track user) {
+          <option [value]="user">{{ user }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="productFilter">Product</label>
+      <select id="productFilter" [(ngModel)]="selectedProduct" (change)="applyFilters()">
+        <option value="">All Products</option>
+        @for (product of uniqueProducts; track product) {
+          <option [value]="product">{{ product }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="sprintFilter">Sprint</label>
+      <select id="sprintFilter" [(ngModel)]="selectedSprint" (change)="applyFilters()">
+        <option value="">All Sprints</option>
+        @for (sprint of uniqueSprints; track sprint) {
+          <option [value]="sprint">{{ sprint }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="statusFilter">Status</label>
+      <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+        <option value="">All Statuses</option>
+        @for (status of uniqueStatuses; track status) {
+          <option [value]="status">{{ status }}</option>
+        }
+      </select>
+    </div>
+
+    <button class="clear-btn" (click)="resetFilters()">Clear Filters</button>
+  </div>
+
+  <!-- =========================
+       BACKLOG TREE VIEW
+       ========================= -->
+  @for (feature of filteredTree; track feature.id) {
     <mat-card class="feature">
       <div class="row">
         <span class="arrow" (click)="toggle(feature); $event.stopPropagation()">
@@ -17,6 +80,11 @@
         <strong class="title" (click)="openEdit(feature)">
           {{ feature.title }}
         </strong>
+
+        <!-- Assigned To Display -->
+        <span class="assignee-badge" [class.unassigned]="!feature.assignedTo">
+          {{ feature.assignedTo || 'Unassigned' }}
+        </span>
 
         <button mat-icon-button [matMenuTriggerFor]="featureMenu">+</button>
 
@@ -38,6 +106,11 @@
 
                 <span class="title" (click)="openEdit(story)">
                   {{ story.title }}
+                </span>
+
+                <!-- Assigned To Display -->
+                <span class="assignee-badge" [class.unassigned]="!story.assignedTo">
+                  {{ story.assignedTo || 'Unassigned' }}
                 </span>
 
                 <button mat-icon-button [matMenuTriggerFor]="storyMenu">+</button>
@@ -70,6 +143,11 @@
                           {{ taskItem.title }}
                         </span>
 
+                        <!-- Assigned To Display -->
+                        <span class="assignee-badge" [class.unassigned]="!taskItem.assignedTo">
+                          {{ taskItem.assignedTo || 'Unassigned' }}
+                        </span>
+
                         <div style="width: 28px"></div>
                       </div>
                     </mat-card>
@@ -81,6 +159,8 @@
         </div>
       }
     </mat-card>
+  } @empty {
+    <div class="empty-state">No work items match your current filter selection.</div>
   }
 </div>
 
