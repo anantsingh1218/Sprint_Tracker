@@ -28,6 +28,10 @@ export class BugList implements OnInit {
   stories: any[] = [];
   users: any[] = [];
 
+
+  showDeletePopup=false;
+  bugToDelete: IBug|null =null;
+
   constructor(
     private bugService: BugService,
     private sprintService: SprintService,
@@ -130,4 +134,58 @@ export class BugList implements OnInit {
     }
     this.closeBug();
   }
+
+
+  deleteBug(bug: IBug, event: Event): void {
+
+    event.stopPropagation();
+
+    this.bugToDelete = bug;
+    this.showDeletePopup = true;
+
+  }
+
+  // ==========================
+  // YES button
+  // ==========================
+  confirmDelete(): void {
+
+    if (!this.bugToDelete) {
+      return;
+    }
+
+    this.bugService.deleteBug(this.bugToDelete.id).subscribe({
+
+      next: () => {
+
+        this.fetchBugs();
+
+        this.showDeletePopup = false;
+        this.bugToDelete = null;
+
+      },
+
+      error: err => {
+
+        console.error('Error deleting bug:', err);
+
+        this.showDeletePopup = false;
+        this.bugToDelete = null;
+
+      }
+
+    });
+
+  }
+
+  // ==========================
+  // NO button
+  // ==========================
+  cancelDelete(): void {
+
+    this.showDeletePopup = false;
+    this.bugToDelete = null;
+
+  }
+
 }
