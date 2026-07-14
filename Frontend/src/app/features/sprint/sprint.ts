@@ -1,134 +1,388 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 
-import { SprintService } from '../../core/sprint/sprint';
-import { TaskService } from '../../core/task/task';
+import { SprintService } from './sprint.service';
+import { TaskService } from '../tasks/task.service';
+
+interface SprintData {
+  id?: string;
+  sprintName: string;
+  description: string;
+  productCode: string | null;
+  startDate: string;
+  endDate: string;
+  sprintDuration: number;
+  status: string;
+}
 
 @Component({
   selector: 'app-sprint',
   standalone: true,
   imports: [FormsModule, CommonModule],
   templateUrl: './sprint.html',
-  styleUrl: './sprint.css'
+  styleUrl: './sprint.css',
 })
-export class Sprint {
-  getTasksForSprint(sprintId: string) {
-  return this.taskService.getTasksBySprint(sprintId);
-}
+export class Sprint implements OnInit {
 
-getTaskCount(sprintId: string) {
-  return this.taskService.getTasksBySprint(sprintId).length;
-}
-
-get totalTasks() {
-  return this.taskService.getTasks().length;
-}
-
-get completedSprints() {
-  return this.sprints.filter(
-    (s: any) => s.status === 'Completed'
-  ).length;
-}
-
-getSprintProgress(sprintId: string) {
-  const total = this.getTaskCount(sprintId);
-
-  if (total === 0) {
-    return 0;
-  }
-
-  // Demo progress calculation
-  return Math.min(total * 20, 100);
-}
-
+  sprints: SprintData[] = [];
+  selectedSprint: SprintData | null = null;
   showSprintModal = false;
+  allTasks: any[] = [];
 
-  newSprint = {
-    name: '',
+  newSprint: SprintData = {
+    sprintName: '',
     description: '',
+    productCode: null,
     startDate: '',
     endDate: '',
-    duration: '', // days
-    status: 'Planned'
+    sprintDuration: 0,
+    status: 'Planned',
   };
 
   constructor(
-  private sprintService: SprintService,
-  private taskService: TaskService
-) {}
+    private sprintService: SprintService,
+    private taskService: TaskService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {}
 
-  get sprints() {
-    return this.sprintService.getSprints();
+  ngOnInit(): void {
+
+    this.loadSprints();
+    this.loadTasks();
+
+    this.route.paramMap.subscribe((params) => {
+
+      const sprintCode = params.get('id');
+
+      if (sprintCode) {
+
+        this.sprintService.getSprintById(sprintCode).subscribe({
+
+          next: (res: SprintData) => {
+            this.selectedSprint = res;
+            this.cdr.detectChanges();
+          },
+
+          error: (err: any) => {
+            console.error('Error fetching specific sprint:', err);
+          }
+
+        });
+
+      } else {
+
+        this.selectedSprint = null;
+        this.cdr.detectChanges();
+
+      }
+
+    });
+
+  }
+
+  loadSprints(): void {
+
+    this.sprintService.getSprints().subscribe({
+
+      next: (res: SprintData[]) => {
+        this.sprints = res;
+        this.cdr.detectChanges();
+      },
+
+      error: (err: any) => {
+        console.error('Error loading sprints:', err);
+      }
+
+    });
+
+  }
+
+  loadTasks(): void {
+
+    this.taskService.getTasks().subscribe({
+
+      next: (res: any[]) => {
+        this.allTasks = res;
+        this.cdr.detectChanges();
+      },
+
+      error: (err: any) => {
+        console.error('Error loading tasks:', err);
+      }
+
+    });
+
+  }
+
+  getTasksForSprint(sprintId: string | undefined) {
+
+    if (!sprintId) return [];
+
+    return this.allTasks.filter(
+      (t: any) => t.sprintCode === 'SP' + sprintId
+    );
+
+  }
+
+  getTaskCount(sprintId: string | undefined) {
+
+    return this.getTasksForSprint(sprintId).length;
+
+  }
+
+  get totalTasks() {
+
+    return this.allTasks.length;
+
+  }
+
+  get completedSprints() {
+
+    return this.sprints.filter(
+      (s: SprintData) => s.status === 'Completed'
+    ).length;
+
+  }
+
+  getSprintProgress(sprintId: string | undefined) {
+
+    const tasks = this.getTasksForSprint(sprintId);
+
+    if (!tasks || tasks.length === 0) {
+      return 0;
+    }
+
+    const done = tasks.filter(
+      (t: any) =>
+        t.taskstatus === 'DONE' ||
+        t.taskstatus === 'CLOSED'
+    ).length;
+
+    return Math.round((done / tasks.length) * 100);
+
   }
 
   openSprintForm() {
+
     this.showSprintModal = true;
+
   }
 
   closeSprintForm() {
+
     this.showSprintModal = false;
+
   }
 
+  // ====================================================
+  // WEEKEND HELPER METHODS
+  // ====================================================
+
+  private isWeekend(date: Date): boolean {
+
+    const day = date.getDay();
+
+    return day === 0 || day === 6;
+
+  }
+
+  /**
+   * If the selected start date falls on Saturday/Sunday,
+   * automatically begin counting from Monday.
+   */
+  private moveToNextWorkingDay(date: Date): Date {
+
+    const result = new Date(date);
+
+    while (this.isWeekend(result)) {
+      result.setDate(result.getDate() + 1);
+    }
+
+    return result;
+
+  }
+
+  /**
+   * Adds working days only.
+   * Saturdays and Sundays are skipped.
+   */
+  private addWorkingDays(start: Date, workingDays: number): Date {
+
+    let result = this.moveToNextWorkingDay(start);
+
+    if (workingDays <= 0) {
+      return result;
+    }
+
+    let count = 0;
+
+    while (count < workingDays) {
+
+      result.setDate(result.getDate() + 1);
+
+      if (!this.isWeekend(result)) {
+        count++;
+      }
+
+    }
+
+    return result;
+
+  }
+
+  /**
+   * Counts only weekdays between two dates.
+   */
+  private getWorkingDays(start: Date, end: Date): number {
+
+    let count = 0;
+
+    const current = this.moveToNextWorkingDay(start);
+
+    while (current < end) {
+
+      current.setDate(current.getDate() + 1);
+
+      if (!this.isWeekend(current)) {
+        count++;
+      }
+
+    }
+
+    return count;
+
+  }
+
+  // ====================================================
+  // CALCULATE DURATION
+  // ====================================================
+
   calculateDuration(): void {
+
     if (!this.newSprint.startDate || !this.newSprint.endDate) {
-      this.newSprint.duration = '0';
+
+      this.newSprint.sprintDuration = 0;
+      return;
+
     }
 
     const start = new Date(this.newSprint.startDate);
     const end = new Date(this.newSprint.endDate);
 
-    const diffTime = end.getTime() - start.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (end < start) {
 
-    this.newSprint.duration = String(diffDays)
+      this.newSprint.sprintDuration = 0;
+      return;
+
+    }
+
+    this.newSprint.sprintDuration =
+      this.getWorkingDays(start, end);
+
   }
+    onDateChange() {
 
-  onDateChange() {
     if (!this.newSprint.startDate || !this.newSprint.endDate) {
       return;
     }
 
-    // Only auto-calculate duration if user hasn't entered one
-    if (!this.newSprint.duration) {
-      const start = new Date(this.newSprint.startDate);
-      const end = new Date(this.newSprint.endDate);
+    // Always recalculate duration whenever dates change
+    this.calculateDuration();
 
-      const diffTime = end.getTime() - start.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      this.newSprint.duration = diffDays.toString();
-    }
   }
 
   onDurationChange() {
-    if (!this.newSprint.startDate || !this.newSprint.duration) {
+
+    if (!this.newSprint.startDate || !this.newSprint.sprintDuration) {
       return;
     }
 
     const start = new Date(this.newSprint.startDate);
-    const duration = Number(this.newSprint.duration);
 
-    const end = new Date(start);
-    end.setDate(start.getDate() + duration);
+    const end = this.addWorkingDays(
+      start,
+      this.newSprint.sprintDuration
+    );
 
-    this.newSprint.endDate = end.toISOString().split('T')[0];
+    this.newSprint.endDate =
+      end.toISOString().split('T')[0];
+
   }
 
   createSprint() {
-    if (!this.newSprint.name) return;
 
-    this.sprintService.addSprint(this.newSprint);
+    if (!this.newSprint.sprintName) {
+      return;
+    }
 
-    this.newSprint = {
-  name: '',
-  description: '',
-  duration: '',
-  startDate: '',
-  endDate: '',
-  status: 'Planned'
-};
+    this.sprintService.addSprint(this.newSprint).subscribe({
 
-    this.showSprintModal = false;
+      next: () => {
+
+        this.loadSprints();
+
+        this.newSprint = {
+          sprintName: '',
+          description: '',
+          productCode: null,
+          startDate: '',
+          endDate: '',
+          sprintDuration: 0,
+          status: 'Planned',
+        };
+
+        this.closeSprintForm();
+
+      },
+
+      error: (err: any) => {
+
+        console.error('Error creating sprint:', err);
+
+      }
+
+    });
+
   }
+
+  deleteSprint(id: string | undefined): void {
+
+    if (!id) {
+
+      console.error('Cannot delete sprint: Missing ID');
+      return;
+
+    }
+
+    if (confirm('Are you sure you want to delete this sprint?')) {
+
+      this.sprintService.deleteSprint(id).subscribe({
+
+        next: () => {
+
+          this.loadSprints();
+
+          if (this.selectedSprint?.id === id) {
+            this.selectedSprint = null;
+          }
+
+          this.cdr.detectChanges();
+
+        },
+
+        error: (err: any) => {
+
+          console.error('Error deleting sprint:', err);
+
+        }
+
+      });
+
+    }
+
+  }
+
 }

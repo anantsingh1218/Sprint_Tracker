@@ -1,1 +1,87 @@
-<h2 style="background:blue">NAVBAR WORKING</h2>
+<div class="navbar">
+
+  <!-- LEFT: Logo / Title -->
+  <div class="left">
+    <h2>SprintLite</h2>
+  </div>
+
+  <!-- CENTER: Search -->
+  <div class="center">
+
+    <input
+      type="text"
+      [(ngModel)]="searchText"
+      (input)="onSearch()"
+      placeholder="Search work items, sprints..."
+    />
+
+    @if (searchResults.length > 0) {
+      <div class="search-dropdown">
+
+        @for (item of searchResults; track item.type + '-' + item.id) {
+          <div
+            class="search-item"
+            (click)="navigateToItem(item)"
+          >
+            <strong>{{ item.type }}</strong> - {{ item.name }}
+          </div>
+        }
+
+      </div>
+    }
+
+  </div>
+
+  <!-- RIGHT: Actions -->
+  <div class="right">
+
+    @if (isProjectManager) {
+      <button
+        class="btn"
+        (click)="navigateToRegister()"
+      >
+        Register New User
+      </button>
+    }
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+
+      <!-- Avatar -->
+      <div
+        class="avatar"
+        (click)="toggleMenu()"
+      >
+        @if (username) {
+          {{ username[0] | uppercase }}
+        } @else {
+          A
+        }
+      </div>
+
+      <!-- Dropdown -->
+      @if (isMenuOpen) {
+        <div class="dropdown-menu">
+
+          <div
+            class="dropdown-item"
+            (click)="goToProfile()"
+          >
+            Profile
+          </div>
+
+          <div
+            class="dropdown-item"
+            (click)="logout()"
+          >
+            Logout
+          </div>
+
+        </div>
+      }
+
+    </div>
+
+  </div>
+
+</div>

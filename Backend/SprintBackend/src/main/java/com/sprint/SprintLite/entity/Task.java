@@ -6,10 +6,18 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Getter
 @Setter
@@ -20,6 +28,11 @@ public class Task extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+//    @Generated
+    @GeneratedColumn(value = "'T' || id")
+    @Column(name = "task_code", insertable = false, updatable = false)
+    private String taskCode;
 
     @Column(name = "title", length = Integer.MAX_VALUE)
     private String title;
@@ -47,6 +60,7 @@ public class Task extends BaseEntity {
     @JoinColumn(name = "storyid", nullable = false)
     private Story storyid;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "sprintid", nullable = false)
@@ -57,5 +71,8 @@ public class Task extends BaseEntity {
 
     @Column(name = "remainingestimatehours")
     private Integer remainingestimatehours;
+    @NonNull
+    @OneToMany(mappedBy = "taskid")
+    private Set<Worklog> worklogs = new LinkedHashSet<>();
 
 }

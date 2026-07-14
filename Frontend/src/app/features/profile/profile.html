@@ -1,0 +1,60 @@
+@if (profile) {
+  <div class="profile-page">
+    <div class="profile-card">
+
+      <!-- Avatar Header -->
+      <div class="profile-header">
+        <div class="avatar-circle">
+          {{ profile.username[0] | uppercase }}
+        </div>
+        <div class="profile-title">
+          <h1 class="profile-name">{{ profile.username }}</h1>
+          <span class="role-badge">{{ profile.role }}</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Details -->
+      <div class="profile-fields">
+
+        <div class="field-row">
+          <div class="field-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="field-content">
+            <span class="field-label">USERNAME</span>
+            <span class="field-value">{{ profile.username }}</span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+          </div>
+          <div class="field-content">
+            <span class="field-label">EMAIL ADDRESS</span>
+            <span class="field-value">{{ profile.email }}</span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="field-content">
+            <span class="field-label">ASSIGNED ROLE</span>
+            <span class="field-value">{{ profile.role }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

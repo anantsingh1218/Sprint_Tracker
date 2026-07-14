@@ -21,21 +21,39 @@ public class PathsConfig {
                 "/csrf-token",
                 "/register",
                 "/login",
-                "/attachment/**"
-                );
+                "/attachment/**",
+                "/worklog/**",
+                "/attachment/**",
+                "/forgot-password",
+                "/system/status",
+                "/bootstrap-admin",
+                "/search/**",
+                "/DSU/**",
+                "/users/**"
+        );
     }
 
     @Bean(name = "securedPaths")
     public List<String> securedPaths() {
         return List.of(
-//                "/attachment/*",
-                "/**"
+//                "/**"
+                "/dashboard/**",
+                "/user/**",
+                "/backlog/**",
+                "/feature/**",
+                "/product/**",
+                "/sprint/**",
+                "/story/**",
+                "/task/**",
+                "/Bug/**",
+                "/profile/**"
         );
     }
 
     @Bean(name = "adminPaths")
     public List<String> adminPaths() {
         return List.of(
+                "/register"
         );
     }
 }

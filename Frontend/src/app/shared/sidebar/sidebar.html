@@ -1,5 +1,65 @@
-<div class="sidebar">
-  <a routerLink="/dashboard">📊 Dashboard</a>
-  <a routerLink="/sprints">🏃 Sprints</a>
-  <a routerLink="/tasks">📋 Tasks</a>
+<div class="sidebar" [class.collapsed]="collapsed">
+
+  <div class="toggle">
+
+    <button (click)="toggleSidebar()">
+      ☰
+    </button>
+
+  </div>
+
+  <div class="logo">
+
+    <div class="logo-badge">
+      SL
+    </div>
+
+    @if(!collapsed){
+
+      <div class="logo-text">
+
+        <h3>SprintLite</h3>
+
+        <small>Project Board</small>
+
+      </div>
+
+    }
+
+  </div>
+
+  <div class="nav">
+
+    @for(item of visibleMenu; track item.route){
+
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active">
+
+        @if(!collapsed){
+
+          <span>{{ item.label }}</span>
+
+        }
+
+      </a>
+
+    }
+
+  </div>
+
+  @if(!collapsed){
+
+    <div class="footer">
+
+      <small>
+
+        © SprintLite 2026-2027
+
+      </small>
+
+    </div>
+
+  }
+
 </div>

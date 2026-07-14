@@ -38,7 +38,9 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        System.out.println("JWT FILTER EXECUTED");
         String authHeader = request.getHeader(ApplicationConstants.JWT_HEADER);
+        System.out.println("Authorization Header = " + authHeader);
         if (null != authHeader) {
             try {
                 // Extract the JWT token
@@ -53,10 +55,12 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
                         Claims claims = Jwts.parser().verifyWith(secretKey)
                                 .build().parseSignedClaims(jwt).getPayload();
                         String username = String.valueOf(claims.get("username"));
+                        System.out.println("Username from JWT = " + username);
                         String roles = String.valueOf(claims.get("roles"));
                         Authentication authentication = new UsernamePasswordAuthenticationToken(username,
                                 null, AuthorityUtils.commaSeparatedStringToAuthorityList(roles));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
+                        System.out.println("Authentication Set Successfully");
                     }
                 }
 

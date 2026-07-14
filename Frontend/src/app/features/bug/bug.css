@@ -1,0 +1,26 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}

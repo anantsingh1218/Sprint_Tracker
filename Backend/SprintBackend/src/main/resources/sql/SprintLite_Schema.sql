@@ -32,6 +32,8 @@ CREATE TYPE STATUS AS ENUM (
     'CLOSED'
     );
 
+
+
 -- =========================
 -- TABLES
 -- =========================
@@ -41,8 +43,15 @@ CREATE TABLE SPRINT (
                         SPRINTNAME text,
                         SPRINTDURATION integer DEFAULT 15,
                         STATUS SPRINTSTATUS,
+                        PRODUCTID integer,
                         STARTDATE date,
-                        ENDDATE date
+                        ENDDATE date,
+                        CREATEDAT timestamp,
+                        CREATEDBY varchar,
+                        UPDATEDAT timestamp,
+                        UPDATEDBY varchar,
+                        SPRINT_CODE varchar(50) GENERATED ALWAYS AS ('SP' || ID) STORED
+
 );
 
 CREATE TABLE USERS (
@@ -65,7 +74,8 @@ CREATE TABLE PRODUCTTABLE (
                               CREATEDAT timestamp,
                               CREATEDBY varchar,
                               UPDATEDAT timestamp,
-                              UPDATEDBY varchar
+                              UPDATEDBY varchar,
+                              PRODUCT_CODE varchar(50) GENERATED ALWAYS AS ('P' || PRODUCTID) STORED
 );
 
 CREATE TABLE FEATURETABLE (
@@ -74,6 +84,7 @@ CREATE TABLE FEATURETABLE (
                               DESCRIPTION text,
                               PRODUCTID integer,
                               SPRINTID integer,
+                              USERID integer,
                               FEATURESTATUS STATUS,
                               PRIORITY PRIORITY,
                               ESTIMATEDSTORYPOINTS integer,
@@ -81,7 +92,8 @@ CREATE TABLE FEATURETABLE (
                               CREATEDAT timestamp,
                               CREATEDBY varchar,
                               UPDATEDAT timestamp,
-                              UPDATEDBY varchar
+                              UPDATEDBY varchar,
+                              FEATURE_CODE varchar(50) GENERATED ALWAYS AS ('F' || FEATUREID) STORED
 );
 
 CREATE TABLE STORYTABLE (
@@ -97,7 +109,8 @@ CREATE TABLE STORYTABLE (
                             CREATEDAT timestamp,
                             CREATEDBY varchar,
                             UPDATEDAT timestamp,
-                            UPDATEDBY varchar
+                            UPDATEDBY varchar,
+                            STORY_CODE varchar(50) GENERATED ALWAYS AS ('S' || ID) STORED
 );
 
 CREATE TABLE TASKTABLE (
@@ -114,11 +127,13 @@ CREATE TABLE TASKTABLE (
                            CREATEDAT timestamp,
                            CREATEDBY varchar,
                            UPDATEDAT timestamp,
-                           UPDATEDBY varchar
+                           UPDATEDBY varchar,
+                           TASK_CODE varchar(50) GENERATED ALWAYS AS ('T' || ID) STORED
 );
 
 CREATE TABLE BUGS (
                       ID integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                      TITLE varchar,
                       BUGSTATUS STATUS,
                       PRIORITY PRIORITY,
                       DESCRIPTION text,
@@ -131,7 +146,8 @@ CREATE TABLE BUGS (
                       CREATEDAT timestamp,
                       CREATEDBY varchar,
                       UPDATEDAT timestamp,
-                      UPDATEDBY varchar
+                      UPDATEDBY varchar,
+                      BUGS_CODE varchar(50) GENERATED ALWAYS AS ('B' || ID) STORED
 );
 
 CREATE TABLE ATTACHMENTS (
@@ -185,6 +201,10 @@ CREATE TABLE DSUNOTES (
                         NOTESDATE date,
                         ENTITYTYPE ENTITYTYPE,
                         ENTITYID integer,
+                        STATUS STATUS,
+                        COMPLETEDWORK varchar,
+                        BLOCKERS varchar,
+                        NEXTPLAN varchar,
                         CREATEDAT timestamp,
                         CREATEDBY varchar,
                         UPDATEDAT timestamp,
@@ -195,6 +215,9 @@ CREATE TABLE DSUNOTES (
 -- FOREIGN KEYS
 -- =========================
 
+ALTER TABLE SPRINT
+    ADD FOREIGN KEY (PRODUCTID) REFERENCES PRODUCTTABLE(PRODUCTID);
+
 ALTER TABLE PRODUCTTABLE
     ADD FOREIGN KEY (OWNERID) REFERENCES USERS(ID);
 
@@ -203,6 +226,9 @@ ALTER TABLE FEATURETABLE
 
 ALTER TABLE FEATURETABLE
     ADD FOREIGN KEY (SPRINTID) REFERENCES SPRINT(ID);
+
+ALTER TABLE FEATURETABLE
+    ADD FOREIGN KEY (USERID) REFERENCES USERS(ID);
 
 ALTER TABLE STORYTABLE
     ADD FOREIGN KEY (FEATUREID) REFERENCES FEATURETABLE(FEATUREID);
@@ -251,3 +277,4 @@ ALTER TABLE WORKLOG
 
 ALTER TABLE WORKLOG
     ADD FOREIGN KEY (BUGID) REFERENCES BUGS(ID);
+

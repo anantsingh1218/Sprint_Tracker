@@ -1,0 +1,127 @@
+<div class="overlay">
+  <div class="workitem">
+    <div class="header">
+      <div class="title-block">
+        <div class="story-id">
+          @if (feature.id) {
+            Feature #{{ feature.id }}
+          } @else {
+            New Feature
+          }
+        </div>
+        <input class="title" [(ngModel)]="feature.title" placeholder="Enter title..." />
+      </div>
+
+      <div class="header-center">
+        @if (feature.id) {
+          <button
+            class="icon-btn"
+            (click)="toggleAttachmentsView()"
+            [class.active]="isAttachmentView"
+            title="Attachments"
+          >
+            {{ !isAttachmentView ? 'Go to Attachments Page' : 'Back to Description Page' }}
+          </button>
+        }
+      </div>
+
+      <button class="btn-close" (click)="closeOverlay()">✕</button>
+    </div>
+
+    <div class="body">
+      <div class="left">
+        @if (!isAttachmentView) {
+          <label>Description</label>
+          <textarea [(ngModel)]="feature.description"></textarea>
+
+          @if (feature.id) {
+            <div class="comments">
+              <h4>Discussion</h4>
+
+              <div class="comment" *ngFor="let c of feature.comments">
+                <b>{{ getUserName(c.userCode) }}</b>
+                <p>{{ c.text }}</p>
+                <small>{{ c.createdAt | date: 'short' }}</small>
+              </div>
+
+              <div class="add-comment">
+                <input [(ngModel)]="newComment" placeholder="Add comment..." />
+                <button (click)="addComment()">Add</button>
+              </div>
+            </div>
+          }
+        }
+
+        @if (isAttachmentView && feature.id) {
+          <h4>Attachments</h4>
+
+          <input type="file" multiple (change)="onFileSelected($event)" />
+
+          <div class="selected-files" *ngIf="selectedFiles().length">
+            <h5>Selected Files</h5>
+
+            <div *ngFor="let file of selectedFiles()">To be uploaded : {{ file.name }}</div>
+          </div>
+
+          <button (click)="uploadFiles()">Upload</button>
+
+          <div class="attachment-list">
+            <div class="attachment" *ngFor="let file of attachments()">
+              <a [href]="file.filename" target="_blank">
+                {{ file.filename }}
+              </a>
+
+              <button class="remove-btn" (click)="deleteAttachment(file.filename)">X</button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="right">
+        <label>Product</label>
+        <select [(ngModel)]="feature.productCode">
+          <option value="">Select Products</option>
+          <option *ngFor="let f of products" [value]="f.name">{{ f.name }}</option>
+        </select>
+
+        <label>Sprint</label>
+        <select [(ngModel)]="feature.sprintCode">
+          <option value="">Select Sprint</option>
+          <option *ngFor="let s of sprints" [value]="s.name">{{ s.name }}</option>
+        </select>
+
+        <label>Assigned To</label>
+        <select [(ngModel)]="feature.userCode">
+          <option value="">Unassigned</option>
+          <option value="SYSTEM">SYSTEM</option>
+          <option *ngFor="let u of users" [value]="u.name">{{ u.name }}</option>
+        </select>
+
+        <label>Status</label>
+        <select [(ngModel)]="feature.status">
+          <option value="OPEN">Open</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="DONE">Done</option>
+        </select>
+
+        <label>Priority</label>
+        <select [(ngModel)]="feature.priority">
+          <option value="LOW">Low</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HIGH">High</option>
+          <option value="CRITICAL">Critical</option>
+        </select>
+
+        <label>Story Points (Estimated)</label>
+        <input type="number" [(ngModel)]="feature.estimatedStoryPoints" />
+
+        <label>Remaining Estimate</label>
+        <input type="number" [(ngModel)]="feature.remainingStoryPoint" />
+      </div>
+    </div>
+    <div class="footer">
+      <button class="btn-save" (click)="saveFeature()">{{ feature.id ? 'Save' : 'Create' }}</button>
+      <button class="btn-cancel" (click)="closeOverlay()">Cancel</button>
+    </div>
+  </div>
+</div>

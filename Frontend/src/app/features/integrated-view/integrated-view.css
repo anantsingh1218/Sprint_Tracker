@@ -1,0 +1,266 @@
+/* =====================================================
+   FILTER BAR STYLING
+   ===================================================== */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #edebe9;
+  margin-bottom: 20px;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 150px;
+}
+
+.filter-group label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #605e5c;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-group input,
+.filter-group select {
+  height: 32px;
+  border: 1px solid #d2d0ce;
+  border-radius: 2px;
+  padding: 0 8px;
+  font-size: 13px;
+  color: #323130;
+  outline: none;
+  background-color: #FAF9F8;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  border-color: #0078d4;
+  background-color: #fff;
+}
+
+.clear-btn {
+  height: 32px;
+  padding: 0 16px;
+  background: transparent;
+  border: 1px dashed #a19f9d;
+  color: #323130;
+  font-size: 13px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.clear-btn:hover {
+  background: #f3f2f1;
+  border-color: #323130;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  background: #ffffff;
+  border: 1px dashed #edebe9;
+  color: #605e5c;
+  font-size: 14px;
+}
+
+/* =====================================================
+   ASSIGNEE BADGE STYLING
+   ===================================================== */
+.assignee-badge {
+  font-size: 12px;
+  color: #4f4f4f;
+  background: #f3f2f1;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #e1dfdd;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.assignee-badge.unassigned {
+  color: #a19f9d;
+  background: transparent;
+  border-style: dashed;
+}
+
+/* Base modifications for the row to align the items nicely */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+}
+
+/* Make sure elements stack elegantly in smaller container viewports */
+.backlog {
+  padding: 24px;
+  background: #f3f2f1;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* =========================
+   TOOLBAR
+   ========================= */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-weight: 600;
+  color: #323130;
+}
+
+/* =========================
+   BASE CARD
+   ========================= */
+mat-card {
+  box-shadow: none !important;
+  border: 1px solid #edebe9;
+  border-radius: 3px;
+  background: #fff;
+}
+
+/* title */
+.title {
+  flex: 1;
+  cursor: pointer;
+  color: #323130;
+}
+
+/* =========================
+   EXPAND ARROW
+   ========================= */
+.arrow {
+  width: 18px;
+  text-align: center;
+  color: #605e5c;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* =========================
+   CHILD INDENTATION
+   ========================= */
+.children {
+  margin-top: 6px;
+  margin-left: 18px;
+}
+
+/* =========================
+   HOVER EFFECT
+   ========================= */
+.feature:hover,
+.story:hover,
+.task:hover {
+  background: #f3f2f1;
+}
+/* =====================================================
+   WORK ITEM TYPES (CORE VISUAL SYSTEM)
+   ===================================================== */
+
+/* FEATURE */
+.feature {
+  border-left: 6px solid #0f6cbd;
+  background: #f5faff;
+}
+
+/* STORY */
+.story {
+  border-left: 5px solid #2b88d8;
+  background: #f8fbff;
+}
+
+/* TASK */
+.task {
+  border-left: 5px solid #107c10;
+  background: #f3fff5;
+}
+
+/* BUG override */
+.task.bug {
+  border-left-color: #d13438;
+  background: #fff5f5;
+}
+
+/* =====================================================
+   TYPE BADGES
+   ===================================================== */
+.work-item-type {
+  font-size: 11px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* badge colors */
+.type-feature {
+  background: #dbeafe;
+  color: #0f4a85;
+}
+
+.type-story {
+  background: #e8f0fe;
+  color: #1e4db7;
+}
+
+.type-task {
+  background: #e7f9ed;
+  color: #0f6a2a;
+}
+
+.type-bug {
+  background: #fde7e9;
+  color: #a4262c;
+}
+
+/* =========================
+   BUTTON (Azure-like minimal)
+   ========================= */
+button[mat-icon-button] {
+  width: 28px;
+  height: 28px;
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+button[mat-icon-button]:hover {
+  opacity: 1;
+  background: rgba(0, 120, 212, 0.08);
+  border-radius: 3px;
+}
+
+/* =========================
+   OVERLAY
+   ========================= */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}

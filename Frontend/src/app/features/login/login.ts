@@ -1,7 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/auth/auth';
+import { ApiService } from '../../core/apiService/api-service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { LoginResponse } from '../../dtos/LoginResponse';
+import { LoginRequest } from '../../dtos/LoginRequest';
+import { SystemService } from '../../services/systemService';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -10,47 +16,71 @@ import { AuthService } from '../../core/auth/auth';
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnDestroy {
   email = '';
   password = '';
   loading = false;
-  errorMessage: string = ''
-  errorMessageUpdated: boolean = false;
+  errorMessage = signal('');
+  isInitialized: boolean = false;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private apiService: ApiService,
+    private systemService: SystemService,
   ) {}
 
-   onLogin() {
-  if (!this.email && !this.password) {
-    // TODO: Change to inside Login Component
-    // TODO: Add username only or password only cases also.
-    // alert('Please enter email and password');
-    this.errorMessage = 'Please enter email and password'
-    this.errorMessageUpdated = true
-    return;
-  }
-  else if (!this.email){
-    // alert('Please enter email and password');
-    this.errorMessage = 'Please enter email'
-    this.errorMessageUpdated = true
-    return;
-  }
-  else if (!this.password){
-    // alert('Please enter email and password');
-    this.errorMessage = 'Please enter password'
-    this.errorMessageUpdated = true
-    return;
-  }
-  // Temporary frontend-only login
+  ngOnInit(): void {
+    this.systemService.loadStatus();
 
-  localStorage.setItem('token', 'dummy-token');
+    this.systemService.status$.pipe(takeUntil(this.destroy$)).subscribe((system) => {
+      this.isInitialized = system?.initialized ?? false;
+    });
+  }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
-  // TODO: Change to inside Login Component
-  // alert('Login successful!');
-  this.errorMessage = 'Login Successful'
-  this.errorMessageUpdated = true
+  sendLoginRequest() {
+    this.errorMessage.set(''); // Reset every login
+    const payload: LoginRequest = { username: this.email, password: this.password };
+    this.apiService.postRequest<LoginResponse>('/login', payload).subscribe({
+      next: (response) => {
+        const jwtToken: string = response.token;
+        this.authService.saveToken(jwtToken);
+        this.router.navigate(['/dashboard']);
+        console.log('Server Response : ', response);
+      },
+      error: (err: HttpErrorResponse) => {
+        switch (err.status) {
+          case 401:
+            this.errorMessage.set('Invalid username or password');
+            break;
+          case 500:
+            this.errorMessage.set('Server error, try again later');
+            break;
+          default:
+            this.errorMessage.set(err.error?.errorMessage || 'Login failed');
+            break;
+        }
+      },
+    });
+  }
 
-  this.router.navigate(['/dashboard']);
-}}
+  onLogin() {
+    this.authService.logout();
+    if (!this.email && !this.password) {
+      this.errorMessage.set('Please enter email and password');
+      return;
+    } else if (!this.email) {
+      this.errorMessage.set('Please enter email');
+      return;
+    } else if (!this.password) {
+      this.errorMessage.set('Please enter password');
+      return;
+    }
+    this.sendLoginRequest();
+  }
+}

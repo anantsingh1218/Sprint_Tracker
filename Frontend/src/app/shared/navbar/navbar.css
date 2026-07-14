@@ -1,0 +1,221 @@
+/* MAIN NAVBAR */
+.navbar {
+  height: 56px;
+  width: 100%;
+  background: #0f172a;
+  /* deep Azure DevOps-like dark */
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* LEFT SIDE */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  width: 34px;
+  height: 34px;
+  background: #2563eb;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.title h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.title small {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* CENTER SEARCH */
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.center input {
+  width: 60%;
+  max-width: 500px;
+
+  padding: 8px 12px;
+  border-radius: 8px;
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #111827;
+  color: white;
+
+  outline: none;
+  transition: 0.2s;
+}
+
+.center input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* RIGHT SIDE */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn {
+  background: #2563eb;
+  border: none;
+  color: white;
+
+  padding: 6px 12px;
+  border-radius: 6px;
+
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.2s;
+}
+
+.btn:hover {
+  background: #1d4ed8;
+}
+
+/* USER AVATAR */
+.avatar {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+}
+
+/* PROFILE DROPDOWN MENU */
+.profile-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 40px;
+  /* pull it slightly closer to cover any hover gap */
+  right: 0;
+  width: 160px;
+  background: #1e293b;
+  /* deep slate */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  flex-direction: column;
+  padding: 6px 0;
+  animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Trigger dropdown on hover */
+.profile-container:hover .dropdown-menu {
+  display: flex;
+}
+
+/* Add a invisible padding bridge so hover does not get lost when moving to dropdown */
+.profile-container::after {
+  content: '';
+  position: absolute;
+  top: 36px;
+  right: 0;
+  width: 100%;
+  height: 20px;
+  z-index: 999;
+}
+
+.dropdown-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background: #334155;
+  color: #60a5fa;
+  /* light blue highlight */
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.global-search-results {
+  position: absolute;
+  top: 56px; /* right below navbar */
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 500px;
+  max-width: 60%;
+
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  z-index: 1100;
+}
+
+.search-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: white;
+  cursor: pointer;
+}
+
+.search-item:hover {
+  background: #334155;
+}

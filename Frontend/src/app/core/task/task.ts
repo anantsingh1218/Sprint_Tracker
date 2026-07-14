@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+/*import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,10 @@ export class TaskService {
       id: crypto.randomUUID() // IMPORTANT for edit feature
     });
   }
+
+  getTaskById(id: string) {
+  return this.tasks.find((t: any) => t.id === id);
+}
 
   getTasksBySprint(sprintId: string) {
     return this.tasks.filter(t => t.sprintId === sprintId);
@@ -40,4 +44,4 @@ export class TaskService {
       };
     }
   }
-}
+} */

@@ -3,8 +3,11 @@ package com.sprint.SprintLite.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,5 +28,8 @@ public class Attachment extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploadedby")
     private Users uploadedby;
+    @NonNull
+    @OneToMany(mappedBy = "attachmentid")
+    private Set<AttachmentMapping> attachmentmappings = new LinkedHashSet<>();
 
 }

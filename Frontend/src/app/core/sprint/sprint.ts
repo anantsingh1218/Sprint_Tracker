@@ -5,10 +5,8 @@ import { Injectable } from '@angular/core';
 })
 export class SprintService {
 
-  private sprints: any[] = [
-    { id: '1', name: 'Sprint 1' },
-    { id: '2', name: 'Sprint 2' }
-  ];
+  private sprints: any[] = [];
+  selectedSprint:any=[];
 
   private nextId = 3;
 

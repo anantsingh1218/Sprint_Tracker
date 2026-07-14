@@ -1,0 +1,200 @@
+<!-- Main Page Wrapper -->
+<div class="story-page-wrapper">
+
+  <!-- Dashboard Top Header Section -->
+  <div class="story-page-header">
+    <h2>Stories</h2>
+    <button class="btn-create-story" (click)="openCreateStory()">+ Create Story</button>
+  </div>
+
+  <!-- Dashboard Cards Grid -->
+  <div class="stories-container">
+    @for (story of stories; track story.id) {
+      <div class="story-card" (click)="openStory(story)">
+        <h3 class="story-card-title">{{ story.title }}</h3>
+        <p class="story-card-body">{{ story.body }}</p>
+
+        <div class="story-card-footer">
+          <span class="status-badge" [ngClass]="story.status.toLowerCase()">
+            {{ story.status || 'todo' }}
+          </span>
+          <span class="story-points-badge">{{ story.remainingStoryPoint || 0 }} pts</span>
+        </div>
+      </div>
+    } @empty {
+      <div class="no-stories-fallback">
+        <p>No stories found. Click "+ Create Story" to add one!</p>
+      </div>
+    }
+  </div>
+
+  <!-- ========================================== -->
+  <!-- INTEGRATED DETAIL MODAL OVERLAY -->
+  <!-- ========================================== -->
+  @if (isStoryOpen && selectedStory) {
+    <div class="modal-backdrop" (click)="closeStory()">
+      <div class="modal-content-wrapper" (click)="$event.stopPropagation()">
+
+        <!-- Modal Top Bar Header -->
+        <div class="modal-header-bar">
+          <span class="story-id-indicator">
+            {{ selectedStory.id ? 'Story #' + selectedStory.id : 'New Story' }}
+          </span>
+          <button class="btn-close-x" (click)="closeStory()">✕</button>
+        </div>
+
+        <div class="modal-split-layout">
+
+          <!-- LEFT CORE EDIT CONTENT SIDE -->
+          <div class="layout-main-panel">
+            <div class="form-group-title">
+              <input
+                type="text"
+                [(ngModel)]="selectedStory.title"
+                placeholder="Enter title..."
+                class="input-story-title"
+              />
+            </div>
+
+            <div class="form-group-description">
+              <label>Description</label>
+              <textarea
+                [(ngModel)]="selectedStory.body"
+                placeholder="Describe your user story mechanics..."
+                class="textarea-story-body">
+              </textarea>
+            </div>
+
+            <!-- Discussion & Comments (ONLY SHOW WHEN UPDATING) -->
+            @if (selectedStory.id) {
+              <div class="discussion-panel">
+                <h4>Discussion</h4>
+
+                <div class="comments-timeline-stream">
+                  @for (cmt of selectedStory.comments; track cmt.createdAt) {
+                    <div class="individual-comment-bubble">
+                      <span class="comment-author">{{ getUserName(cmt.userCode) }}:</span>
+                      <p class="comment-text-content">{{ cmt.text }}</p>
+                    </div>
+                  }
+                </div>
+
+                <div class="comment-input-action-row">
+                  <input
+                    type="text"
+                    [(ngModel)]="newComment"
+                    placeholder="Add comment..."
+                    class="input-new-comment"
+                    (keyup.enter)="addComment()"
+                  />
+                  <button class="btn-add-comment" (click)="addComment()">Add</button>
+                </div>
+              </div>
+            }
+
+            <!-- Attachments (ONLY SHOW WHEN UPDATING) -->
+            @if (selectedStory.id) {
+              <div class="attachment-trigger-zone">
+                <button class="btn-toggle-attachments" (click)="toggleAttachmentsView()">
+                  {{ isAttachmentView ? '◄ Hide Attachments' : 'Go to Attachments Page ►' }}
+                </button>
+
+                @if (isAttachmentView) {
+                  <div class="attachments-inline-manager">
+                    <input type="file" multiple (change)="onFileSelected($event)" />
+                    <button (click)="uploadFiles()" [disabled]="!selectedFiles().length">Upload Files</button>
+
+                    @if (attachmentUploadStatus()) {
+                      <p class="status-text">{{ attachmentUploadStatus() }}</p>
+                    }
+
+                    <ul class="file-list-render">
+                      @for (file of attachments(); track file.filename) {
+                        <li>
+                          <span>{{ file.filename }}</span>
+                          <button class="btn-delete-file" (click)="deleteAttachment(file.filename)">Delete</button>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- RIGHT METADATA SIDEBAR DROP PANEL -->
+          <div class="layout-metadata-sidebar">
+            <div class="meta-field-select-row">
+              <label>Feature</label>
+              <select [(ngModel)]="selectedStory.featureCode" class="select-dropdown-meta">
+                <option [ngValue]="null">Select Feature</option>
+                @for (f of features(); track f.featureCode) {
+                  <option [ngValue]="f.featureCode">{{ f.title }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="meta-field-select-row">
+              <label>Sprint</label>
+              <select [(ngModel)]="selectedStory.sprintCode" class="select-dropdown-meta">
+                <option [ngValue]="null">Select Sprint</option>
+                @for (s of sprints(); track s.id) {
+                  <option [ngValue]="'SP' + s.id">{{ s.sprintName }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="meta-field-select-row">
+              <label>Assigned To</label>
+              <select [(ngModel)]="selectedStory.userCode" class="select-dropdown-meta">
+                <option [ngValue]="null">Unassigned</option>
+                @for (u of users(); track u) {
+                  <option [ngValue]="'U' + u.id">{{ u.username }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="meta-field-select-row">
+              <label>Status</label>
+              <select [(ngModel)]="selectedStory.status" class="select-dropdown-meta">
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">IN_PROGRESS</option>
+                <option value="BLOCKED"> BLOCKED</option>
+                <option value="DONE"> DONE</option>
+                <option value="CLOSED"> CLOSED</option>
+              </select>
+            </div>
+
+            <div class="meta-field-select-row">
+              <label>Priority</label>
+              <select [(ngModel)]="selectedStory.priority" class="select-dropdown-meta">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+              </select>
+            </div>
+
+            <div class="meta-field-select-row">
+              <label>Story Points (Estimated)</label>
+              <input
+                type="number"
+                [(ngModel)]="selectedStory.remainingStoryPoint"
+                class="input-numeric-points"
+                min="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Footer Strip Actions -->
+        <div class="modal-actions-footer-strip">
+          <button class="btn-action-save" (click)="saveStory()">
+            {{ selectedStory.id ? 'Update' : 'Create' }}
+          </button>
+          <button class="btn-action-cancel" (click)="closeStory()">Cancel</button>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>
