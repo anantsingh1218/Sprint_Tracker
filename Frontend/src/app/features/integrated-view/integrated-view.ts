@@ -1,5 +1,6 @@
-import { Component, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // <-- Required for ngModel filtering
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -32,6 +33,7 @@ interface TreeNode extends WorkItem {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule, // <-- Added here
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
@@ -48,6 +50,26 @@ export class IntegrateView {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
+  filteredTree: TreeNode[] = []; // <-- Render this in the HTML instead of 'tree'
+
+  // --- FILTER BINDINGS ---
+  searchTerm: string = '';
+  selectedProduct: string = '';
+  selectedSprint: string = '';
+  selectedStatus: string = '';
+  selectedUser: string = '';
+
+  // --- SIGNALS FOR DROPDOWNS ---
+  usersList = signal<any[]>([]);
+  featuresList = signal<any[]>([]);
+  storyList = signal<any[]>([]);
+  sprintsList = signal<any[]>([]);
+
+  // --- DYNAMIC UNIQUE OPTION LISTS FOR FILTERS ---
+  uniqueProducts: string[] = [];
+  uniqueSprints: string[] = [];
+  uniqueStatuses: string[] = [];
+  uniqueUsers: string[] = [];
 
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
@@ -56,24 +78,21 @@ export class IntegrateView {
   parentItem: WorkItem | null = null;
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
-  usersList = signal<any[]>([]);
-  featuresList = signal<any[]>([]);
-  storyList = signal<any[]>([]);
-  sprintsList = signal<any[]>([]);
+
   features: IFeatureResponse[] = [];
   stories: IStoryResponse[] = [];
   tasks: ITasksResponse[] = [];
   bugs: IBugResponse[] = [];
 
   constructor(
-    private service: WorkItemService,
+    public service: WorkItemService, // set to public to read from template/computed values safely
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
   ) {
     this.getBacklog();
   }
 
-  // ---------- TREE ----------
+  // ---------- TREE & FILTERING ----------
   buildTree(items: WorkItem[]): TreeNode[] {
     const map = new Map<string, TreeNode>();
 
@@ -98,7 +117,86 @@ export class IntegrateView {
 
   toggle(node: TreeNode) {
     node.expanded = !node.expanded;
-    this.tree = [...this.tree];
+    // Mirror structural toggle directly in both arrays
+    const findAndToggle = (list: TreeNode[]) => {
+      for (let item of list) {
+        if (item.id === node.id) {
+          item.expanded = node.expanded;
+          return true;
+        }
+        if (item.children && findAndToggle(item.children)) return true;
+      }
+      return false;
+    };
+    findAndToggle(this.tree);
+    this.applyFilters();
+  }
+
+  /**
+   * Applies all filters on the base hierarchical tree.
+   * Keeps parent structures intact if a child node matches the filters.
+   */
+applyFilters() {
+    const hasActiveFilters = 
+      !!this.searchTerm.trim() || 
+      !!this.selectedProduct || 
+      !!this.selectedSprint || 
+      !!this.selectedStatus ||
+      !!this.selectedUser; // <-- Added user check
+
+    if (!hasActiveFilters) {
+      this.filteredTree = JSON.parse(JSON.stringify(this.tree));
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const filterNode = (nodes: TreeNode[], parentProduct: string | null = null): TreeNode[] => {
+      return nodes
+        .map((node): TreeNode | null => {
+          const currentProduct = node.type === WorkItemType.Feature ? node.productCategory : parentProduct;
+          const filteredChildren = filterNode(node.children || [], currentProduct);
+
+          const matchesSearch = !this.searchTerm.trim() || 
+            node.title.toLowerCase().includes(this.searchTerm.toLowerCase());
+          
+          const matchesSprint = !this.selectedSprint || 
+            node.sprintName === this.selectedSprint;
+
+          const matchesStatus = !this.selectedStatus || 
+            node.status === this.selectedStatus;
+
+          const matchesProduct = !this.selectedProduct || 
+            currentProduct === this.selectedProduct;
+
+          // --- New User Filter Check ---
+          const matchesUser = !this.selectedUser || 
+            node.assignedTo === this.selectedUser;
+
+          const nodeSelfMatches = matchesSearch && matchesSprint && matchesStatus && matchesProduct && matchesUser;
+
+          if (nodeSelfMatches || filteredChildren.length > 0) {
+            return {
+              ...node,
+              children: filteredChildren,
+              expanded: true 
+            };
+          }
+          return null;
+        })
+        .filter((node): node is TreeNode => node !== null);
+    };
+
+    this.filteredTree = filterNode(this.tree);
+    this.cdr.detectChanges();
+  }
+
+  resetFilters() {
+    this.searchTerm = '';
+    this.selectedProduct = '';
+    this.selectedSprint = '';
+    this.selectedStatus = '';
+    this.selectedUser = ''; // <-- Reset user
+    this.applyFilters();
   }
 
   openCreate(type: WorkItemType, parent: WorkItem | null = null) {
@@ -188,7 +286,7 @@ export class IntegrateView {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = '/story/add';
+          endpoint = '/story/create';
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -200,8 +298,10 @@ export class IntegrateView {
           payload = this.toBug(item);
           break;
       }
-
-      this.apiService.postRequest<any>(endpoint, payload).subscribe({
+      let {comments, ...destructedPayload} = payload;
+      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      this.apiService.postRequest<any>(endpoint, payloadToSend).subscribe({
         next: (response) => {
           let savedWorkItem: WorkItem;
           switch (item.type) {
@@ -237,7 +337,7 @@ export class IntegrateView {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = `/story/${item.id}`;
+          endpoint = `/story/${item.id.substring(1)}`;
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -249,8 +349,10 @@ export class IntegrateView {
           payload = this.toBug(item);
           break;
       }
-
-      this.apiService.putRequest<any>(endpoint, payload).subscribe({
+      let {comments, ...destructedPayload} = payload;
+      const payloadToSend = {...destructedPayload, comments: comments?.at(-1)?.text};
+      console.log("To Save Payload = " + JSON.stringify(payloadToSend));
+      this.apiService.putRequest<any>(endpoint, payloadToSend).subscribe({
         next: () => {
           const items = [...this.service.items];
           const index = items.findIndex((i) => i.id === item.id);
@@ -264,17 +366,20 @@ export class IntegrateView {
         error: (err) => console.error('Failed to update work item', err),
       });
     }
+    this.closeOverlay();
   }
 
-  private refreshTree() {
+private refreshTree() {
     const items = this.service.items;
+    this.populateDropdownOptions(items); // <-- Refresh dropdown arrays
+
     const featureNodes = items.filter((i) => i.type === WorkItemType.Feature);
     const storyNodes = items.filter((i) => i.type === WorkItemType.Story);
     const taskNodes = items.filter((i) => i.type === WorkItemType.Task);
     const bugNodes = items.filter((i) => i.type === WorkItemType.Bug);
 
     this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];
-    this.cdr.detectChanges();
+    this.applyFilters();
   }
 
   // ---------- MAPPERS ----------
@@ -327,7 +432,6 @@ export class IntegrateView {
   }
 
   toBug(item: WorkItem): IBug {
-    console.log(item);
     return {
       id: Number(item.id.substring(1)),
       bugCode: item.id,
@@ -514,10 +618,8 @@ export class IntegrateView {
     tasks: WorkItem[],
     bugs: WorkItem[],
   ): TreeNode[] {
-    // 1. Create a universal lookup map
     const map = new Map<string, TreeNode>();
 
-    // 2. Add Features to the map
     features.forEach((f) => {
       map.set(this.normalizeId(f.id), {
         ...f,
@@ -526,12 +628,10 @@ export class IntegrateView {
       });
     });
 
-    // 3. Add Stories to the map AND push them to their Feature parents
     stories.forEach((s) => {
       const normalizedStoryId = this.normalizeId(s.id);
       const parentId = this.normalizeId(s.parentId);
 
-      // Create the story node shell in our map so its upcoming tasks can find it
       const storyNode: TreeNode = {
         ...s,
         children: [],
@@ -539,14 +639,12 @@ export class IntegrateView {
       };
       map.set(normalizedStoryId, storyNode);
 
-      // Attach story node to its feature parent
       const parentFeature = map.get(parentId);
       if (parentFeature) {
         parentFeature.children.push(storyNode);
       }
     });
 
-    // 4. Push Tasks to their Story parents
     tasks.forEach((t) => {
       const parentId = this.normalizeId(t.parentId);
       const parentStory = map.get(parentId);
@@ -564,7 +662,6 @@ export class IntegrateView {
       }
     });
 
-    // 5. Push Bugs to their Story parents
     bugs.forEach((b) => {
       const parentId = this.normalizeId(b.parentId);
       const parentStory = map.get(parentId);
@@ -582,9 +679,14 @@ export class IntegrateView {
       }
     });
 
-    // 6. Return ONLY the root level nodes (Features)
-    // We filter the full map values down to items that have no parentId
     return Array.from(map.values()).filter((node) => node.parentId === null);
+  }
+
+  private populateDropdownOptions(items: WorkItem[]) {
+    this.uniqueProducts = Array.from(new Set(items.map(i => i.productCategory).filter(Boolean))).sort() as string[];
+    this.uniqueSprints = Array.from(new Set(items.map(i => i.sprintName).filter(Boolean))).sort() as string[];
+    this.uniqueStatuses = Array.from(new Set(items.map(i => i.status).filter(Boolean))).sort() as string[];
+    this.uniqueUsers = Array.from(new Set(items.map(i => i.assignedTo).filter(Boolean))).sort() as string[];
   }
 
   private getBacklog() {
@@ -593,28 +695,30 @@ export class IntegrateView {
       storyData: this.apiService.getRequest<any[]>('/story/all'),
       tasks: this.apiService.getRequest<ITasksResponse[]>('/task/all'),
       bugs: this.apiService.getRequest<IBugResponse[]>('/Bug'),
-      // Fetch dropdown reference entries simultaneously 
-      usersData: this.apiService.getRequest<any[]>('/users/all'), 
+      usersData: this.apiService.getRequest<any[]>('/users/all'),
       featuresData: this.apiService.getRequest<any[]>('/feature'),
-      sprintsData: this.apiService.getRequest<any[]>('/sprint/all')
-
+      sprintsData: this.apiService.getRequest<any[]>('/sprint/all'),
     }).subscribe({
       next: ({ features, tasks, bugs, usersData, featuresData, storyData, sprintsData }) => {
         const featureNodes = features.map((f) => this.mapFeature(f));
         const storyNodes = storyData.map((s) => this.mapStory(s));
         const taskNodes = tasks.map((t) => this.mapTask(t));
         const bugNodes = bugs.map((b) => this.mapBug(b));
+
         this.usersList.set(usersData || []);
         this.featuresList.set(featuresData || []);
         this.sprintsList.set(sprintsData || []);
         this.storyList.set(storyData || []);
-        const allItems: WorkItem[] = [...featureNodes, ...storyNodes, ...taskNodes, ...bugNodes]
-        this.service.update(allItems)
-        // Overwrite tree variable with a brand new array reference
-        this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];
 
-        // Force Angular to scan and render the UI now that asynchronous data is ready
-        this.cdr.detectChanges();
+        const allItems: WorkItem[] = [...featureNodes, ...storyNodes, ...taskNodes, ...bugNodes];
+        this.service.update(allItems);
+
+        // Populate dropdown data directly
+        this.populateDropdownOptions(allItems);
+
+        // Populate tree configurations
+        this.tree = [...this.buildTreeWithChildren(featureNodes, storyNodes, taskNodes, bugNodes)];
+        this.applyFilters(); // Initialize display array
       },
       error: (err) => {
         console.error('Error fetching backlog data', err);
