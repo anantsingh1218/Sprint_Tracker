@@ -52,7 +52,7 @@ export class IntegrateView {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
-  filteredTree: TreeNode[] = []; 
+  filteredTree: TreeNode[] = [];
 
   // --- FILTER BINDINGS ---
   searchTerm: string = '';
@@ -512,14 +512,14 @@ export class IntegrateView {
       id: item.id,
       title: item.title,
       description: item.description,
-      status: item.status,
+      featureStatus: item.status,
       priority: item.priority,
       estimatedStoryPoints: item.estimatedPoints,
-      remainingStoryPoint: item.remainingPoints,
-      productCode: item.productCategory,
-      sprintCode: item.sprintName,
-      userCode: item.assignedTo,
-      comments: item.comments,
+      remainingStoryPoints: item.remainingPoints,
+      productName: item.productCategory,
+      sprintName: item.sprintName,
+      assignedTo: item.assignedTo,
+      commentsList: item.comments,
     };
   }
 
@@ -575,20 +575,20 @@ export class IntegrateView {
 
   fromFeature(f: IFeature): WorkItem {
     return {
-      id: f.id,
+      id: f.id ?? '',
       title: f.title,
       type: WorkItemType.Feature,
-      parentId: f.productCode ?? null,
-      status: f.status,
+      parentId: null,
+      status: f.featureStatus,
       description: f.description,
-      sprintName: f.sprintCode,
+      sprintName: f.sprintName,
       priority: f.priority,
-      assignedTo: f.userCode,
-      productCategory: f.productCode,
+      assignedTo: f.assignedTo,
+      productCategory: f.productName,
       reopenCount: 0,
       estimatedPoints: f.estimatedStoryPoints,
-      remainingPoints: f.remainingStoryPoint,
-      comments: f.comments,
+      remainingPoints: f.remainingStoryPoints,
+      comments: f.commentsList != undefined ? f.commentsList : [],
     };
   }
 

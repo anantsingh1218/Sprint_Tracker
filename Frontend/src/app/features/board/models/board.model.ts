@@ -14,6 +14,8 @@ export interface TaskCard {
 
   assignee: string;
 
+  status: string;
+
 }
 
 export interface BoardColumn {

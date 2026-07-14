@@ -6,6 +6,7 @@ import {
   Output,
   SimpleChanges,
   OnInit,
+  ChangeDetectorRef
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -72,6 +73,7 @@ export class Tasks implements OnChanges, OnInit {
   constructor(
     private taskService: TaskService,
     private route: ActivatedRoute,
+    private cdr:ChangeDetectorRef
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -137,6 +139,7 @@ export class Tasks implements OnChanges, OnInit {
     this.taskService.getTasks().subscribe({
       next: (res) => {
         this.tasksList = res.map(task => this.mapResponseToInterface(task));
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading tasks', err),
     });
@@ -167,7 +170,7 @@ export class Tasks implements OnChanges, OnInit {
     // Convert both to strings and trim any whitespace to prevent false negatives
     const taskSprint = String(t.sprintCode || '').trim();
     const selectedSprint = String(this.selectedSprintId).trim();
-    
+
     return taskSprint === selectedSprint;
   });
   }

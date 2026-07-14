@@ -81,20 +81,97 @@ VALUES
 -- =========================
 -- TASK
 -- =========================
-INSERT INTO TaskTable (title, body, userId, taskStatus, priority, storyId, sprintId, originalEstimateHours, remainingEstimateHours, createdAt, createdBy, updatedAt, updatedBy)
+INSERT INTO TaskTable
+(
+    title,
+    body,
+    userId,
+    taskStatus,
+    priority,
+    storyId,
+    sprintId,
+    originalEstimateHours,
+    remainingEstimateHours,
+    completed_date,
+    completed_at,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy
+)
 VALUES
-    ('Gather Requirements', 'Collect lead requirements', 2, 'DONE', 'MEDIUM', 1, 1, 4, 0,
-     CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
 
-    ('Design Lead Screen', 'Create lead UI', 2, 'IN_PROGRESS', 'HIGH', 1, 1, 8, 3,
-     CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
+    (
+        'Gather Requirements',
+        'Collect lead requirements',
+        2,
+        'DONE',
+        'MEDIUM',
+        1,
+        1,
+        4,
+        0,
+        CURRENT_DATE,
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP,
+        'SYSTEM',
+        CURRENT_TIMESTAMP,
+        'SYSTEM'
+    ),
 
-    ('Implement Lead API', 'Create backend APIs', 2, 'OPEN', 'HIGH', 1, 1, 12, 12,
-     CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM'),
+    (
+        'Design Lead Screen',
+        'Create lead UI',
+        2,
+        'IN_PROGRESS',
+        'HIGH',
+        1,
+        1,
+        8,
+        3,
+        NULL,
+        NULL,
+        CURRENT_TIMESTAMP,
+        'SYSTEM',
+        CURRENT_TIMESTAMP,
+        'SYSTEM'
+    ),
 
-    ('Dashboard Wireframe', 'Create dashboard wireframe', 2, 'OPEN', 'MEDIUM', 3, 2, 6, 6,
-     CURRENT_TIMESTAMP, 'SYSTEM', CURRENT_TIMESTAMP, 'SYSTEM');
+    (
+        'Implement Lead API',
+        'Create backend APIs',
+        2,
+        'OPEN',
+        'HIGH',
+        1,
+        1,
+        12,
+        12,
+        NULL,
+        NULL,
+        CURRENT_TIMESTAMP,
+        'SYSTEM',
+        CURRENT_TIMESTAMP,
+        'SYSTEM'
+    ),
 
+    (
+        'Dashboard Wireframe',
+        'Create dashboard wireframe',
+        2,
+        'OPEN',
+        'MEDIUM',
+        3,
+        2,
+        6,
+        6,
+        NULL,
+        NULL,
+        CURRENT_TIMESTAMP,
+        'SYSTEM',
+        CURRENT_TIMESTAMP,
+        'SYSTEM'
+    );
 
 -- =========================
 -- BUGS

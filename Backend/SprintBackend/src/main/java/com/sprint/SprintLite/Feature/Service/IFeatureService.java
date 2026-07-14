@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface IFeatureService {
 
-    RegisterResponseDto createFeature(CreateFeatureRequest request);
+    FeatureResponseDto createFeature(CreateFeatureRequest request);
 
     FeatureResponseDto getFeatureByFeatureCode(String featureCode);
 

@@ -1,37 +1,100 @@
 <div class="analytics-card" *ngIf="teamCapacity">
 
     <div class="card-header">
-        <h3>Team Capacity</h3>
-        <span class="ratio">{{ teamCapacity.availableMembers }}/{{ teamCapacity.totalMembers }} available</span>
+
+        <div>
+
+            <h3>Team Capacity</h3>
+
+            <p class="subtitle">
+
+                Current Team Workload
+
+            </p>
+
+        </div>
+
+        <span class="badge">
+
+            {{teamCapacity.totalMembers}} Members
+
+        </span>
+
     </div>
 
     <div class="capacity-track">
-        <div class="seg seg-success"
-             [style.width.%]="(teamCapacity.availableMembers / teamCapacity.totalMembers) * 100">
+
+        <div
+                class="seg seg-success"
+
+                [style.width.%]="(teamCapacity.availableMembers/teamCapacity.totalMembers)*100">
+
         </div>
-        <div class="seg seg-warning"
-             [style.width.%]="(teamCapacity.busyMembers / teamCapacity.totalMembers) * 100">
+
+        <div
+                class="seg seg-warning"
+
+                [style.width.%]="(teamCapacity.busyMembers/teamCapacity.totalMembers)*100">
+
         </div>
-        <div class="seg seg-danger"
-             [style.width.%]="(teamCapacity.overloadedMembers / teamCapacity.totalMembers) * 100">
+
+        <div
+                class="seg seg-danger"
+
+                [style.width.%]="(teamCapacity.overloadedMembers/teamCapacity.totalMembers)*100">
+
         </div>
+
     </div>
 
     <div class="stats">
 
-        <div>
-            <span><i class="dot dot-success"></i>Available</span>
-            <strong>{{ teamCapacity.availableMembers }}</strong>
+        <div class="stat">
+
+            <span>
+
+                🟢 Available
+
+            </span>
+
+            <strong>
+
+                {{teamCapacity.availableMembers}}
+
+            </strong>
+
         </div>
 
-        <div>
-            <span><i class="dot dot-warning"></i>Busy</span>
-            <strong>{{ teamCapacity.busyMembers }}</strong>
+        <div class="stat">
+
+            <span>
+
+                🟠 Busy
+
+            </span>
+
+            <strong>
+
+                {{teamCapacity.busyMembers}}
+
+            </strong>
+
         </div>
 
-        <div>
-            <span><i class="dot dot-danger"></i>Overloaded</span>
-            <strong>{{ teamCapacity.overloadedMembers }}</strong>
+        <div class="stat">
+
+            <span>
+
+                🔴 Overloaded
+
+            </span>
+
+            <strong>
+
+                {{teamCapacity.overloadedMembers}}
+
+            </strong>
+
         </div>
 
     </div>

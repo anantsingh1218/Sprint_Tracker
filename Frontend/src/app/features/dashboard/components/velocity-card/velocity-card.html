@@ -1,35 +1,130 @@
-<div
-    class="analytics-card"
-    *ngIf="velocity"
->
+<div class="analytics-card" *ngIf="velocity">
 
     <div class="card-header">
-        <h3>Sprint Velocity</h3>
-        <span class="badge">{{ velocity.sprintName }}</span>
+
+        <div>
+
+            <h3>Sprint Velocity</h3>
+
+            <p class="subtitle">
+
+                Story Completion Progress
+
+            </p>
+
+        </div>
+
+        <span class="badge">
+
+            {{ velocity.sprintName }}
+
+        </span>
+
     </div>
 
     <div class="velocity-body">
 
-        <div class="ring-wrap">
-            <svg class="progress-ring" viewBox="0 0 80 80">
-                <circle class="ring-bg" cx="40" cy="40" r="34"></circle>
-                <circle class="ring-fill" cx="40" cy="40" r="34"
-                        [attr.stroke-dasharray]="213.6"
-                        [attr.stroke-dashoffset]="213.6 - (213.6 * (velocity.velocity || 0) / 100)">
-                </circle>
-            </svg>
-            <div class="ring-value">{{ velocity.velocity }}%</div>
+        <div class="ring-section">
+
+            <div class="ring-wrap">
+
+                <svg class="progress-ring" viewBox="0 0 80 80">
+
+                    <circle
+                            class="ring-bg"
+                            cx="40"
+                            cy="40"
+                            r="34">
+                    </circle>
+
+                    <circle
+                            class="ring-fill"
+                            cx="40"
+                            cy="40"
+                            r="34"
+
+                            [attr.stroke-dasharray]="213.6"
+
+                            [attr.stroke-dashoffset]="213.6 - (213.6 * (velocity.velocity || 0) / 100)">
+                    </circle>
+
+                </svg>
+
+                <div class="ring-value">
+
+                    {{velocity.velocity}}%
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="story-info">
-            <div>
-                <span>Completed</span>
-                <strong>{{ velocity.completedStories }}</strong>
+        <div class="stats">
+
+            <div class="stat">
+
+                <span>
+
+                    Completed
+
+                </span>
+
+                <strong>
+
+                    {{velocity.completedStories}}
+
+                </strong>
+
             </div>
-            <div>
-                <span>Total Stories</span>
-                <strong>{{ velocity.totalStories }}</strong>
+
+            <div class="stat">
+
+                <span>
+
+                    Remaining
+
+                </span>
+
+                <strong>
+
+                    {{velocity.totalStories - velocity.completedStories}}
+
+                </strong>
+
             </div>
+
+            <div class="stat">
+
+                <span>
+
+                    Total Stories
+
+                </span>
+
+                <strong>
+
+                    {{velocity.totalStories}}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+        <div class="progress-wrapper">
+
+            <div class="progress-bar">
+
+                <div
+                        class="progress-fill"
+
+                        [style.width.%]="velocity.velocity">
+
+                </div>
+
+            </div>
+
         </div>
 
     </div>

@@ -1,95 +1,224 @@
 <div class="header">
   <h2>Bugs</h2>
+
   <button class="add-btn" (click)="openCreateBug()">
     + Create Bug
   </button>
 </div>
 
 <div class="sprint-filter" style="gap: 16px;">
+
   <div style="display: flex; gap: 8px; align-items: center;">
     <label>Select Sprint:</label>
+
     <select [(ngModel)]="filterSprintCode" (ngModelChange)="fetchBugs()">
       <option value="">All Sprints</option>
-      <option *ngFor="let s of sprints" [value]="'SP' + s.id">{{ s.sprintName }}</option>
+
+      <option *ngFor="let s of sprints" [value]="'SP' + s.id">
+        {{ s.sprintName }}
+      </option>
     </select>
   </div>
+
   <div style="display: flex; gap: 8px; align-items: center;">
     <label>Select Story:</label>
+
     <select [(ngModel)]="filterStoryCode" (ngModelChange)="fetchBugs()">
       <option value="">All Stories</option>
-      <option *ngFor="let st of stories" [value]="'S' + st.id">{{ st.title }}</option>
+
+      <option *ngFor="let st of stories" [value]="'S' + st.id">
+        {{ st.title }}
+      </option>
     </select>
   </div>
+
 </div>
 
 <div class="board">
+
   <!-- OPEN -->
   <div class="column">
+
     <h3>Open</h3>
+
     <div class="task-list">
-      <div class="task-card" *ngFor="let bug of openBugs" (click)="openBug(bug)">
+
+      <div
+        class="task-card"
+        *ngFor="let bug of openBugs"
+        (click)="openBug(bug)">
+
         <div class="task-header">
+
           <h4>{{ bug.bugCode }}: {{ bug.title }}</h4>
-          <span class="priority">{{ bug.priority }}</span>
+
+          <div class="header-actions">
+
+            <span class="priority">
+              {{ bug.priority }}
+            </span>
+
+            <button
+              class="icon-delete"
+              (click)="deleteBug(bug, $event)"
+              title="Delete Bug">
+              🗑️
+            </button>
+
+          </div>
+
         </div>
+
         <p>{{ bug.description || 'No description' }}</p>
-        <div class="task-meta" style="flex-direction: column; align-items: flex-start; gap: 4px; border-top: none; padding-top: 0; margin-top: 4px;">
-          <span *ngIf="bug.sprintCode">Sprint: {{ getSprintName(bug.sprintCode) }}</span>
-          <span *ngIf="bug.storyCode">Story: {{ getStoryName(bug.storyCode) }}</span>
+
+        <div
+          class="task-meta"
+          style="flex-direction: column; align-items:flex-start; gap:4px; border-top:none; padding-top:0; margin-top:4px;">
+
+          <span *ngIf="bug.sprintCode">
+            Sprint: {{ getSprintName(bug.sprintCode) }}
+          </span>
+
+          <span *ngIf="bug.storyCode">
+            Story: {{ getStoryName(bug.storyCode) }}
+          </span>
+
         </div>
+
         <div class="task-meta">
           <span>👤 {{ bug.assignedUserCode || 'Unassigned' }}</span>
           <span>⏱ {{ bug.remainingestimatehours || 0 }}h</span>
         </div>
+
       </div>
+
     </div>
+
   </div>
 
   <!-- IN PROGRESS -->
   <div class="column">
+
     <h3>In Progress</h3>
+
     <div class="task-list">
-      <div class="task-card" *ngFor="let bug of inProgressBugs" (click)="openBug(bug)">
+
+      <div
+        class="task-card"
+        *ngFor="let bug of inProgressBugs"
+        (click)="openBug(bug)">
+
         <div class="task-header">
+
           <h4>{{ bug.bugCode }}: {{ bug.title }}</h4>
-          <span class="priority">{{ bug.priority }}</span>
+
+          <div class="header-actions">
+
+            <span class="priority">
+              {{ bug.priority }}
+            </span>
+
+            <button
+              class="icon-delete"
+              (click)="deleteBug(bug, $event)"
+              title="Delete Bug">
+              🗑️
+            </button>
+
+          </div>
+
         </div>
+
         <p>{{ bug.description || 'No description' }}</p>
-        <div class="task-meta" style="flex-direction: column; align-items: flex-start; gap: 4px; border-top: none; padding-top: 0; margin-top: 4px;">
-          <span *ngIf="bug.sprintCode">Sprint: {{ getSprintName(bug.sprintCode) }}</span>
-          <span *ngIf="bug.storyCode">Story: {{ getStoryName(bug.storyCode) }}</span>
+
+        <div
+          class="task-meta"
+          style="flex-direction: column; align-items:flex-start; gap:4px; border-top:none; padding-top:0; margin-top:4px;">
+
+          <span *ngIf="bug.sprintCode">
+            Sprint: {{ getSprintName(bug.sprintCode) }}
+          </span>
+
+          <span *ngIf="bug.storyCode">
+            Story: {{ getStoryName(bug.storyCode) }}
+          </span>
+
         </div>
+
         <div class="task-meta">
           <span>👤 {{ bug.assignedUserCode || 'Unassigned' }}</span>
           <span>⏱ {{ bug.remainingestimatehours || 0 }}h</span>
         </div>
+
       </div>
+
     </div>
+
   </div>
 
   <!-- CLOSED -->
   <div class="column">
+
     <h3>Closed</h3>
+
     <div class="task-list">
-      <div class="task-card" *ngFor="let bug of closedBugs" (click)="openBug(bug)">
+
+      <div
+        class="task-card"
+        *ngFor="let bug of closedBugs"
+        (click)="openBug(bug)">
+
         <div class="task-header">
+
           <h4>{{ bug.bugCode }}: {{ bug.title }}</h4>
-          <span class="priority">{{ bug.priority }}</span>
+
+          <div class="header-actions">
+
+            <span class="priority">
+              {{ bug.priority }}
+            </span>
+
+            <button
+              class="icon-delete"
+              (click)="deleteBug(bug, $event)"
+              title="Delete Bug">
+              🗑️
+            </button>
+
+          </div>
+
         </div>
+
         <p>{{ bug.description || 'No description' }}</p>
-        <div class="task-meta" style="flex-direction: column; align-items: flex-start; gap: 4px; border-top: none; padding-top: 0; margin-top: 4px;">
-          <span *ngIf="bug.sprintCode">Sprint: {{ getSprintName(bug.sprintCode) }}</span>
-          <span *ngIf="bug.storyCode">Story: {{ getStoryName(bug.storyCode) }}</span>
+
+        <div
+          class="task-meta"
+          style="flex-direction: column; align-items:flex-start; gap:4px; border-top:none; padding-top:0; margin-top:4px;">
+
+          <span *ngIf="bug.sprintCode">
+            Sprint: {{ getSprintName(bug.sprintCode) }}
+          </span>
+
+          <span *ngIf="bug.storyCode">
+            Story: {{ getStoryName(bug.storyCode) }}
+          </span>
+
         </div>
+
         <div class="task-meta">
           <span>👤 {{ bug.assignedUserCode || 'Unassigned' }}</span>
           <span>⏱ {{ bug.remainingestimatehours || 0 }}h</span>
         </div>
+
       </div>
+
     </div>
+
   </div>
+
 </div>
 
+<!-- BUG OVERLAY -->
 <app-bug
   *ngIf="isBugOpen"
   [bug]="selectedBug"
@@ -97,5 +226,36 @@
   [stories]="stories"
   [users]="users"
   (close)="closeBug()"
-  (save)="saveBug($event)"
-></app-bug>
+  (save)="saveBug($event)">
+</app-bug>
+
+<!-- DELETE CONFIRMATION POPUP -->
+<div class="popup-overlay" *ngIf="showDeletePopup">
+
+  <div class="popup-card">
+
+    <h3>Delete Bug</h3>
+
+    <p>
+      Are you sure you want to delete this bug?
+    </p>
+
+    <div class="popup-buttons">
+
+      <button
+        class="cancel-btn"
+        (click)="cancelDelete()">
+        No
+      </button>
+
+      <button
+        class="confirm-btn"
+        (click)="confirmDelete()">
+        Yes
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
