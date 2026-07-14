@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -31,7 +31,8 @@ export class BugList implements OnInit {
   constructor(
     private bugService: BugService,
     private sprintService: SprintService,
-    private storyService: StoryService
+    private storyService: StoryService,
+    private cdr:ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -58,6 +59,7 @@ export class BugList implements OnInit {
     this.bugService.getAllBugs().subscribe({
       next: (res: IBug[]) => {
         this.bugs = res;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error fetching bugs:', err)
     });
