@@ -1,6 +1,6 @@
 import { Component, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <-- Required for ngModel filtering
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -34,7 +34,7 @@ interface TreeNode extends WorkItem {
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule, // <-- Added here
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatMenuModule,
@@ -52,7 +52,7 @@ export class IntegrateView {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
-  filteredTree: TreeNode[] = []; // <-- Render this in the HTML instead of 'tree'
+  filteredTree: TreeNode[] = []; 
 
   // --- FILTER BINDINGS ---
   searchTerm: string = '';
@@ -103,34 +103,23 @@ export class IntegrateView {
     this.getBacklog();
   }
 
-  /**
-   * Triggers the delete confirmation overlay
-   */
   promptDelete(item: WorkItem, type: WorkItemType): void {
     this.itemToDelete = item;
     this.itemToDeleteType = type;
     this.showDeleteConfirmation = true;
   }
 
-  /**
-   * Closes the confirmation overlay without deleting
-   */
   cancelDelete(): void {
     this.showDeleteConfirmation = false;
     this.itemToDelete = null;
     this.itemToDeleteType = '';
   }
 
-  /**
-   * Checks if the item has children for cascading deletion warning
-   */
   hasChildren(item: any): boolean {
     return !!(item.children && item.children.length > 0);
   }
 
-  /**
-   * Flattens all nested children to display a complete overview of what will be lost
-   */
+  // Flattens all nested children to display a complete overview of what will be lost
   getFlattenedChildren(item: any): { id: any; title: string; type: string }[] {
     const list: { id: any; title: string; type: string }[] = [];
 
@@ -149,9 +138,6 @@ export class IntegrateView {
     return list;
   }
 
-  /**
-   * Executes the actual deletion (filtering them out of the frontend list)
-   */
   executeDelete(): void {
     if (!this.itemToDelete) return;
 
@@ -213,13 +199,8 @@ export class IntegrateView {
     this.failedItemId = '';
     this.failedItemTitle = '';
     this.errorMessage = '';
-    // Optional: You might want to reload/re-fetch the original list here
-    // since the local optimistic UI deletion failed on the backend.
   }
 
-  /**
-   * Deep search & destroy tree node traversal helper
-   */
   private deleteNodeFromTree(tree: any[], targetId: string | number): any[] {
     // Return a fresh array copy (Immutability)
     return tree
