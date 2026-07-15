@@ -6,7 +6,6 @@
 }
 
 <div class="dsu-container">
-
   <!-- Create DSU -->
   <div class="dsu-card">
     <h2>Create DSU</h2>
@@ -22,11 +21,11 @@
         <option value="BUG">BUG</option>
         <option value="SPRINT">SPRINT</option>
       </select>
-      <input [(ngModel)]="entityCode" type="text" placeholder="Entity Code (e.g. T1, SP1)">
+      <input [(ngModel)]="entityCode" type="text" placeholder="Entity Code (e.g. T1, SP1)" />
     </div>
 
     <!-- Date -->
-    <input [(ngModel)]="dsuData.notesdate" type="date">
+    <input [(ngModel)]="dsuData.notesdate" type="date" />
 
     <!-- Status -->
     <select [(ngModel)]="dsuData.status">
@@ -39,37 +38,24 @@
     </select>
 
     <!-- Completed Work -->
-    <textarea
-      [(ngModel)]="dsuData.completedwork"
-      placeholder="Completed Work">
-    </textarea>
+    <textarea [(ngModel)]="dsuData.completedwork" placeholder="Completed Work"> </textarea>
 
     <!-- Blockers -->
-    <textarea
-      [(ngModel)]="dsuData.blockers"
-      placeholder="Blockers">
-    </textarea>
+    <textarea [(ngModel)]="dsuData.blockers" placeholder="Blockers"> </textarea>
 
     <!-- Next Plan -->
-    <textarea
-      [(ngModel)]="dsuData.nextplan"
-      placeholder="Next Plan">
-    </textarea>
+    <textarea [(ngModel)]="dsuData.nextplan" placeholder="Next Plan"> </textarea>
 
-    <button (click)="submitDSU()">
-      Submit DSU
-    </button>
+    <button (click)="submitDSU()">Submit DSU</button>
   </div>
 
   <!-- DSU Report -->
   <div class="dsu-card">
     <h2>DSU Report</h2>
 
-    <input [(ngModel)]="reportDate" type="date">
+    <input [(ngModel)]="reportDate" type="date" />
 
-    <button (click)="fetchReport()">
-      Get Report
-    </button>
+    <button (click)="fetchReport()">Get Report</button>
 
     @if (reportData) {
       <div class="report-box">
@@ -85,30 +71,27 @@
 
     <!-- Date Range -->
     <div class="form-row">
-      <input [(ngModel)]="autoStartDate" type="date">
-      <input [(ngModel)]="autoEndDate" type="date">
+      <input [(ngModel)]="autoStartDate" type="date" />
+      <input [(ngModel)]="autoEndDate" type="date" />
     </div>
 
-    <button (click)="generateAutoDSU()">
-      Generate Auto DSU
-    </button>
+    <button (click)="generateAutoDSU()">Generate Auto DSU</button>
 
     @if (autoDsuData) {
       <div class="report-box">
         <h3>Generated Summary</h3>
 
-       <div class="structured-report">
-  @for (item of autoDsuData.completedWork.split(','); track item) {
-    @if (item.trim() !== '') {
-      <div class="report-item">
-        <span class="dot"></span>
-        <span>{{ item }}</span>
-      </div>
-    }
-  }
-</div>
+        <div class="structured-report">
+          @for (item of autoDsuData.completedWork.split(','); track item) {
+            @if (item.trim() !== '') {
+              <div class="report-item">
+                <span class="dot"></span>
+                <span>{{ item }}</span>
+              </div>
+            }
+          }
+        </div>
       </div>
     }
   </div>
-
 </div>

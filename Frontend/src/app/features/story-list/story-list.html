@@ -1,6 +1,5 @@
 <!-- Main Page Wrapper -->
 <div class="story-page-wrapper">
-
   <!-- Dashboard Top Header Section -->
   <div class="story-page-header">
     <h2>Stories</h2>
@@ -34,7 +33,6 @@
   @if (isStoryOpen && selectedStory) {
     <div class="modal-backdrop" (click)="closeStory()">
       <div class="modal-content-wrapper" (click)="$event.stopPropagation()">
-
         <!-- Modal Top Bar Header -->
         <div class="modal-header-bar">
           <span class="story-id-indicator">
@@ -44,7 +42,6 @@
         </div>
 
         <div class="modal-split-layout">
-
           <!-- LEFT CORE EDIT CONTENT SIDE -->
           <div class="layout-main-panel">
             <div class="form-group-title">
@@ -61,7 +58,8 @@
               <textarea
                 [(ngModel)]="selectedStory.body"
                 placeholder="Describe your user story mechanics..."
-                class="textarea-story-body">
+                class="textarea-story-body"
+              >
               </textarea>
             </div>
 
@@ -102,7 +100,9 @@
                 @if (isAttachmentView) {
                   <div class="attachments-inline-manager">
                     <input type="file" multiple (change)="onFileSelected($event)" />
-                    <button (click)="uploadFiles()" [disabled]="!selectedFiles().length">Upload Files</button>
+                    <button (click)="uploadFiles()" [disabled]="!selectedFiles().length">
+                      Upload Files
+                    </button>
 
                     @if (attachmentUploadStatus()) {
                       <p class="status-text">{{ attachmentUploadStatus() }}</p>
@@ -112,7 +112,9 @@
                       @for (file of attachments(); track file.filename) {
                         <li>
                           <span>{{ file.filename }}</span>
-                          <button class="btn-delete-file" (click)="deleteAttachment(file.filename)">Delete</button>
+                          <button class="btn-delete-file" (click)="deleteAttachment(file.filename)">
+                            Delete
+                          </button>
                         </li>
                       }
                     </ul>
@@ -159,9 +161,9 @@
               <select [(ngModel)]="selectedStory.status" class="select-dropdown-meta">
                 <option value="OPEN">Open</option>
                 <option value="IN_PROGRESS">IN_PROGRESS</option>
-                <option value="BLOCKED"> BLOCKED</option>
-                <option value="DONE"> DONE</option>
-                <option value="CLOSED"> CLOSED</option>
+                <option value="BLOCKED">BLOCKED</option>
+                <option value="DONE">DONE</option>
+                <option value="CLOSED">CLOSED</option>
               </select>
             </div>
 
@@ -193,7 +195,6 @@
           </button>
           <button class="btn-action-cancel" (click)="closeStory()">Cancel</button>
         </div>
-
       </div>
     </div>
   }

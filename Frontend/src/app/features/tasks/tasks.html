@@ -1,51 +1,34 @@
 <div class="header">
-
   <h2>Task Board</h2>
 
-  <button class="add-btn" (click)="openTaskForm()">
-    + Create Task
-  </button>
-
+  <button class="add-btn" (click)="openTaskForm()">+ Create Task</button>
 </div>
 
 <div class="sprint-filter">
-
   <label>Select Sprint:</label>
 
   <select [(ngModel)]="selectedSprintId">
-
-    <option value="">
-      All Sprints
-    </option>
+    <option value="">All Sprints</option>
 
     <option *ngFor="let s of sprints()" [value]="'SP' + s.id">
       {{ s.sprintName }}
     </option>
-
   </select>
-
 </div>
 
 <!-- BOARD -->
 <div class="board">
-
   <!-- TO DO -->
   <div class="column">
-
-    <h3> To Do</h3>
+    <h3>To Do</h3>
 
     <div
       cdkDropList
       [cdkDropListData]="todoTasks"
       (cdkDropListDropped)="drop($event, 'Open')"
-      class="task-list">
-
-      <div
-        class="task-card"
-        *ngFor="let t of todoTasks"
-        cdkDrag
-        (click)="openEditTask(t)">
-
+      class="task-list"
+    >
+      <div class="task-card" *ngFor="let t of todoTasks" cdkDrag (click)="openEditTask(t)">
         <div class="task-header">
           <h4>{{ t.title }}</h4>
           <span class="priority">{{ t.priority }}</span>
@@ -57,29 +40,21 @@
           <span>👤 {{ t.userCode || 'Unassigned' }}</span>
           <span>⏱ {{ t.remainingHours || 0 }}h</span>
         </div>
-
       </div>
-
     </div>
   </div>
 
   <!-- IN PROGRESS -->
   <div class="column">
-
-    <h3> In Progress</h3>
+    <h3>In Progress</h3>
 
     <div
       cdkDropList
       [cdkDropListData]="inProgressTasks"
       (cdkDropListDropped)="drop($event, 'In Progress')"
-      class="task-list">
-
-      <div
-        class="task-card"
-        *ngFor="let t of inProgressTasks"
-        cdkDrag
-        (click)="openEditTask(t)">
-
+      class="task-list"
+    >
+      <div class="task-card" *ngFor="let t of inProgressTasks" cdkDrag (click)="openEditTask(t)">
         <div class="task-header">
           <h4>{{ t.title }}</h4>
           <span class="priority">{{ t.priority }}</span>
@@ -91,29 +66,21 @@
           <span> {{ t.userCode || 'Unassigned' }}</span>
           <span> {{ t.remainingHours || 0 }}h</span>
         </div>
-
       </div>
-
     </div>
   </div>
 
   <!-- DONE -->
   <div class="column">
-
-    <h3> Done </h3>
+    <h3>Done</h3>
 
     <div
       cdkDropList
       [cdkDropListData]="doneTasks"
       (cdkDropListDropped)="drop($event, 'Done')"
-      class="task-list">
-
-      <div
-        class="task-card"
-        *ngFor="let t of doneTasks"
-        cdkDrag
-        (click)="openEditTask(t)">
-
+      class="task-list"
+    >
+      <div class="task-card" *ngFor="let t of doneTasks" cdkDrag (click)="openEditTask(t)">
         <div class="task-header">
           <h4>{{ t.title }}</h4>
           <span class="priority">{{ t.priority }}</span>
@@ -125,14 +92,10 @@
           <span> {{ t.userCode || 'Unassigned' }}</span>
           <span> {{ t.remainingHours || 0 }}h</span>
         </div>
-
       </div>
-
     </div>
   </div>
-
 </div>
-
 
 <!-- ================= TASK OVERLAY ================= -->
 <app-task-overlay
@@ -142,5 +105,6 @@
   [users]="users()"
   [stories]="stories()"
   (save)="onTaskSaved($event)"
-  (close)="closeTaskOverlay()">
+  (close)="closeTaskOverlay()"
+>
 </app-task-overlay>

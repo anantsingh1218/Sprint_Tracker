@@ -1,7 +1,6 @@
 @if (isOpen && selectedStory) {
   <div class="modal-backdrop" (click)="closeModal()">
     <div class="modal-content-wrapper" (click)="$event.stopPropagation()">
-
       <!-- Modal Top Bar Header -->
       <div class="modal-header-bar">
         <span class="story-id-indicator">
@@ -27,9 +26,9 @@
             <textarea
               [(ngModel)]="selectedStory.body"
               placeholder="Describe your user story mechanics..."
-              class="textarea-story-body">
+              class="textarea-story-body"
+            >
             </textarea>
-
           </div>
 
           <!-- Discussion & Comments -->
@@ -68,7 +67,9 @@
               @if (isAttachmentView) {
                 <div class="attachments-inline-manager">
                   <input type="file" multiple (change)="onFileSelected($event)" />
-                  <button (click)="uploadFiles()" [disabled]="!selectedFiles().length">Upload Files</button>
+                  <button (click)="uploadFiles()" [disabled]="!selectedFiles().length">
+                    Upload Files
+                  </button>
 
                   @if (attachmentUploadStatus()) {
                     <p class="status-text">{{ attachmentUploadStatus() }}</p>
@@ -78,7 +79,9 @@
                     @for (file of attachments(); track file.filename) {
                       <li>
                         <span>{{ file.filename }}</span>
-                        <button class="btn-delete-file" (click)="deleteAttachment(file.filename)">Delete</button>
+                        <button class="btn-delete-file" (click)="deleteAttachment(file.filename)">
+                          Delete
+                        </button>
                       </li>
                     }
                   </ul>
@@ -159,7 +162,6 @@
         </button>
         <button class="btn-action-cancel" (click)="closeModal()">Cancel</button>
       </div>
-
     </div>
   </div>
 }

@@ -1,94 +1,60 @@
 <div class="toolbar">
-
   <label>Sprint</label>
 
   <select [(ngModel)]="selectedSprintId" (change)="loadBoard()">
-
     <option *ngFor="let sprint of sprints" [value]="sprint.id">
-
       {{ sprint.sprintCode }} - {{ sprint.sprintName }}
-
     </option>
-
   </select>
-
 </div>
 
 <div class="board">
-
-  <div class="column" *ngFor="let column of columns$ | async" cdkDropList [cdkDropListData]="column.tasks"
-    [cdkDropListConnectedTo]="dropLists" [id]="column.status" (cdkDropListDropped)="drop($event, column)">
-
+  <div
+    class="column"
+    *ngFor="let column of columns$ | async"
+    cdkDropList
+    [cdkDropListData]="column.tasks"
+    [cdkDropListConnectedTo]="dropLists"
+    [id]="column.status"
+    (cdkDropListDropped)="drop($event, column)"
+  >
     <div class="column-header">
-
       <h3>{{ column.status }}</h3>
 
       <span class="count">
         {{ column.tasks.length }}
       </span>
-
     </div>
 
-    <div class="empty" *ngIf="column.tasks.length === 0">
-
-      No Tasks
-
-    </div>
+    <div class="empty" *ngIf="column.tasks.length === 0">No Tasks</div>
 
     <div class="card" *ngFor="let task of column.tasks" cdkDrag>
-
       <div class="card-title">
-
         {{ task.title }}
-
       </div>
 
       <div class="story">
-
         {{ task.story }}
-
       </div>
 
       <div class="card-footer">
-
         <span class="priority" [ngClass]="task.priority.toLowerCase()">
-
           {{ task.priority }}
-
         </span>
-
       </div>
 
-      <div class="meta">
-
-        👤 {{ task.assignee }}
-
-      </div>
+      <div class="meta">👤 {{ task.assignee }}</div>
 
       <div class="meta">
-
-        ⏱<div class="meta">
-
-          @if(column.status === 'DONE'){
-
-          <span class="completed">
-            ✔ Completed
-          </span>
-
+        ⏱
+        <div class="meta">
+          @if (column.status === 'DONE') {
+            <span class="completed"> ✔ Completed </span>
           } @else {
-
-          <span>
-            ⏱ {{ task.remainingHours }} hrs remaining
-          </span>
-
+            <span> ⏱ {{ task.remainingHours }} hrs remaining </span>
           }
-
         </div>
-
       </div>
-
     </div>
-
   </div>
-
 </div>
