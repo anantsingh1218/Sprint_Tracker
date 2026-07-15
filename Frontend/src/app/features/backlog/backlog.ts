@@ -1,8 +1,8 @@
 import { Component, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <-- Required for ngModel filtering
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButtonModule, MatIconButton } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 
 import { Priority, WorkItem, WorkItemType } from '../../models/workItem';
@@ -15,13 +15,14 @@ import { IStory } from '../../models/storyInterface';
 import { ApiService } from '../../core/apiService/api-service';
 import { IFeatureResponse } from '../../models/featureResponseInterface';
 import { IStoryResponse } from '../../models/storyResponseInterface';
-import { forkJoin } from 'rxjs';
+import { catchError, concat, forkJoin, throwError } from 'rxjs';
 import { ITasksResponse } from '../../models/taskResponseInterface';
 import { ITask } from '../../models/taskInterface';
 import { IBug } from '../../models/bugInterface';
 import { IBugResponse } from '../../models/bugResponseInterface';
 import { Bug } from '../bug/bug';
 import { TaskOverlay } from '../task-overlay/task-overlay';
+import { HttpErrorResponse } from '@angular/common/http';
 
 interface TreeNode extends WorkItem {
   children: TreeNode[];
@@ -29,7 +30,7 @@ interface TreeNode extends WorkItem {
 }
 
 @Component({
-  selector: 'app-backlog',
+  selector: 'app-integrated-view',
   standalone: true,
   imports: [
     CommonModule,
@@ -50,7 +51,7 @@ export class Backlog {
   readonly WorkItemType = WorkItemType;
 
   tree: TreeNode[] = [];
-  filteredTree: TreeNode[] = []; // <-- Render this in the HTML instead of 'tree'
+  filteredTree: TreeNode[] = [];
 
   // --- FILTER BINDINGS ---
   searchTerm: string = '';
@@ -70,26 +71,10 @@ export class Backlog {
   uniqueSprints: string[] = [];
   uniqueStatuses: string[] = [];
   uniqueUsers: string[] = [];
-  // uniqueProducts = computed(() => {
-  //   const products = this.service.items
-  //     .map(item => item.productCategory)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(products)).sort();
-  // });
 
-  // uniqueSprints = computed(() => {
-  //   const sprints = this.service.items
-  //     .map(item => item.sprintName)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(sprints)).sort();
-  // });
-
-  // uniqueStatuses = computed(() => {
-  //   const statuses = this.service.items
-  //     .map(item => item.status)
-  //     .filter((val): val is NonNullable<typeof val> => val != null);
-  //   return Array.from(new Set(statuses)).sort();
-  // });
+  showDeleteConfirmation = false;
+  itemToDelete: any = null;
+  itemToDeleteType: string = '';
 
   selectedFeature: IFeature | null = null;
   selectedStory: IStory | null = null;
@@ -99,17 +84,136 @@ export class Backlog {
   overlayType: WorkItemType | null = null;
   isOverlayOpen = false;
 
+  showErrorOverlay = false;
+  failedItemTitle = '';
+  failedItemId: string | number = '';
+  errorMessage = '';
+
   features: IFeatureResponse[] = [];
   stories: IStoryResponse[] = [];
   tasks: ITasksResponse[] = [];
   bugs: IBugResponse[] = [];
 
   constructor(
-    private service: WorkItemService,
+    public service: WorkItemService, // set to public to read from template/computed values safely
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
   ) {
     this.getBacklog();
+  }
+
+  promptDelete(item: WorkItem, type: WorkItemType): void {
+    this.itemToDelete = item;
+    this.itemToDeleteType = type;
+    this.showDeleteConfirmation = true;
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirmation = false;
+    this.itemToDelete = null;
+    this.itemToDeleteType = '';
+  }
+
+  hasChildren(item: any): boolean {
+    return !!(item.children && item.children.length > 0);
+  }
+
+  // Flattens all nested children to display a complete overview of what will be lost
+  getFlattenedChildren(item: any): { id: any; title: string; type: string }[] {
+    const list: { id: any; title: string; type: string }[] = [];
+
+    const traverse = (node: any) => {
+      if (node.children && node.children.length > 0) {
+        node.children.forEach((child: any) => {
+          // Fallback type determination if child.type doesn't exist (e.g. nested stories under features)
+          const childType = child.type || (node.type === 'Feature' ? 'Story' : 'Task');
+          list.push({ id: child.id, title: child.title, type: childType });
+          traverse(child);
+        });
+      }
+    };
+
+    traverse(item);
+    return list;
+  }
+
+  executeDelete(): void {
+    if (!this.itemToDelete) return;
+
+    const targetId = this.itemToDelete.id;
+    const targetTitle = this.itemToDelete.title;
+
+    // 1. Gather all IDs in bottom-up order
+    const childIds = (this.getFlattenedChildren(this.itemToDelete) || []).map(
+      (child: any) => child.id,
+    );
+    const idsToDelete = [...childIds, targetId];
+
+    // 2. Close the confirmation overlay immediately so we don't have overlapping dialogs
+    this.cancelDelete();
+
+    // 3. Create the delete observables, catch errors at the request level!
+    const deleteObservables = idsToDelete.map((id) =>
+      this.service.deleteByCode(id).pipe(
+        catchError((err: HttpErrorResponse) => {
+          // Intercepting here prevents the concat pipe from swallowing the context.
+          // We re-throw the error so that the main subscriber block catches it.
+          return throwError(() => err);
+        }),
+      ),
+    );
+
+    // 4. Execute deletion sequentially
+    concat(...deleteObservables).subscribe({
+      next: (data) => {
+        console.log('Successfully deleted a node segment: ', data);
+      },
+      error: (err: HttpErrorResponse) => {
+        // The API failed! Trigger the error popup instantly without breaking local state.
+        console.error('Delete failed on server:', err);
+
+        const friendlyMessage = err.error?.message || err.message || 'Server error occurred.';
+        this.triggerErrorOverlay(targetId, targetTitle, friendlyMessage);
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        // SUCCESS: Only remove it from the local UI tree once ALL deletions successfully complete
+        this.filteredTree = this.deleteNodeFromTree(this.filteredTree, targetId);
+        console.log('Entire hierarchy successfully deleted.');
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  // --- Helper methods for the Error Overlay ---
+  triggerErrorOverlay(id: string | number, title: string, message: string): void {
+    this.failedItemId = id;
+    this.failedItemTitle = title;
+    this.errorMessage = message;
+    this.showErrorOverlay = true;
+  }
+
+  closeErrorOverlay(): void {
+    this.showErrorOverlay = false;
+    this.failedItemId = '';
+    this.failedItemTitle = '';
+    this.errorMessage = '';
+  }
+
+  private deleteNodeFromTree(tree: any[], targetId: string | number): any[] {
+    // Return a fresh array copy (Immutability)
+    return tree
+      .filter((node) => node.id !== targetId) // Filter out target at root level
+      .map((node) => {
+        // If it has children, recursively filter them and return a new node copy
+        if (node.children && node.children.length > 0) {
+          return {
+            ...node,
+            children: this.deleteNodeFromTree(node.children, targetId),
+          };
+        }
+        return node;
+      });
   }
 
   // ---------- TREE & FILTERING ----------
@@ -156,7 +260,7 @@ export class Backlog {
    * Applies all filters on the base hierarchical tree.
    * Keeps parent structures intact if a child node matches the filters.
    */
-applyFilters() {
+  applyFilters() {
     const hasActiveFilters =
       !!this.searchTerm.trim() ||
       !!this.selectedProduct ||
@@ -173,32 +277,31 @@ applyFilters() {
     const filterNode = (nodes: TreeNode[], parentProduct: string | null = null): TreeNode[] => {
       return nodes
         .map((node): TreeNode | null => {
-          const currentProduct = node.type === WorkItemType.Feature ? node.productCategory : parentProduct;
+          const currentProduct =
+            node.type === WorkItemType.Feature ? node.productCategory : parentProduct;
           const filteredChildren = filterNode(node.children || [], currentProduct);
 
-          const matchesSearch = !this.searchTerm.trim() ||
+          const matchesSearch =
+            !this.searchTerm.trim() ||
             node.title.toLowerCase().includes(this.searchTerm.toLowerCase());
 
-          const matchesSprint = !this.selectedSprint ||
-            node.sprintName === this.selectedSprint;
+          const matchesSprint = !this.selectedSprint || node.sprintName === this.selectedSprint;
 
-          const matchesStatus = !this.selectedStatus ||
-            node.status === this.selectedStatus;
+          const matchesStatus = !this.selectedStatus || node.status === this.selectedStatus;
 
-          const matchesProduct = !this.selectedProduct ||
-            currentProduct === this.selectedProduct;
+          const matchesProduct = !this.selectedProduct || currentProduct === this.selectedProduct;
 
           // --- New User Filter Check ---
-          const matchesUser = !this.selectedUser ||
-            node.assignedTo === this.selectedUser;
+          const matchesUser = !this.selectedUser || node.assignedTo === this.selectedUser;
 
-          const nodeSelfMatches = matchesSearch && matchesSprint && matchesStatus && matchesProduct && matchesUser;
+          const nodeSelfMatches =
+            matchesSearch && matchesSprint && matchesStatus && matchesProduct && matchesUser;
 
           if (nodeSelfMatches || filteredChildren.length > 0) {
             return {
               ...node,
               children: filteredChildren,
-              expanded: true
+              expanded: true,
             };
           }
           return null;
@@ -306,7 +409,7 @@ applyFilters() {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = '/story/add';
+          endpoint = '/story/create';
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -314,11 +417,14 @@ applyFilters() {
           payload = this.toTask(item);
           break;
         case WorkItemType.Bug:
-          endpoint = '/bug/add';
+          endpoint = '/Bug/add';
           payload = this.toBug(item);
           break;
       }
-      this.apiService.postRequest<any>(endpoint, payload).subscribe({
+      let { comments, ...destructedPayload } = payload;
+      const payloadToSend = { ...destructedPayload, comments: comments?.at(-1)?.text };
+      console.log('To Save Payload = ' + JSON.stringify(payloadToSend));
+      this.apiService.postRequest<any>(endpoint, payloadToSend).subscribe({
         next: (response) => {
           let savedWorkItem: WorkItem;
           switch (item.type) {
@@ -354,7 +460,7 @@ applyFilters() {
           payload = this.toFeature(item);
           break;
         case WorkItemType.Story:
-          endpoint = `/story/${item.id}`;
+          endpoint = `/story/${item.id.substring(1)}`;
           payload = this.toStory(item);
           break;
         case WorkItemType.Task:
@@ -362,12 +468,27 @@ applyFilters() {
           payload = this.toTask(item);
           break;
         case WorkItemType.Bug:
-          endpoint = `/bug/${item.id}`;
+          endpoint = `/Bug/${item.id}`;
           payload = this.toBug(item);
           break;
       }
+      let { comments, ...destructedPayload } = payload || {};
+      let commentText = '';
 
-      this.apiService.putRequest<any>(endpoint, payload).subscribe({
+      if (Array.isArray(comments)) {
+        // If it's an array of objects (e.g., [{text: 'test'}]), grab the last one's text
+        const lastComment = comments.at(-1);
+        commentText = typeof lastComment === 'object' ? lastComment?.text : (lastComment ?? '');
+      } else if (typeof comments === 'string') {
+        // If it's already a plain string coming from the overlay payload mapping
+        commentText = comments;
+      }
+      const payloadToSend = {
+        ...destructedPayload,
+        comments: commentText,
+      };
+      console.log('To Save Payload to update = ' + JSON.stringify(payloadToSend));
+      this.apiService.putRequest<any>(endpoint, payloadToSend).subscribe({
         next: () => {
           const items = [...this.service.items];
           const index = items.findIndex((i) => i.id === item.id);
@@ -381,9 +502,10 @@ applyFilters() {
         error: (err) => console.error('Failed to update work item', err),
       });
     }
+    this.closeOverlay();
   }
 
-private refreshTree() {
+  private refreshTree() {
     const items = this.service.items;
     this.populateDropdownOptions(items); // <-- Refresh dropdown arrays
 
@@ -446,7 +568,6 @@ private refreshTree() {
   }
 
   toBug(item: WorkItem): IBug {
-    console.log(item);
     return {
       id: Number(item.id.substring(1)),
       bugCode: item.id,
@@ -466,7 +587,7 @@ private refreshTree() {
 
   fromFeature(f: IFeature): WorkItem {
     return {
-      id: f.id || f.featureCode || '',
+      id: f.id ?? '',
       title: f.title,
       type: WorkItemType.Feature,
       parentId: null,
@@ -479,7 +600,7 @@ private refreshTree() {
       reopenCount: 0,
       estimatedPoints: f.estimatedStoryPoints,
       remainingPoints: f.remainingStoryPoints,
-      comments: f.commentsList || [],
+      comments: f.commentsList != undefined ? f.commentsList : [],
     };
   }
 
@@ -498,7 +619,7 @@ private refreshTree() {
       reopenCount: 0,
       estimatedPoints: s.estimatedStoryPoints,
       remainingPoints: s.remainingStoryPoint,
-      comments: s.comments,
+      comments: s.comments != undefined ? s.comments : [],
     };
   }
 
@@ -517,7 +638,7 @@ private refreshTree() {
       reopenCount: 0,
       estimatedPoints: t.estimatedHours,
       remainingPoints: t.remainingHours,
-      comments: t.comments,
+      comments: t.comments != undefined ? t.comments : [],
     };
   }
 
@@ -571,6 +692,24 @@ private refreshTree() {
   }
 
   private mapStory(story: IStoryResponse): WorkItem {
+    let parsedComments: any[] = [];
+
+    // Access the property dynamically using a safe type cast
+    const rawComments = (story as any).comments;
+
+    if (rawComments && typeof rawComments === 'string') {
+      if (rawComments.trim() !== '') {
+        parsedComments = [
+          {
+            text: rawComments,
+            userCode: story.userCode || 'System', // Fallback to avoid 'Unassigned'
+            createdAt: new Date().toISOString(),
+          },
+        ];
+      }
+    } else if (Array.isArray(rawComments)) {
+      parsedComments = rawComments;
+    }
     return {
       id: 'S' + story.id,
       title: story.title,
@@ -585,7 +724,7 @@ private refreshTree() {
       reopenCount: 0,
       estimatedPoints: story.storyPoints,
       remainingPoints: story.storyPoints,
-      comments: story.comments,
+      comments: parsedComments,
     };
   }
 
@@ -698,10 +837,18 @@ private refreshTree() {
   }
 
   private populateDropdownOptions(items: WorkItem[]) {
-    this.uniqueProducts = Array.from(new Set(items.map(i => i.productCategory).filter(Boolean))).sort() as string[];
-    this.uniqueSprints = Array.from(new Set(items.map(i => i.sprintName).filter(Boolean))).sort() as string[];
-    this.uniqueStatuses = Array.from(new Set(items.map(i => i.status).filter(Boolean))).sort() as string[];
-    this.uniqueUsers = Array.from(new Set(items.map(i => i.assignedTo).filter(Boolean))).sort() as string[];
+    this.uniqueProducts = Array.from(
+      new Set(items.map((i) => i.productCategory).filter(Boolean)),
+    ).sort() as string[];
+    this.uniqueSprints = Array.from(
+      new Set(items.map((i) => i.sprintName).filter(Boolean)),
+    ).sort() as string[];
+    this.uniqueStatuses = Array.from(
+      new Set(items.map((i) => i.status).filter(Boolean)),
+    ).sort() as string[];
+    this.uniqueUsers = Array.from(
+      new Set(items.map((i) => i.assignedTo).filter(Boolean)),
+    ).sort() as string[];
   }
 
   private getBacklog() {
@@ -715,6 +862,7 @@ private refreshTree() {
       sprintsData: this.apiService.getRequest<any[]>('/sprint/all'),
     }).subscribe({
       next: ({ features, tasks, bugs, usersData, featuresData, storyData, sprintsData }) => {
+        // console.log(storyData);
         const featureNodes = features.map((f) => this.mapFeature(f));
         const storyNodes = storyData.map((s) => this.mapStory(s));
         const taskNodes = tasks.map((t) => this.mapTask(t));
@@ -724,7 +872,7 @@ private refreshTree() {
         this.featuresList.set(featuresData || []);
         this.sprintsList.set(sprintsData || []);
         this.storyList.set(storyData || []);
-
+        console.log(this.storyList());
         const allItems: WorkItem[] = [...featureNodes, ...storyNodes, ...taskNodes, ...bugNodes];
         this.service.update(allItems);
 

@@ -95,7 +95,7 @@ export class Sidebar {
     {
       label: 'Backlog',
       route: '/backlog',
-      roles: ['ROLE_PM','ROLE_Scrum_Master', 'ROLE_Developer', 'ROLE_QA', 'ROLE_BA']
+      roles: ['ROLE_Developer', 'ROLE_QA', 'ROLE_BA']
     },
 
     {

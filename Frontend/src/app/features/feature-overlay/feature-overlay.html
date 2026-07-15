@@ -6,8 +6,8 @@
 
       <div class="title-block">
         <div class="story-id">
-          @if (feature.featureCode) {
-            Feature #{{ feature.featureCode }}
+          @if (feature.id) {
+            Feature #{{ feature.id }}
           } @else {
             New Feature
           }
@@ -21,7 +21,7 @@
       </div>
 
       <div class="header-center">
-        @if (feature.featureCode) {
+        @if (feature.id) {
           <button
             class="icon-btn"
             (click)="toggleAttachmentsView()"
@@ -42,14 +42,13 @@
 
       <!-- LEFT -->
       <div class="left">
-
         @if (!isAttachmentView) {
 
           <label>Description</label>
 
           <textarea [(ngModel)]="feature.description"></textarea>
 
-          @if (feature.featureCode) {
+          @if (feature.id) {
 
             <div class="comments">
 
@@ -84,7 +83,7 @@
 
         }
 
-        @if (isAttachmentView && feature.featureCode) {
+        @if (isAttachmentView && feature.id) {
 
           <h4>Attachments</h4>
 
@@ -221,7 +220,7 @@
         class="btn-save"
         (click)="saveFeature()"
       >
-        {{ feature.featureCode ? 'Update Feature' : 'Create Feature' }}
+        {{ feature.id ? 'Update Feature' : 'Create Feature' }}
       </button>
 
     </div>

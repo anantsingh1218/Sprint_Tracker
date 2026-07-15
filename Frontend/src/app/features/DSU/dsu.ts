@@ -95,6 +95,8 @@ ngOnInit(): void {
       next: (res: any) => {
         this.selectedDsu = res;
         console.log('Selected DSU:', res);
+      this.cdr.detectChanges()
+
       },
       error: (err: any) => {
         console.error('Error loading DSU:', err);
@@ -111,6 +113,8 @@ ngOnInit(): void {
         next: (res: any) => {
           this.reportData = res;
           console.log('DSU Report:', res);
+      this.cdr.detectChanges()
+
         },
 
         error: (err: any) => {
@@ -128,6 +132,7 @@ ngOnInit(): void {
     next: (res: any) => {
       this.autoDsuData = res;
       console.log('Auto DSU:', res);
+      this.cdr.detectChanges()
     },
     error: (err: any) => {
       console.error('Error generating Auto DSU:', err);

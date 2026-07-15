@@ -119,6 +119,27 @@ export class StoryList implements OnInit {
   }
 
   mapResponseToInterface(storyRes: IStoryResponse): IStory {
+    // 1. Safely normalize comments to always be an array of objects { text: string, ... }
+    let normalizedComments: any[] = [];
+    if (storyRes.comments) {
+      if (Array.isArray(storyRes.comments)) {
+        normalizedComments = storyRes.comments.map(c => 
+          typeof c === 'string' ? { text: c, userCode: 'System' } : c
+        );
+      } else if (typeof storyRes.comments === 'string') {
+        try {
+          // If the string is a JSON array string
+          const parsed = JSON.parse(storyRes.comments);
+          normalizedComments = Array.isArray(parsed) 
+            ? parsed.map(c => typeof c === 'string' ? { text: c } : c)
+            : [{ text: storyRes.comments }];
+        } catch {
+          // Plain fallback string
+          normalizedComments = [{ text: storyRes.comments }];
+        }
+      }
+    }
+
     return {
       id: 'S' + storyRes.id,
       title: storyRes.title,
@@ -130,21 +151,35 @@ export class StoryList implements OnInit {
       featureCode: storyRes.featureCode,
       sprintCode: storyRes.sprintCode,
       userCode: storyRes.userCode,
-      comments: storyRes.comments || [],
+      comments: normalizedComments,
     };
   }
 
   saveStory() {
-    // 1. Guard check: Stop execution if selectedStory is null
     if (!this.selectedStory) return;
 
-    const {comments , ...destructedPayload} = this.selectedStory;
-    const payload = {...destructedPayload, comments: comments.at(-1)?.text};
+    const { comments, ...destructedPayload } = this.selectedStory;
+    let commentText = '';
 
-    console.log(payload);
+    if (Array.isArray(comments)) {
+      const lastComment = comments.at(-1);
+      commentText = typeof lastComment === 'object' ? (lastComment?.text ?? '') : (lastComment ?? '');
+    } else if (typeof comments === 'string') {
+      commentText = comments;
+    }
+
+    // 2. Build the correct payload
+    const payloadToSend = {
+      ...destructedPayload,
+      // Strip out the client-side prefix 'S' from the payload ID if creating/updating
+      id: this.selectedStory.id ? Number(this.selectedStory.id.substring(1)) : null,
+      comments: commentText,
+    };
+
+    console.log('Sending payload:', payloadToSend);
 
     if (this.selectedStory.id) {
-      this.St1.updateStory(Number(this.selectedStory.id.substring(1)), payload).subscribe({
+      this.St1.updateStory(Number(this.selectedStory.id.substring(1)), payloadToSend).subscribe({
         next: () => {
           this.loadStories();
           this.closeStory();
@@ -152,7 +187,7 @@ export class StoryList implements OnInit {
         error: (err: any) => console.error('Update failed', err),
       });
     } else {
-      this.St1.createStory(payload).subscribe({
+      this.St1.createStory(payloadToSend).subscribe({
         next: () => {
           this.loadStories();
           this.closeStory();
@@ -163,19 +198,28 @@ export class StoryList implements OnInit {
   }
 
   addComment() {
-    // 2. Guard check: Ensure we have both a comment and an active valid story ID
-    if (!this.newComment.trim() || !this.selectedStory || !this.selectedStory.id) return;
+    if (!this.newComment.trim() || !this.selectedStory?.id) return;
 
-    const storyToUpdate = this.selectedStory; // local reference helper to satisfy compiler
-    
-    this.St1.updateStory(Number(storyToUpdate.id.substring(1)), { comments: this.newComment }).subscribe({
-      next: () => {
-        storyToUpdate.comments = storyToUpdate.comments || [];
-        storyToUpdate.comments.push({
-          userCode: storyToUpdate.userCode ? storyToUpdate.userCode : (null as unknown as string),
+    this.St1.updateStory(Number(this.selectedStory.id.substring(1)), {
+      comments: this.newComment,
+    }).subscribe({
+      next: (response: any) => {
+        if (!this.selectedStory!.comments) {
+          this.selectedStory!.comments = [];
+        }
+
+        // 2. Create the comment object to match what your template expects
+        // If your backend returns the newly created comment object, use that instead!
+        const newCmt = {
           text: this.newComment,
-          createdAt: new Date().toISOString(),
-        });
+          userCode: 'U1',
+          createdAt: new Date().toISOString(), // Used for your track expression
+        };
+
+        // 3. Update the array immutably so Angular change detection fires flawlessly
+        this.selectedStory!.comments = [...this.selectedStory!.comments, newCmt];
+
+        // 4. Clear the input and force change detection just in case
         this.newComment = '';
         this.cdr.markForCheck();
       },
@@ -188,9 +232,20 @@ export class StoryList implements OnInit {
   }
 
   getUserName(userCode: string | null): string {
-    return this.users().find((u) => u.id === userCode)?.name || 'Unassigned';
-  }
+    if (!userCode) return 'Unassigned';
+    
+    return (
+      this.users().find((u) => {
+        // Check if the list element has a raw userCode property matching "U2"
+        if (u.userCode === userCode) return true;
 
+        // Check if it matches your calculated UI prefix format: e.g. "U" + 2 === "U2"
+        if (u.id && 'U' + u.id === userCode) return true;
+
+        return false;
+      })?.username || 'Unassigned'
+    ); // Changed .name to .username based on your select loop
+  }
   loadAttachments() {
     // 3. Guard check: Only proceed if selectedStory and its ID exist
     if (!this.selectedStory || !this.selectedStory.id) return;

@@ -115,7 +115,9 @@ export class FeatureOverlay implements OnInit, OnChanges {
       .getAttachments(WorkItemType.Feature, this.apiService.toApiWorkItemId(this.feature.id || this.feature.featureCode || ''))
       .subscribe({
         next: (data) => {
-          this.attachments.set(data.fileToBeFetched);
+          if(data && data.fileToBeFetched){
+            this.attachments.set(data.fileToBeFetched);
+          }
         },
         error: (err: HttpErrorResponse) => {
           this.attachments.set([]);

@@ -71,9 +71,9 @@
                 <h4>Discussion</h4>
 
                 <div class="comments-timeline-stream">
-                  @for (cmt of selectedStory.comments; track cmt.createdAt) {
+                  @for (cmt of selectedStory.comments; track $index) {
                     <div class="individual-comment-bubble">
-                      <span class="comment-author">{{ getUserName(cmt.userCode) }}:</span>
+                      <span class="comment-author">{{ getUserName(selectedStory.userCode) }}:</span>
                       <p class="comment-text-content">{{ cmt.text }}</p>
                     </div>
                   }
