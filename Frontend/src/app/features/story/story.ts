@@ -72,12 +72,23 @@ export class Story implements OnInit {
     this.St1.updateStory(Number(this.selectedStory.id.substring(1)), {
       comments: this.newComment,
     }).subscribe({
-      next: () => {
-        this.selectedStory?.comments.push({
-          userCode: this.selectedStory.userCode ? this.selectedStory.userCode : '',
+      next: (response: any) => {
+        if (!this.selectedStory!.comments) {
+          this.selectedStory!.comments = [];
+        }
+
+        // 2. Create the comment object to match what your template expects
+        // If your backend returns the newly created comment object, use that instead!
+        const newCmt = {
           text: this.newComment,
-          createdAt: new Date().toISOString(),
-        });
+          userCode: 'U1',
+          createdAt: new Date().toISOString(), // Used for your track expression
+        };
+
+        // 3. Update the array immutably so Angular change detection fires flawlessly
+        this.selectedStory!.comments = [...this.selectedStory!.comments, newCmt];
+
+        // 4. Clear the input and force change detection just in case
         this.newComment = '';
         this.cdr.markForCheck();
       },
@@ -90,7 +101,19 @@ export class Story implements OnInit {
   }
 
   getUserName(userCode: string | null): string {
-    return this.usersList.find((u) => u.userCode === userCode)?.name || 'Unassigned';
+    if (!userCode) return 'Unassigned';
+
+    return (
+      this.usersList.find((u) => {
+        // Check if the list element has a raw userCode property matching "U2"
+        if (u.userCode === userCode) return true;
+
+        // Check if it matches your calculated UI prefix format: e.g. "U" + 2 === "U2"
+        if (u.id && 'U' + u.id === userCode) return true;
+
+        return false;
+      })?.username || 'Unassigned'
+    ); // Changed .name to .username based on your select loop
   }
 
   loadAttachments() {

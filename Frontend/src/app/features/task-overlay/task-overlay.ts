@@ -15,7 +15,7 @@ import { FetchAttachmentsResponse } from '../../models/fetchAttachmnetResponseIn
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './task-overlay.html',
-  styleUrl: './task-overlay.css'
+  styleUrl: './task-overlay.css',
 })
 export class TaskOverlay implements OnInit {
   @Input() task: ITask | null = null;
@@ -32,7 +32,10 @@ export class TaskOverlay implements OnInit {
   attachmentUploadStatus = signal('');
   newComment = '';
 
-  constructor(private apiService: ApiService, private taskService: TaskService) {}
+  constructor(
+    private apiService: ApiService,
+    private taskService: TaskService,
+  ) {}
 
   ngOnInit() {
     if (!this.task) {
@@ -64,21 +67,23 @@ export class TaskOverlay implements OnInit {
   loadAttachments() {
     if (!this.task?.id) return;
     try {
-      this.apiService.getAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task.id)).subscribe({
-        next: (data : FetchAttachmentsResponse) => {
-          if(data?.fileToBeFetched){
-            this.attachments.set(data.fileToBeFetched);
-          }
-        },
-        error: (err: HttpErrorResponse) => {
-          this.attachments.set([]);
-          if (err.status === 500) {
-            this.attachmentUploadStatus.set('Resource not found');
-          }
-        },
-      });
-    } catch(e) {
-      console.warn("Invalid ID format for attachments");
+      this.apiService
+        .getAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task.id))
+        .subscribe({
+          next: (data: FetchAttachmentsResponse) => {
+            if (data?.fileToBeFetched) {
+              this.attachments.set(data.fileToBeFetched);
+            }
+          },
+          error: (err: HttpErrorResponse) => {
+            this.attachments.set([]);
+            if (err.status === 500) {
+              this.attachmentUploadStatus.set('Resource not found');
+            }
+          },
+        });
+    } catch (e) {
+      console.warn('Invalid ID format for attachments');
     }
   }
 
@@ -92,14 +97,20 @@ export class TaskOverlay implements OnInit {
     if (!this.selectedFiles().length || !this.task?.id) return;
 
     try {
-      this.apiService.uploadAttachments(WorkItemType.Task, this.apiService.toApiWorkItemId(this.task?.id), this.selectedFiles()).subscribe({
-        next: (res: Attachment[]) => {
-          this.selectedFiles.set([]);
-          this.attachmentUploadStatus.set('Files uploaded Successfully');
-          this.attachments.set(res);
-        },
-      });
-    } catch(e) {}
+      this.apiService
+        .uploadAttachments(
+          WorkItemType.Task,
+          this.apiService.toApiWorkItemId(this.task?.id),
+          this.selectedFiles(),
+        )
+        .subscribe({
+          next: (res: Attachment[]) => {
+            this.selectedFiles.set([]);
+            this.attachmentUploadStatus.set('Files uploaded Successfully');
+            this.attachments.set(res);
+          },
+        });
+    } catch (e) {}
   }
 
   deleteAttachment(filename: string) {
@@ -112,37 +123,19 @@ export class TaskOverlay implements OnInit {
       });
   }
 
-
-
   saveTask() {
-    // const taskToSave = { ...this.task };
-    // if (this.newComment.trim()) {
-    //   const newComment : IComment = {
-    //     userCode: taskToSave.userCode ? taskToSave.userCode : '',
-    //     text: this.newComment.trim(),
-    //     createdAt: Date.now().toString()
-    //   }
-    //   taskToSave.comments?.push(newComment);
-    // } else {
-    //   taskToSave.comments = taskToSave.comments;
-    // }
+    if (!this.task) return;
 
-    // let {comments, ...destructuredTask} = taskToSave;
-    // const payload = {...taskToSave, comments: comments?.at(-1)?.text}
-    // console.log("SENDING TASK TO BACKEND:", JSON.stringify(payload));
-    // if (this.task?.id) {
-    //   this.taskService.updateTask(payload).subscribe({
-    //     next: (res) => this.save.emit(res),
-    //     error: (err) => console.error('Failed to update task', err)
-    //   });
-    // } else {
-    //   this.taskService.addTask(payload).subscribe({
-    //     next: (res) => this.save.emit(res),
-    //     error: (err) => console.error('Failed to create task', err)
-    //   });
-    // }
-    const updatedTask = this.task;
-    this.save.emit(updatedTask);
+    if (this.newComment?.trim()) {
+    this.task.comments = this.task.comments || [];
+    this.task.comments.push({ userCode:this.task.userCode != null ? this.task.userCode : '' , text: this.newComment.trim(), createdAt: Date.now().toString() });
+  }
+
+    let { comments, ...destructedPayload } = this.task;
+    const payloadToSend = { ...destructedPayload, comments: comments?.at(-1)?.text };
+    console.log('To Save Payload = ' + JSON.stringify(payloadToSend));
+    this.save.emit(payloadToSend);
+    this.newComment = '';
   }
 
   closeOverlay() {

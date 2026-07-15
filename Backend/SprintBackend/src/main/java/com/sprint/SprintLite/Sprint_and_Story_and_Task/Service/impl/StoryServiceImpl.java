@@ -196,7 +196,56 @@ public class StoryServiceImpl implements IStoryService {
             if (story.getSprintid() != null) dto.setSprintCode(CodeUtils.encode("SP", story.getSprintid().getId()));
             if (story.getUserid() != null) dto.setUserCode(CodeUtils.encode("U", story.getUserid().getId()));
 
+            List<Comment> storyComments = commentRepository.findByEntitytypeAndEntityid(EntityType.STORY, story.getId());
+
+            if (!storyComments.isEmpty()) {
+                // Safely grab the text of the last comment if the list isn't empty
+                dto.setComments(storyComments.getLast().getComment());
+            } else {
+                // Fallback if there are no comments yet
+                dto.setComments(null);
+            }
+
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public StoryResponseDto getStoryById(Integer id) {
+        // 1. Fetch the story or throw a 404/runtime exception if it doesn't exist
+        Story story = storyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Story not found with ID: " + id));
+
+        // 2. Initialize the response DTO
+        StoryResponseDto dto = new StoryResponseDto();
+        dto.setId(story.getId());
+        dto.setTitle(story.getTitle());
+        dto.setBody(story.getBody());
+        dto.setStoryStatus(story.getStorystatus());
+        dto.setPriority(story.getPriority());
+        dto.setStoryPoints(story.getStorypoints());
+
+        // 3. Handle relational mappings safely
+        if (story.getFeatureid() != null) {
+            dto.setFeatureCode(CodeUtils.encode("F", story.getFeatureid().getId()));
+        }
+        if (story.getSprintid() != null) {
+            dto.setSprintCode(CodeUtils.encode("SP", story.getSprintid().getId()));
+        }
+        if (story.getUserid() != null) {
+            dto.setUserCode(CodeUtils.encode("U", story.getUserid().getId()));
+        }
+
+        List<Comment> storyComments = commentRepository.findByEntitytypeAndEntityid(EntityType.STORY, story.getId());
+
+        if (!storyComments.isEmpty()) {
+            // Safely grab the text of the last comment if the list isn't empty
+            dto.setComments(storyComments.getLast().getComment());
+        } else {
+            // Fallback if there are no comments yet
+            dto.setComments(null);
+        }
+
+        return dto;
     }
 }

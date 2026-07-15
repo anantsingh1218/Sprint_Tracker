@@ -418,7 +418,7 @@ export class IntegrateView {
           payload = this.toTask(item);
           break;
         case WorkItemType.Bug:
-          endpoint = '/bug/add';
+          endpoint = '/Bug/add';
           payload = this.toBug(item);
           break;
       }
@@ -469,13 +469,26 @@ export class IntegrateView {
           payload = this.toTask(item);
           break;
         case WorkItemType.Bug:
-          endpoint = `/bug/${item.id}`;
+          endpoint = `/Bug/${item.id}`;
           payload = this.toBug(item);
           break;
       }
-      let { comments, ...destructedPayload } = payload;
-      const payloadToSend = { ...destructedPayload, comments: comments?.at(-1)?.text };
-      console.log('To Save Payload = ' + JSON.stringify(payloadToSend));
+      let { comments, ...destructedPayload } = payload || {};
+      let commentText = '';
+
+      if (Array.isArray(comments)) {
+        // If it's an array of objects (e.g., [{text: 'test'}]), grab the last one's text
+        const lastComment = comments.at(-1);
+        commentText = typeof lastComment === 'object' ? lastComment?.text : (lastComment ?? '');
+      } else if (typeof comments === 'string') {
+        // If it's already a plain string coming from the overlay payload mapping
+        commentText = comments;
+      }
+      const payloadToSend = {
+        ...destructedPayload,
+        comments: commentText,
+      };
+      console.log('To Save Payload to update = ' + JSON.stringify(payloadToSend));
       this.apiService.putRequest<any>(endpoint, payloadToSend).subscribe({
         next: () => {
           const items = [...this.service.items];
@@ -607,7 +620,7 @@ export class IntegrateView {
       reopenCount: 0,
       estimatedPoints: s.estimatedStoryPoints,
       remainingPoints: s.remainingStoryPoint,
-      comments: s.comments,
+      comments: s.comments != undefined ? s.comments : [],
     };
   }
 
@@ -626,7 +639,7 @@ export class IntegrateView {
       reopenCount: 0,
       estimatedPoints: t.estimatedHours,
       remainingPoints: t.remainingHours,
-      comments: t.comments,
+      comments: t.comments != undefined ? t.comments : [],
     };
   }
 
@@ -680,6 +693,24 @@ export class IntegrateView {
   }
 
   private mapStory(story: IStoryResponse): WorkItem {
+    let parsedComments: any[] = [];
+
+    // Access the property dynamically using a safe type cast
+    const rawComments = (story as any).comments;
+
+    if (rawComments && typeof rawComments === 'string') {
+      if (rawComments.trim() !== '') {
+        parsedComments = [
+          {
+            text: rawComments,
+            userCode: story.userCode || 'System', // Fallback to avoid 'Unassigned'
+            createdAt: new Date().toISOString(),
+          },
+        ];
+      }
+    } else if (Array.isArray(rawComments)) {
+      parsedComments = rawComments;
+    }
     return {
       id: 'S' + story.id,
       title: story.title,
@@ -694,7 +725,7 @@ export class IntegrateView {
       reopenCount: 0,
       estimatedPoints: story.storyPoints,
       remainingPoints: story.storyPoints,
-      comments: story.comments,
+      comments: parsedComments,
     };
   }
 
@@ -832,6 +863,7 @@ export class IntegrateView {
       sprintsData: this.apiService.getRequest<any[]>('/sprint/all'),
     }).subscribe({
       next: ({ features, tasks, bugs, usersData, featuresData, storyData, sprintsData }) => {
+        // console.log(storyData);
         const featureNodes = features.map((f) => this.mapFeature(f));
         const storyNodes = storyData.map((s) => this.mapStory(s));
         const taskNodes = tasks.map((t) => this.mapTask(t));
@@ -841,7 +873,7 @@ export class IntegrateView {
         this.featuresList.set(featuresData || []);
         this.sprintsList.set(sprintsData || []);
         this.storyList.set(storyData || []);
-
+        console.log(this.storyList());
         const allItems: WorkItem[] = [...featureNodes, ...storyNodes, ...taskNodes, ...bugNodes];
         this.service.update(allItems);
 

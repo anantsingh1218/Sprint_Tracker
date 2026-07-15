@@ -11,4 +11,5 @@ public interface IStoryService {
     StoryResponseDto updateStory(Integer id,CreateStoryRequest story);
     void deleteStory(Integer id);
     List<StoryResponseDto> getAllStories();
+    StoryResponseDto getStoryById(Integer id);
 }

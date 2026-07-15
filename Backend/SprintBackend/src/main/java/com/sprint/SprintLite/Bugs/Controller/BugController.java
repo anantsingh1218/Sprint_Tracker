@@ -26,9 +26,9 @@ public class BugController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BugResponseDto> getBugById(@PathVariable Integer id) {
+    public ResponseEntity<BugResponseDto> getBugById(@PathVariable String id) {
         return ResponseEntity.ok(
-                bugService.getBugByiD(id)
+                bugService.getBugByiD(CodeUtils.decodeToInteger("B", id))
         );
     }
     @GetMapping
@@ -60,11 +60,11 @@ public class BugController {
 
     @PutMapping("/{id}")
     public ResponseEntity<BugResponseDto> updateBug(
-            @PathVariable Integer id,
+            @PathVariable String id,
             @RequestBody BugDto request
     ) {
         return ResponseEntity.ok(
-                bugService.updateBug(id, request)
+                bugService.updateBug(CodeUtils.decodeToInteger("B", id), request)
         );
     }
 
