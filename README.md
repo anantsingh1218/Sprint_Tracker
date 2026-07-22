@@ -70,6 +70,3 @@ This repository is divided into two main components:
 - Task tracking and status updates.
 - Performance and progress visualization using interactive charts.
 - Secure, scalable, and observable architecture.
-
-## License
-This project is proprietary and confidential.
