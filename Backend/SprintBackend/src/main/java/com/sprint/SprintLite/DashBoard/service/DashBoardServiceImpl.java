@@ -503,13 +503,6 @@ public class DashBoardServiceImpl
 
             for (Task task : tasks) {
 
-                /*
-                 * A task is considered remaining if:
-                 * 1. It is not completed yet
-                 * OR
-                 * 2. It gets completed AFTER this day
-                 */
-
                 if (task.getCompletedDate() == null
                         || task.getCompletedDate().isAfter(day)) {
 
